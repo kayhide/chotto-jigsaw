@@ -3,8 +3,12 @@ COMPOSE_PROJECT_NAME := chotto-jigsaw
 COMPOSE_COMMAND := docker-compose
 
 
+dev:
+	$$($(MAKE) --no-print-directory envs) && hivemind
+.PHONY: dev
+
 guard:
-	@eval "$(shell $(MAKE) envs)" && bundle exec guard
+	$$($(MAKE) --no-print-directory envs) && bundle exec guard
 .PHONY: guard
 
 infra-up:
@@ -33,5 +37,5 @@ rails-console:
 .PHONY: rails-console
 
 db-console:
-	@eval "$(shell $(MAKE) envs)" && psql -U postgres -h localhost -p $$DB_PORT -d timecard_kun_${RAILS_ENV}
+	@eval "$(shell $(MAKE) envs)" && rails dbconsole
 .PHONY: db-console
