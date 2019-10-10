@@ -6,10 +6,11 @@
         - @user.errors.full_messages.each do |message|
           li = message
 
-  .field
-    = f.label :username
-    = f.text_field :username
-  .field
-    = f.label :email
-    = f.text_field :email
-  .actions = f.submit
+  .input-field
+    = f.label :username, class: %w()
+    = f.text_field :username, class: %w()
+  .input-field
+    = f.label :email, class: %w()
+    = f.text_field :email, class: %w()
+
+  .actions = f.submit nil, class: %w(btn btn-primary btn-raised)
