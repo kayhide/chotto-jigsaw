@@ -4,17 +4,17 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	$$($(MAKE) --no-print-directory envs) && hivemind
+	@$$($(MAKE) --no-print-directory envs) && hivemind
 .PHONY: dev
 
 guard:
-	$$($(MAKE) --no-print-directory envs) && bundle exec guard
+	@$$($(MAKE) --no-print-directory envs) && bundle exec guard
 .PHONY: guard
 
 infra-up:
 	${COMPOSE_COMMAND} up -d
-	@bundle exec spring stop
-	$$($(MAKE) --no-print-directory envs) && rails db:setup || rails db:migrate
+	@$$($(MAKE) --no-print-directory envs) && bundle exec spring stop
+	@$$($(MAKE) --no-print-directory envs) && rails db:setup || rails db:migrate
 .PHONY: infra-up
 
 infra-down:
@@ -22,20 +22,16 @@ infra-down:
 	@bundle exec spring stop
 .PHONY: infra-down
 
-rails-update:
-	$$($(MAKE) --no-print-directory envs) && bin/update
-.PHONY: rails-update
-
-envs: DB_CONTAINER := $(shell docker ps -q --filter 'name=${COMPOSE_PROJECT_NAME}_db_*')
-envs: DB_PORT := $(shell docker port ${DB_CONTAINER} | cut -d ':' -f 2)
 envs:
+	$(eval DB_CONTAINER := $(shell docker ps -q --filter 'name=${COMPOSE_PROJECT_NAME}_db_*'))
+	$(eval DB_PORT := $(shell docker port ${DB_CONTAINER} | cut -d ':' -f 2))
 	@echo "export DB_PORT=${DB_PORT}"
-.PHONY: env
+.PHONY: envs
 
 rails-console:
-	@eval "$(shell $(MAKE) envs)" && rails console
+	@$$($(MAKE) --no-print-directory envs) && rails console
 .PHONY: rails-console
 
 db-console:
-	@eval "$(shell $(MAKE) envs)" && rails dbconsole
+	@$$($(MAKE) --no-print-directory envs) && rails dbconsole
 .PHONY: db-console
