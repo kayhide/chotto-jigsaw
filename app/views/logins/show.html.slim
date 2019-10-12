@@ -5,9 +5,8 @@
         .card-content
           span.card-title Login
           .input-field
-            input#login_email type="text" name="login[email]" value=@login.email class=(@login.errors.include?(:email) ? ["invalid"] : [])
+            = f.text_field :email, class: (@login.errors.include?(:email) ? ["invalid"] : [])
             = f.label :email
-            - @login.errors.full_messages_for(:email). each do |msg|
+            - @login.errors.full_messages_for(:email).each do |msg|
               span.helper-text data-error=msg
-        .card-action
-            = f.submit "Login", class: %w(btn btn-default btn-raised)
+          = f.submit "Login", class: %w(btn btn-default btn-raised)
