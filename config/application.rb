@@ -25,5 +25,9 @@ module ChottoJigsaw
       g.helper          false
       g.channel         assets: false
     end
+
+    config.action_view.field_error_proc = Proc.new do |html_tag, instance|
+      html_tag.html_safe
+    end
   end
 end

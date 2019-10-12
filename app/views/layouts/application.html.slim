@@ -5,6 +5,8 @@ html
     = csrf_meta_tags
     = csp_meta_tag
 
+
+    = stylesheet_link_tag 'https://fonts.googleapis.com/icon?family=Material+Icons'
     = stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload'
     = javascript_pack_tag 'application', 'data-turbolinks-track': 'reload'
 
@@ -12,4 +14,7 @@ html
     nav
       .nav-wrapper
         a.brand-logo.left href="#" Chotto Jigsaw
-    == yield
+        - if current_user
+          == render 'layouts/menu'
+    .container
+      == yield

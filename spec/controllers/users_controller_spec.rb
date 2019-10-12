@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe UsersController, type: :controller do
+  authenticate_user
 
   let(:valid_attributes) {
     {

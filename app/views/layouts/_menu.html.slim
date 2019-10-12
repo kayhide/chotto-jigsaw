@@ -1,0 +1,14 @@
+ul#user-dropdown.dropdown-content
+  li
+    span = current_user.email
+  li.divider tabindex="-1"
+  li = link_to 'Logout', [:login], method: :delete
+
+ul.right
+  li
+    a.dropdown-trigger href="#" data-target="user-dropdown"
+      = current_user.username
+      i.material-icons.right arrow_drop_down
+ul.right
+  li = link_to 'Users', [:users]
+  li = link_to 'Puzzles', [:puzzles]

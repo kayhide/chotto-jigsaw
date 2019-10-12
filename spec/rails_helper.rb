@@ -33,6 +33,9 @@ rescue ActiveRecord::PendingMigrationError => e
   exit 1
 end
 RSpec.configure do |config|
+  config.include ActiveSupport::Testing::TimeHelpers
+  config.include FactoryBot::Syntax::Methods
+
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
 
