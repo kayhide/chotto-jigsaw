@@ -1,23 +1,19 @@
-h1 Listing puzzles
+h1 Puzzles
 
-table
-  thead
-    tr
-      th User
-      th Linear measure
-      th
-      th
-      th
+.row
+  .col.s12.m4
+    .card
+      .card-content
+        .card-title New Puzzle
+        .center
+          = link_to new_puzzle_path, class: %w(btn-floating btn-large) do
+            i.material-icons add
 
-  tbody
-    - @puzzles.each do |puzzle|
-      tr
-        td = puzzle.user
-        td = puzzle.linear_measure
-        td = link_to 'Show', puzzle
-        td = link_to 'Edit', edit_puzzle_path(puzzle)
-        td = link_to 'Destroy', puzzle, data: { confirm: 'Are you sure?' }, method: :delete
-
-br
-
-= link_to 'New Puzzle', new_puzzle_path
+  - @puzzles.each do |puzzle|
+    .col.s12.m4
+      .card
+        .card-image
+          = image_tag puzzle.image
+        .card-action
+          = link_to '#', class: %w(waves-effect waves-light btn) do
+            i.material-icons play_arrow

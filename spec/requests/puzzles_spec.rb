@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Puzzles", type: :request do
+  authenticate_user
+
   describe "GET /puzzles" do
     it "works! (now write some real specs)" do
       get puzzles_path

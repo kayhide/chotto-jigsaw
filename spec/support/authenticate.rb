@@ -7,6 +7,7 @@ Module.new do
 
       allow(controller).to receive(:authenticate!)
       allow(controller).to receive(:current_user_id) { current_user.id }
+      allow(controller).to receive(:current_user) { current_user }
     end
   end
 

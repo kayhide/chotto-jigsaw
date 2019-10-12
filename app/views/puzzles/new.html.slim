@@ -1,5 +1,13 @@
 h1 New puzzle
 
-== render 'form'
+= form_for @puzzle do |f|
+  .file-field.input-field
+    .btn
+      span Image
+      = f.file_field :image
+    .file-path-wrapper
+      input.file-path.validate type="text"
+
+  .actions = f.submit nil, class: %w(btn btn-primary btn-raised)
 
 = link_to 'Back', puzzles_path

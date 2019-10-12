@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :puzzle do
-    user { "" }
+    user
     linear_measure { 1.5 }
   end
 end
