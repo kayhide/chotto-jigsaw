@@ -13,7 +13,16 @@ h1 Puzzles
     .col.s12.m4
       .card
         .card-image
-          = image_tag puzzle.image
+          = image_tag puzzle.picture
+        .card-content
+          .row
+            .col.s12.m6
+              = puzzle.pieces_count
+              span< pcs
+            .col.s12.m6
+              .right = puzzle.difficulty
         .card-action
-          = link_to '#', class: %w(waves-effect waves-light btn) do
+          = link_to puzzle, class: %w(waves-effect waves-light) do
+            i.material-icons search
+          = link_to '#', class: %w(waves-effect waves-light) do
             i.material-icons play_arrow

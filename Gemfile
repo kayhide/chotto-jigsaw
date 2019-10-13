@@ -6,6 +6,7 @@ ruby '2.6.4'
 gem 'rails', '~> 6.0.0'
 
 gem 'bootsnap', '>= 1.4.2', require: false
+gem 'image_processing', '~> 1.2'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'pry-doc'
 gem 'pry-rails'
@@ -17,7 +18,6 @@ gem 'turbolinks', '~> 5'
 gem 'webpacker', '~> 4.0'
 
 # gem 'bcrypt', '~> 3.1.7'
-# gem 'image_processing', '~> 1.2'
 
 group :development, :test do
   gem 'factory_bot_rails'

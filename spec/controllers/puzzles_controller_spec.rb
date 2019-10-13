@@ -5,7 +5,7 @@ RSpec.describe PuzzlesController, type: :controller do
 
   let(:valid_attributes) {
     {
-      image: image
+      picture: picture
     }
   }
 
@@ -30,7 +30,7 @@ RSpec.describe PuzzlesController, type: :controller do
   end
 
   describe "POST #create" do
-    let(:image) { fixture_file_upload fixture_path.join('pictures/mountain.jpg') }
+    let(:picture) { fixture_file_upload fixture_path.join('pictures/mountain.jpg') }
 
     context "with valid params" do
       it "creates a new Puzzle" do
