@@ -5,12 +5,14 @@ RSpec.describe PuzzlesController, type: :controller do
 
   let(:valid_attributes) {
     {
-      picture: picture
+      picture: picture,
+      difficulty_level: 4
     }
   }
 
   let(:invalid_attributes) {
     {
+      picture: nil
     }
   }
 
@@ -35,8 +37,14 @@ RSpec.describe PuzzlesController, type: :controller do
     context "with valid params" do
       it "creates a new Puzzle" do
         expect {
-          post :create, params: {puzzle: valid_attributes}
+          post :create, params: { puzzle: valid_attributes }
         }.to change(Puzzle, :count).by(1)
+      end
+
+      it "enqueues SetupJob" do
+        assert_enqueued_with job: SetupJob do
+          post :create, params: { puzzle: valid_attributes }
+        end
       end
 
       it "redirects to the created puzzle" do

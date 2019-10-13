@@ -2,25 +2,27 @@ h1 Puzzles
 
 .row
   .col.s12.m4
-    .card
+    .card.small
       .card-content
         .card-title New Puzzle
-        .center
-          = link_to new_puzzle_path, class: %w(btn-floating btn-large) do
-            i.material-icons add
+        .center-align
+            = link_to new_puzzle_path, class: %w(btn-floating btn-large hoverable) do
+              i.material-icons add
 
   - @puzzles.each do |puzzle|
     .col.s12.m4
-      .card
+      .card.small.hoverable
         .card-image
-          = image_tag puzzle.picture
+          = (puzzle.picture.attached? && image_tag(puzzle.picture))
         .card-content
-          .row
-            .col.s12.m6
-              = puzzle.pieces_count
-              span< pcs
-            .col.s12.m6
-              .right = puzzle.difficulty
+          - if puzzle.ready?
+            = puzzle.pieces_count
+            span< pcs
+            .right
+              = puzzle.difficulty
+          - else
+            .progress
+              .indeterminate
         .card-action
           = link_to puzzle, class: %w(waves-effect waves-light) do
             i.material-icons search

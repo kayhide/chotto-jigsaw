@@ -1,13 +1,28 @@
-h1 New puzzle
+.row
+  .col.s12.m8.offset-m2
+    .card
+      = form_for @puzzle do |f|
+        .card-content
+          span.card-title New puzzle
+          .file-field.input-field
+            .btn
+              span Picture
+              = f.file_field :picture
+            .file-path-wrapper
+              input.file-path.validate type="text"
 
-= form_for @puzzle do |f|
-  .file-field.input-field
-    .btn
-      span Image
-      = f.file_field :picture
-    .file-path-wrapper
-      input.file-path.validate type="text"
+          .row
+            .col.s2
+              label Difficulty
+            - %w(些 易 並).zip(1 .. 3).each do |label, n|
+              label.col.s2
+                = f.radio_button :difficulty_level, n, class: %w(with-gap)
+                span = label
+            - %w(難 極).zip(4 .. 5).each do |label, n|
+              label.col.s2
+                = f.radio_button :difficulty_level, n, class: %w(with-gap), disabled: true
+                span = label
+        .card-action
+          = f.submit nil, class: %w(btn btn-primary)
 
-  .actions = f.submit nil, class: %w(btn btn-primary btn-raised)
-
-= link_to 'Back', puzzles_path
+    = link_to 'Back', puzzles_path

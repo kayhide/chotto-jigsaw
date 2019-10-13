@@ -1,0 +1,35 @@
+h2
+  = @puzzle.difficulty.to_s.camelize
+
+.text-sm = @puzzle.picture.filename
+.text-sm
+  = @puzzle.pieces_count
+  span< pcs
+
+= image_tag @puzzle.picture, style: 'position:absolute;opacity:0.5'
+
+- width = @puzzle.picture.metadata["width"]
+- height = @puzzle.picture.metadata["height"]
+canvas id=dom_id(@puzzle, :canvas) width=width height=height style="width:#{width}px;height:#{height}px"
+
+
+javascript:
+  var canvas = document.getElementById('#{dom_id @puzzle, :canvas}');
+  var ctx = canvas.getContext('2d');
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+
+- @puzzle.pieces.each do |p|
+  ruby:
+    head, *tail = p.points
+    instructions = [
+      ['beginPath', ''],
+      ['moveTo', head.join(',')],
+      *tail.each_slice(3).map { |pts|
+        [pts.all? ? 'bezierCurveTo' : 'lineTo', pts.compact.join(',')]
+      },
+      ['stroke', '']
+    ]
+
+  javascript:
+    #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
