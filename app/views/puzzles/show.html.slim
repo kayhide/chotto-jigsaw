@@ -6,18 +6,29 @@ h2
   = @puzzle.pieces_count
   span< pcs
 
-= image_tag @puzzle.picture, style: 'position:absolute;opacity:0.5'
+- width, height = @puzzle.picture.metadata.values_at("width", "height")
+- aspect_ratio = width.to_f / height.to_f
+- if 1.33 < aspect_ratio
+  - display_width = 800
+  - display_scale = display_width.to_f / width.to_f
+  - display_height = height * display_scale
+- else
+  - display_height = 600
+  - display_scale = display_height.to_f / height.to_f
+  - display_width = width * display_scale
 
-- width = @puzzle.picture.metadata["width"]
-- height = @puzzle.picture.metadata["height"]
-canvas id=dom_id(@puzzle, :canvas) width=width height=height style="width:#{width}px;height:#{height}px"
+.puzzle-show.center
+  = image_tag @puzzle.picture.variant(resize_to_fit: [display_width, display_height])
+  canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
 
+- gen = Random.new @puzzle.id
 
 javascript:
   var canvas = document.getElementById('#{dom_id @puzzle, :canvas}');
   var ctx = canvas.getContext('2d');
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 2;
+  ctx.scale(#{display_scale}, #{display_scale});
+  ctx.strokeStyle = "0deg, 0%, 20%)";
+  ctx.lineWidth = 3 / #{display_scale};
 
 - @puzzle.pieces.each do |p|
   ruby:
@@ -28,8 +39,10 @@ javascript:
       *tail.each_slice(3).map { |pts|
         [pts.all? ? 'bezierCurveTo' : 'lineTo', pts.compact.join(',')]
       },
-      ['stroke', '']
+      ['stroke', ''],
+      ['fill', '']
     ]
 
   javascript:
+    ctx.fillStyle = "hsla(0deg, 0%, #{gen.rand(20) + 70}%, 0.8)";
     #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
