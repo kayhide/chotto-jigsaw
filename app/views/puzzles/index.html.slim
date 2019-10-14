@@ -2,18 +2,23 @@ h2 Puzzles
 
 .row
   .col.s12.m4
-    .card.small
+    .card
       .card-content
-        .card-title New Puzzle
+        .card-title New
         .center-align
             = link_to new_puzzle_path, class: %w(btn-floating btn-large hoverable) do
               i.material-icons add
 
   - @puzzles.each do |puzzle|
     .col.s12.m4
-      .card.small.hoverable
+      .card.puzzle.hoverable id=dom_id(puzzle)
         .card-image
-          = (puzzle.picture.attached? && image_tag(puzzle.picture))
+          - if puzzle.picture.attached?
+            = link_to puzzle, class: %w(waves-effect waves-light) do
+              = image_tag puzzle.picture.variant(resize_to_fill: [600, 600])
+          - if puzzle.ready?
+            = link_to "#", class: %w(btn-floating halfway-fab waves-effect waves-light) do
+              i.material-icons play_arrow
         .card-content
           - if puzzle.ready?
             = puzzle.pieces_count
@@ -23,8 +28,3 @@ h2 Puzzles
           - else
             .progress
               .indeterminate
-        .card-action
-          = link_to puzzle, class: %w(waves-effect waves-light) do
-            i.material-icons search
-          = link_to '#', class: %w(waves-effect waves-light) do
-            i.material-icons play_arrow
