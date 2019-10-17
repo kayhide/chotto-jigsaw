@@ -2,11 +2,14 @@ class GamesController < ApplicationController
   before_action :set_game, only: [:show, :destroy]
   before_action :set_puzzle
 
+  layout 'playboard', only: :show
+
   def index
     @games = Game.order(id: :desc)
   end
 
   def show
+    @puzzle.load_content!
   end
 
   def create

@@ -1,2 +1,24 @@
-= link_to [@puzzle, :games], class: %w(btn-floating waves-effect waves-light) do
-  i.material-icons.left chevron_left
+#playboard.green
+  = link_to [@puzzle, :games], class: %w(btn-floating waves-effect waves-light) do
+    i.material-icons.left chevron_left
+
+  canvas#field style="top:0;left:0;"
+
+    #info style="color:white;position:absolute;bottom:0;left:0;"
+      .progress.progress-info
+        #progressbar.bar style="width:0"
+
+      .btn-group style="position:absolute;bottom:9px;right:9px;"
+        a.btn.btn-inverse href="#zoom-in"
+          i.material-icons plus
+        a.btn.btn-inverse href="#zoom-out"
+          i.material-icons minus
+        a.btn.btn-inverse href="#fit"
+          i.material-icons resize-small
+
+#sound-list
+  / audio.merge src="/audios/merge.mp3"
+  / audio.merge src="/audios/merge.wav"
+
+#picture data-url=url_for(@puzzle.picture)
+#puzzle data-content=raw(@puzzle.slice(:pieces, :linear_measure).to_json)

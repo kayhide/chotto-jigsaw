@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title ChottoJigsaw
+    = csrf_meta_tags
+    = csp_meta_tag
+
+
+    = stylesheet_link_tag 'https://fonts.googleapis.com/icon?family=Material+Icons'
+    = stylesheet_pack_tag 'playboard', media: 'all', 'data-turbolinks-track': 'reload'
+    = javascript_pack_tag 'playboard', 'data-turbolinks-track': 'reload'
+
+  body
+    == yield
