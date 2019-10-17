@@ -1,0 +1,14 @@
+h2 Games
+
+.row
+  .col.s12.m4
+    .card.puzzle.hoverable id=dom_id(@puzzle)
+      .card-image
+        = link_to @puzzle, class: %w(waves-effect waves-light) do
+          = image_tag @puzzle.picture.variant(resize_to_fill: [600, 600])
+
+  .col.s12.m8
+    ul.collection
+      - @games.each do |game|
+        = link_to game, class: %w(collection-item waves-effect waves-light) do
+          =l game.created_at
