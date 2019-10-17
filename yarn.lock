@@ -709,6 +709,26 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@createjs/core@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@createjs/core/-/core-2.0.0-beta.4.tgz#f98c7c60b35659c35dc2646da9af2b9ed14333fd"
+  integrity sha512-+csRjNJozE+C+4JfPEOV7lL6czWHB/+hBpA/oY4JeuVwEsLisaTzwEvfDd6XUUeK3ldlU14RzxZZYD5fDx7gBw==
+
+"@createjs/easeljs@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@createjs/easeljs/-/easeljs-2.0.0-beta.4.tgz#48dc7d05f9bab8ce48d644be5838311577963fdc"
+  integrity sha512-jaZQ4qm71177xJ4NT1EAWNSf3eI5EfWvDHufJ9QaVMQxjW+eMkh8QTZg7U9jPwll/6l9XegSToZZokTYaPM59A==
+  dependencies:
+    "@createjs/core" "^2.0.0-beta.4"
+    "@createjs/tweenjs" "^2.0.0-beta.4"
+
+"@createjs/tweenjs@^2.0.0-beta.4":
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@createjs/tweenjs/-/tweenjs-2.0.0-beta.4.tgz#909afc765892bc0d2260c472b1e12d9197ebe732"
+  integrity sha512-8TBzHn76mKR0PSUcLx3qxfJSMysOdsgYbJFoG/YeH/ViTWBOwmGVeZr6SIylFbqGHLtUyXDQEvSa1enSGUT5XQ==
+  dependencies:
+    "@createjs/core" "^2.0.0-beta.4"
+
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
@@ -4612,6 +4632,11 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
+jquery@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
+  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
+
 js-base64@^2.1.8:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.5.1.tgz#1efa39ef2c5f7980bb1784ade4a8af2de3291121"
@@ -4938,7 +4963,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@^4.0.0, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.4, lodash@^4.17.5, lodash@~4.17.10:
+lodash@^4.0.0, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.4, lodash@^4.17.5, lodash@~4.17.10:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==

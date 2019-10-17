@@ -1,24 +1,30 @@
 #playboard.green
-  = link_to [@puzzle, :games], class: %w(btn-floating waves-effect waves-light) do
-    i.material-icons.left chevron_left
-
   canvas#field style="top:0;left:0;"
 
-    #info style="color:white;position:absolute;bottom:0;left:0;"
-      .progress.progress-info
-        #progressbar.bar style="width:0"
+.row style="width:100%;position:absolute;top:0;"
+  .col.s6.white-text
+    = link_to [@puzzle, :games], class: %w(btn-floating waves-effect waves-light) do
+      i.material-icons chevron_left
 
-      .btn-group style="position:absolute;bottom:9px;right:9px;"
-        a.btn.btn-inverse href="#zoom-in"
-          i.material-icons plus
-        a.btn.btn-inverse href="#zoom-out"
-          i.material-icons minus
-        a.btn.btn-inverse href="#fit"
-          i.material-icons resize-small
+.row style="width:100%;position:absolute;bottom:0;"
+  .col.s6.white-text
+    #info
+      .progress
+        #progressbar.determinate style="width:0%"
+
+.row style="width:100%;position:absolute;bottom:0;"
+  .col.s6.offset-s6
+    .right
+      #zoom-in.btn.btn-floating
+        i.material-icons add
+      #zoom-out.btn.btn-floating
+        i.material-icons remove
+      #fit.btn.btn-floating
+        i.material-icons center_focus_strong
 
 #sound-list
   / audio.merge src="/audios/merge.mp3"
   / audio.merge src="/audios/merge.wav"
 
 #picture data-url=url_for(@puzzle.picture)
-#puzzle data-content=raw(@puzzle.slice(:pieces, :linear_measure).to_json)
+#puzzle data-content=(@puzzle.slice(:pieces, :linear_measure).to_json)

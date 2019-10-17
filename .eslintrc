@@ -7,8 +7,16 @@
     "browser": true
   },
 
+  "globals": {
+    "_": true,
+    "$": true
+  },
+
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "class-methods-use-this": 0,
+    "no-underscore-dangle": 0,
+    "no-param-reassign": ["error", { "props": false }]
   },
 
   "parser": "babel-eslint",
