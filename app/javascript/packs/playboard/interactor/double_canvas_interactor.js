@@ -44,8 +44,8 @@ export default class DoubleCanvasInteractor {
           );
       }
       if (!this.captured) {
-        if (e_.wheelDelta > 0) this.zoom(e_.x, e_.y, 1.2);
-        else this.zoom(e_.x, e_.y, 1 / 1.2);
+        if (e_.wheelDelta > 0) this.zoom(e_.x, e_.y, 1.05);
+        else this.zoom(e_.x, e_.y, 1 / 1.05);
       }
     });
 
