@@ -17,11 +17,11 @@ Point.prototype.apply = function(mtx) {
 };
 
 Point.prototype.distanceTo = function(pt) {
-  return Math.sqrt(Math.pow(pt.x - this.x, 2) + Math.pow(pt.y - this.y, 2));
+  return Math.sqrt((pt.x - this.x) ** 2 + (pt.y - this.y) ** 2);
 };
 
 Point.prototype.isZero = function() {
-  return this.x == 0 && this.y == 0;
+  return this.x === 0 && this.y === 0;
 };
 
 Rectangle.createEmpty = function() {
@@ -122,7 +122,7 @@ Point.prototype.from = function(obj) {
 Point.prototype.to = function(obj) {
   let pt = null;
   if (this.on != null) {
-    if (this.on.stage == obj.stage) {
+    if (this.on.getRoot() === obj.getRoot()) {
       if (this.on_global) {
         pt = obj.globalToLocal(this.x, this.y);
       } else {
@@ -183,7 +183,7 @@ Point.prototype.toWindow = function() {
 };
 
 DisplayObject.prototype.remove = function() {
-  this.parent && this.parent.removeChild(this);
+  if (this.parent) this.parent.removeChild(this);
 };
 
 DisplayObject.prototype.position = function() {
@@ -214,8 +214,21 @@ DisplayObject.prototype.projectTo = function(dst) {
   dst.addChild(this);
 };
 
+DisplayObject.prototype.getRoot = function() {
+  let obj = this;
+  while (obj.parent) {
+    obj = obj.parent;
+  }
+  return obj;
+};
+
+DisplayObject.prototype.getCanvas = function() {
+  const root_ = this.getRoot();
+  return root_ ? root_.canvas : null;
+};
+
 DisplayObject.prototype.localToWindow = function(x, y) {
-  const pt0 = $(this.stage.canvas).position();
+  const pt0 = $(this.getCanvas()).position();
   const pt = this.localToGlobal(x, y);
   pt.x += pt0.left;
   pt.y += pt0.top;
@@ -223,18 +236,18 @@ DisplayObject.prototype.localToWindow = function(x, y) {
 };
 
 DisplayObject.prototype.windowToLocal = function(x, y) {
-  const pt0 = $(this.stage.canvas).position();
+  const pt0 = $(this.getCanvas()).position();
   const pt = this.globalToLocal(x - pt0.left, y - pt0.top);
   return pt;
 };
 
 DisplayObject.prototype.globalToWindow = function(x, y) {
-  const pt0 = $(this.stage.canvas).position();
+  const pt0 = $(this.getCanvas()).position();
   return new Point(x + pt0.left, y + pt0.top);
 };
 
 DisplayObject.prototype.windowToGlobal = function(x, y) {
-  const pt0 = $(this.stage.canvas).position();
+  const pt0 = $(this.getCanvas()).position();
   return new Point(x - pt0.left, y - pt0.top);
 };
 

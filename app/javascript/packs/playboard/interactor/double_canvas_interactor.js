@@ -65,11 +65,11 @@ export default class DoubleCanvasInteractor {
           if (cmd instanceof RotateCommand) {
             this.putToActiveLayer(cmd.piece);
           } else if (cmd instanceof TranslateCommand) {
-            const { canvas } = cmd.piece.shape.stage;
-            const pt0 = $(canvas).offset();
+            const { canvas } = this.active_stage;
+            const { left, top } = $(canvas).offset();
             $(canvas).offset({
-              left: pt0.left + cmd.vector.x * this.puzzle.container.scaleX,
-              top: pt0.top + cmd.vector.y * this.puzzle.container.scaleY
+              left: left + cmd.vector.x * this.puzzle.container.scaleX,
+              top: top + cmd.vector.y * this.puzzle.container.scaleY
             });
           }
         } else {
