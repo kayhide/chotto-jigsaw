@@ -14,7 +14,6 @@ gem 'puma', '~> 3.11'
 gem 'redis', '~> 4.0'
 gem 'sass-rails', '~> 5'
 gem 'slim-rails'
-gem 'turbolinks', '~> 5'
 gem 'webpacker', '~> 4.0'
 
 # gem 'bcrypt', '~> 3.1.7'

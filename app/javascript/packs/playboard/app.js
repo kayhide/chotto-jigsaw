@@ -81,4 +81,3 @@ function play() {
 }
 
 $(document).ready(play);
-$(document).on("turbolinks:load", play);
