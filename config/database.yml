@@ -16,6 +16,4 @@ test:
 
 production:
   <<: *default
-  database: chotto_jigsaw_production
-  username: chotto_jigsaw
-  password: <%= ENV['CHOTTO_JIGSAW_DATABASE_PASSWORD'] %>
+  url: <%= ENV['DATABASE_URL'] %>
