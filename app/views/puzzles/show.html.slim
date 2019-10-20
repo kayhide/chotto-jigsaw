@@ -46,3 +46,13 @@ javascript:
   javascript:
     ctx.fillStyle = "hsla(0deg, 0%, #{gen.rand(20) + 70}%, 0.8)";
     #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
+
+
+h2 Games
+
+.row
+  .col.s12.m8
+    ul.collection
+      - @puzzle.games.order(id: :desc).each do |game|
+        = link_to game, class: %w(collection-item waves-effect waves-light) do
+          =l game.created_at

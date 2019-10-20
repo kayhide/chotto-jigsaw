@@ -1,5 +1,6 @@
 class Puzzle < ApplicationRecord
   belongs_to :user
+  has_many :games
   has_one_attached :picture
   has_one_attached :content
 
