@@ -6,13 +6,13 @@ import MergeCommand from "./command/merge_command";
 import BrowserInteractor from "./interactor/browser_interactor";
 import DoubleCanvasInteractor from "./interactor/double_canvas_interactor";
 
-const sounds = {
-  merge: $("#sound-list > .merge")[0]
-};
-
 function play() {
   const puzzle = new Puzzle($("#field")[0]);
   puzzle.parse($("#puzzle").data("content"));
+
+  const sounds = {
+    merge: $("#sound-list > .merge")[0]
+  };
 
   const image = new Image();
   $(image).on("load", () => {
@@ -34,7 +34,7 @@ function play() {
     Command.onPost.push(cmd => {
       if (cmd instanceof MergeCommand) {
         $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
-        if (sounds && sounds.merge) sounds.merge.play();
+        if (sounds.merge) sounds.merge.play();
         if (puzzle.progress === 1) {
           $("#finished").fadeIn("slow", () =>
             $("#finished").css("opacity", 0.99)

@@ -10,7 +10,7 @@ export default class DoubleCanvasInteractor {
   constructor(puzzle) {
     this.puzzle = puzzle;
     this.colors = {
-      shadow: "#AFF"
+      shadow: "#fff"
     };
   }
 
@@ -20,10 +20,9 @@ export default class DoubleCanvasInteractor {
       canvas_.id = "active";
       $(this.puzzle.stage.canvas).after(canvas_);
 
-      $("#field").css("background-color", "rgba(200, 255, 105, 0.5)");
       $(canvas_)
         .css("position", "absolute")
-        .css("background-color", "rgba(200, 255, 255, 0.5)")
+        // .css("background-color", "rgba(200, 255, 255, 0.5)")
         .hide();
 
       this.active_stage = new Stage(canvas_);
