@@ -15,6 +15,7 @@ function play() {
   };
 
   const image = new Image();
+  image.crossOrigin = "anonymous";
   $(image).on("load", () => {
     puzzle.initizlize(image);
 
