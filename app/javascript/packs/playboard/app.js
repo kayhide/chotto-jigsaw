@@ -1,14 +1,22 @@
 import { Ticker } from "@createjs/easeljs";
 
+import Logger from "./logger";
 import Puzzle from "./model/puzzle";
 import Command from "./command/command";
 import MergeCommand from "./command/merge_command";
+import Game from "./interactor/game";
 import BrowserInteractor from "./interactor/browser_interactor";
-import DoubleCanvasInteractor from "./interactor/double_canvas_interactor";
+import TouchInteractor from "./interactor/touch_interactor";
+import MouseInteractor from "./interactor/mouse_interactor";
+
+function isTouchScreen() {
+  return "ontouchstart" in window;
+}
 
 function play() {
   const puzzle = new Puzzle($("#field")[0]);
   puzzle.parse($("#puzzle").data("content"));
+  const game = new Game(puzzle);
 
   const sounds = {
     merge: $("#sound-list > .merge")[0]
@@ -19,11 +27,17 @@ function play() {
   $(image).on("load", () => {
     puzzle.initizlize(image);
 
-    new BrowserInteractor(puzzle).attach();
-    new DoubleCanvasInteractor(puzzle).attach();
+    new BrowserInteractor(game).attach();
+    if (isTouchScreen()) {
+      new TouchInteractor(game).attach();
+      Logger.trace("attached: TouchInteractor");
+    } else {
+      new MouseInteractor(game).attach();
+      Logger.trace("attached: MouseInteractor");
+    }
 
     puzzle.shuffle();
-    puzzle.fit();
+    game.fit();
 
     {
       const p = document.createElement("p");
@@ -62,18 +76,17 @@ function play() {
     $("body").css("overflow", "hidden");
 
     $("#playboard").fadeIn("slow");
+
+    $(window).on("keydown", e => {
+      if (e.key === "F1") {
+        $("#log").toggle();
+        puzzle.toggleGuide();
+      }
+    });
   });
 
   $("#fit").on("click", () => {
-    puzzle.fit();
-    return false;
-  });
-  $("#zoom-in").on("click", () => {
-    puzzle.zoom(window.innerWidth / 2, window.innerHeight / 2, 1.2);
-    return false;
-  });
-  $("#zoom-out").on("click", () => {
-    puzzle.zoom(window.innerWidth / 2, window.innerHeight / 2, 1 / 1.2);
+    game.fit();
     return false;
   });
 

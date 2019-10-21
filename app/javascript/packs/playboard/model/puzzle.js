@@ -40,6 +40,8 @@ export default class Puzzle {
     this.container = new Container();
     this.wrapper.addChild(this.container);
 
+    this.buildGuide();
+
     this.pieces.forEach(p => {
       p.puzzle = this;
       p.shape = new Shape();
@@ -56,6 +58,40 @@ export default class Puzzle {
         this.updateProgress();
       }
     });
+  }
+
+  buildGuide() {
+    {
+      const guide = new Shape();
+      guide.graphics
+        .setStrokeStyle(1)
+        .beginStroke("rgba(127,255,255,0.7)")
+        .beginFill("rgba(127,255,255,0.5)")
+        .drawCircle(0, 0, 5);
+      guide.visible = false;
+      this.wrapper.addChild(guide);
+      this.wrapperGuide = guide;
+    }
+    {
+      const guide = new Shape();
+      guide.graphics.setStrokeStyle(1).beginStroke("rgba(127,255,255,0.7)");
+      for (let i = 0; i < 6; i += 1) {
+        guide.graphics
+          .moveTo(0, i * 100)
+          .lineTo(500, i * 100)
+          .moveTo(i * 100, 0)
+          .lineTo(i * 100, 500);
+      }
+      guide.visible = false;
+      this.container.addChild(guide);
+      this.containerGuide = guide;
+    }
+  }
+
+  toggleGuide() {
+    this.wrapperGuide.visible = !this.wrapperGuide.visible;
+    this.containerGuide.visible = !this.containerGuide.visible;
+    this.invalidate();
   }
 
   updateProgress() {
@@ -86,45 +122,6 @@ export default class Puzzle {
       });
   }
 
-  centerize() {
-    const rect = this.getBoundary();
-    const { scaleX: sx, scaleY: sy } = this.container;
-    this.container.x = -rect.x * sx + (window.innerWidth - sx * rect.width) / 2;
-    this.container.y =
-      -rect.y * sy + (window.innerHeight - sy * rect.height) / 2;
-    this.stage.update();
-  }
-
-  fit() {
-    const rect = this.getBoundary();
-    const sx = window.innerWidth / rect.width;
-    const sy = window.innerHeight / rect.height;
-    const sc = Math.min(sx, sy);
-    this.wrapper.x = 0;
-    this.wrapper.y = 0;
-    this.container.scaleX = sc;
-    this.container.scaleY = sc;
-    this.container.x = -rect.x * sc + (window.innerWidth - sc * rect.width) / 2;
-    this.container.y =
-      -rect.y * sc + (window.innerHeight - sc * rect.height) / 2;
-    this.stage.update();
-  }
-
-  fill() {
-    const rect = this.getBoundary();
-    const sx = window.innerWidth / rect.width;
-    const sy = window.innerHeight / rect.height;
-    const sc = Math.max(sx, sy);
-    this.wrapper.x = 0;
-    this.wrapper.y = 0;
-    this.container.scaleX = sc;
-    this.container.scaleY = sc;
-    this.container.x = -rect.x * sc + (window.innerWidth - sc * rect.width) / 2;
-    this.container.y =
-      -rect.y * sc + (window.innerHeight - sc * rect.height) / 2;
-    this.stage.update();
-  }
-
   zoom(x, y, scale) {
     this.container.scaleX = this.container.scaleX * scale;
     this.container.scaleY = this.container.scaleX;
@@ -136,6 +133,22 @@ export default class Puzzle {
     const pt1 = this.container.position().apply(mtx);
     this.container.x = pt1.x;
     this.container.y = pt1.y;
+    this.stage.update();
+  }
+
+  get currentScale() {
+    return this.container.scaleX;
+  }
+
+  scale(x, y, scale) {
+    const pt0 = new Point(x, y).fromWindow().to(this.container);
+    const delta = scale / this.currentScale;
+    const mtx = this.container
+      .matrix()
+      .translate(pt0.x, pt0.y)
+      .scale(delta, delta)
+      .translate(-pt0.x, -pt0.y);
+    Object.assign(this.container, mtx.decompose());
     this.stage.update();
   }
 

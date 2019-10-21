@@ -1,4 +1,10 @@
-import { Point, Rectangle, DisplayObject, Stage } from "@createjs/easeljs";
+import {
+  Point,
+  Rectangle,
+  Matrix2D,
+  DisplayObject,
+  Stage
+} from "@createjs/easeljs";
 
 Point.prototype.add = function(p) {
   return new Point(this.x + p.x, this.y + p.y);
@@ -204,6 +210,16 @@ DisplayObject.prototype.copyTransform = function(src) {
 
 DisplayObject.prototype.clearTransform = function() {
   this.setTransform();
+};
+
+DisplayObject.prototype.matrix = function() {
+  return new Matrix2D().appendTransform(
+    this.x,
+    this.y,
+    this.scaleX,
+    this.scaleY,
+    this.rotation
+  );
 };
 
 DisplayObject.prototype.projectTo = function(dst) {

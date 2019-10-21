@@ -1,6 +1,6 @@
 export default class BrowserInteractor {
-  constructor(puzzle) {
-    this.puzzle = puzzle;
+  constructor(game) {
+    this.game = game;
   }
 
   attach() {
@@ -9,17 +9,14 @@ export default class BrowserInteractor {
   }
 
   onWindowResize() {
-    const { innerWidth: w, innerHeight: h } = window;
-    // if $.browser.android?
-    //   window.scrollTo(0, 1);
+    const { innerWidth: width, innerHeight: height } = window;
 
-    this.puzzle.stage.canvas.width = w;
-    this.puzzle.stage.canvas.height = h;
-    $(this.puzzle.stage.canvas)
-      .css("left", (window.innerWidth - w) / 2)
-      .css("top", (window.innerHeight - h) / 2)
-      .width(w)
-      .height(h);
-    this.puzzle.invalidate();
+    Object.assign(this.game.canvas, { width, height });
+    $(this.game.canvas)
+      .css("left", (window.innerWidth - width) / 2)
+      .css("top", (window.innerHeight - height) / 2)
+      .width(width)
+      .height(height);
+    this.game.puzzle.invalidate();
   }
 }

@@ -2,7 +2,7 @@
   canvas#field style="top:0;left:0;"
 
 
-#back-button style="position:absolute;left:1em;top:1em;"
+#back-button
   .white-text
     = link_to [@puzzle, :games], class: %w(btn-floating waves-effect waves-light) do
       i.material-icons chevron_left
@@ -11,12 +11,9 @@
   #progressbar.determinate style="width:0%"
 
 #info.white-text
+#log.white-text
 
 #buttons
-  #zoom-in.btn-floating.waves-effect.waves-light
-    i.material-icons add
-  #zoom-out.btn-floating.waves-effect.waves-light
-    i.material-icons remove
   #fit.btn-floating.waves-effect.waves-light
     i.material-icons center_focus_strong
 

@@ -1,38 +1,40 @@
 @import "~materialize-css/sass/materialize";
 
 .primary-color {
-    background-color: $primary-color;
+  background-color: $primary-color;
 }
 
 .secondary-color {
-    background-color: $secondary-color;
+  background-color: $secondary-color;
 }
 
 .primary-color-text {
-    color: $primary-color;
+  color: $primary-color;
 }
 
 .secondary-color-text {
-    color: $secondary-color;
+  color: $secondary-color;
 }
 
 .puzzle-show {
-    position: relative;
+  position: relative;
+  max-width: 100%;
+  background-size: cover;
+
+  img {
+    position: absolute;
     max-width: 100%;
-    background-size: cover;
-    img {
-        position: absolute;
-        max-width: 100%;
-        opacity: 0.5;
-    }
-    canvas {
-        max-width: 100%;
-        opacity: 1.0;
-    }
+    opacity: 0.5;
+  }
+
+  canvas {
+    max-width: 100%;
+    opacity: 1;
+  }
 }
 
 .card.puzzle {
-    .card-content {
-        height: 5em;
-    }
+  .card-content {
+    height: 5em;
+  }
 }
