@@ -79,10 +79,23 @@ function play() {
 
     $(window).on("keydown", e => {
       if (e.key === "F1") {
-        game.guide = !game.guide
-        game.guide ? $("#log").fadeIn() : $("#log").fadeOut()
+        game.guide = !game.guide;
+        if (game.guide) $("#log-button .open").trigger("click");
+        else $("#log-button .close").trigger("click");
       }
     });
+  });
+
+  $("#log-button .open").on("click", () => {
+    $("#log").fadeIn();
+    $("#log-button .open").hide();
+    $("#log-button .close").show();
+  });
+
+  $("#log-button .close").on("click", () => {
+    $("#log").fadeOut();
+    $("#log-button .open").show();
+    $("#log-button .close").hide();
   });
 
   $("#fit").on("click", () => {
