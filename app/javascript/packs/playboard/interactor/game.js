@@ -72,7 +72,7 @@ export default class Game {
 
   getMover({ x, y }) {
     const pt0 = new Point(x - this.puzzle.wrapper.x, y - this.puzzle.wrapper.y);
-    return ({ x_, y_ }) => {
+    return ({ x: x_, y: y_ }) => {
       Object.assign(this.puzzle.wrapper, { x: x_ - pt0.x, y: y_ - pt0.y });
       this.puzzle.invalidate();
     };
@@ -84,7 +84,7 @@ export default class Game {
     if (piece) {
       let pt0 = new Point(x, y).to(this.puzzle.container);
       let deg0 = 0;
-      this.capture(piece, pt0.to(this.puzzle.container), null);
+      this.capture(piece, pt0);
       return {
         active: true,
         piece,
