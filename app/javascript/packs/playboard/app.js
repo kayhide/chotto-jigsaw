@@ -79,8 +79,8 @@ function play() {
 
     $(window).on("keydown", e => {
       if (e.key === "F1") {
-        $("#log").toggle();
-        puzzle.toggleGuide();
+        game.guide = !game.guide
+        game.guide ? $("#log").fadeIn() : $("#log").fadeOut()
       }
     });
   });

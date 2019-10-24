@@ -8,8 +8,25 @@ import RotateCommand from "../command/rotate_command";
 import MergeCommand from "../command/merge_command";
 
 export default class Game {
+  _guide = false;
+
   get canvas() {
     return this.puzzle.stage.canvas;
+  }
+
+  get guide() {
+    return this._guide;
+  }
+
+  set guide(f) {
+    this._guide = f;
+    this.puzzle.toggleGuide();
+    if (this._guide) {
+      $(this.active_stage.canvas).addClass("z-depth-3")
+    }
+    else {
+      $(this.active_stage.canvas).removeClass("z-depth-3")
+    }
   }
 
   constructor(puzzle) {
@@ -25,10 +42,13 @@ export default class Game {
       $(canvas_)
         .addClass("no-interaction")
         .css("position", "absolute")
-        // .css("background-color", "rgba(200, 255, 255, 0.5)")
+        .css("filter", "drop-shadow(0 8px 6px rgba(0, 0, 0, 0.40)")
         .hide();
 
       this.active_stage = new Stage(canvas_);
+      const blur = 2;
+      const shadow = new Shadow(this.colors.shadow, 0, 0, blur);
+      Object.assign(this.active_stage, { shadow });
       $(this.puzzle.stage.canvas).after(canvas_);
     }
 
@@ -137,9 +157,7 @@ export default class Game {
         .position()
         .from(this.puzzle.container)
         .to(this.active_stage);
-      const blur = 8;
-      const shadow = new Shadow(this.colors.shadow, 0, 0, blur);
-      Object.assign(p.shape, { x, y, rotation: p.rotation(), shadow });
+      Object.assign(p.shape, { x, y, rotation: p.rotation() });
       this.active_stage.addChild(p.shape);
     }
 
