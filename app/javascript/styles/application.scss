@@ -1,5 +1,27 @@
 @import "~materialize-css/sass/materialize";
 
+body {
+  background-image: url("/images/private-holiday-beach.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+nav {
+  background-color: transparent;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.5);
+  margin-top: 2em;
+  padding-top: 0.5em;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-bottom: 2em;
+  border-radius: 1em;
+}
+
 .primary-color {
   background-color: $primary-color;
 }

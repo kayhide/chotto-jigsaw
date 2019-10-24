@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root to: "puzzles#index"
+  root to: "public#index"
 
   resources :users
   resources :puzzles, only: [:index, :show, :new, :create, :destroy], shallow: true do

@@ -16,5 +16,7 @@ html
         a.brand-logo.left href="/" Chotto Jigsaw
         - if current_user
           == render 'layouts/menu'
+        - else
+          == render 'layouts/public_menu'
     .container
       == yield

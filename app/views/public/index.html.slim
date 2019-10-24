@@ -1,0 +1,12 @@
+.row
+  - @games.each do |game|
+    .col.s12.m4
+      .card.game.hoverable id=dom_id(game)
+        .card-image
+          = link_to game, class: %w(waves-effect waves-light) do
+            = image_tag game.puzzle.picture.variant(resize_to_fill: [600, 600])
+        .card-content
+          = game.puzzle.pieces_count
+          span< pcs
+          .right
+            = game.puzzle.difficulty
