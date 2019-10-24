@@ -14,6 +14,14 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe "GET #show" do
+    let(:file) { fixture_path.join('pictures/mountain.jpg') }
+    before do
+      perform_enqueued_jobs do
+        puzzle.picture.attach(io: file.open, filename: file.basename)
+      end
+      SetupJob.perform_now(puzzle.reload, 1)
+    end
+
     it "returns a success response" do
       game = create :game, puzzle: puzzle
       get :show, params: { id: game.id }
