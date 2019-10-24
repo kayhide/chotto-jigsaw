@@ -1,16 +1,25 @@
 import Hammer from "hammerjs";
 
 import Logger from "../logger";
-import Game from "./game";
 
 export default class TouchInteractor {
-  constructor(game) {
-    this.game = game;
-    this.dragger = Game.default_dragger;
+  get dragger() {
+    return this._dragger;
   }
 
-  attach() {
-    this.mc = new Hammer(this.game.canvas);
+  set dragger(x) {
+    this._dragger = x;
+    this.updateListeners();
+  }
+
+  constructor(game) {
+    this.setupHammer(game);
+    this.game = game;
+    this.dragger = game.defaultDragger;
+  }
+
+  setupHammer(game) {
+    this.mc = new Hammer(game.canvas);
     this.mc
       .get("pan")
       .set({ enable: true, pointers: 2, direction: Hammer.DIRECTION_ALL });
@@ -34,15 +43,17 @@ export default class TouchInteractor {
       })
     );
     this.mc.get("spin").recognizeWith(this.mc.get("tap"));
+  }
 
+  attach() {
     this.mc.on("tap", e => {
       Logger.trace(e.type);
-      this.dragEnd();
+      this.dragger = this.dragger.end();
     });
 
     this.mc.on("doubletap", e => {
       Logger.trace(e.type);
-      this.dragEnd();
+      this.dragger = this.dragger.end();
       this.game.fit();
     });
 
@@ -70,10 +81,13 @@ export default class TouchInteractor {
 
     this.mc.on("dragstart", e => {
       Logger.trace(e.type);
-      this.dragStart(e.center);
+      this.dragger = this.dragger.continue(e.center);
     });
     this.mc.on("dragmove", e => {
       this.dragger.move(e.center);
+    });
+    this.mc.on("dragend", e => {
+      this.dragger = this.dragger.attempt();
     });
 
     this.mc.on("spinstart", e => {
@@ -91,19 +105,12 @@ export default class TouchInteractor {
     });
   }
 
-  dragStart(pt) {
-    this.dragEnd();
-    this.dragger = this.game.dragStart(pt);
+  updateListeners() {
     if (this.dragger.active) {
       this.mc.get("pan").set({ enable: false });
       this.mc.get("pinch").set({ enable: false });
       this.mc.get("spin").set({ enable: true });
-    }
-  }
-
-  dragEnd() {
-    if (this.dragger.active) {
-      this.dragger = this.dragger.end();
+    } else {
       this.mc.get("pan").set({ enable: true });
       this.mc.get("pinch").set({ enable: true });
       this.mc.get("drag").set({ enable: true });

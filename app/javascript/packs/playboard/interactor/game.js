@@ -22,11 +22,23 @@ export default class Game {
     this._guide = f;
     this.puzzle.toggleGuide();
     if (this._guide) {
-      $(this.active_stage.canvas).addClass("z-depth-3")
+      $(this.active_stage.canvas).addClass("z-depth-3");
+    } else {
+      $(this.active_stage.canvas).removeClass("z-depth-3");
     }
-    else {
-      $(this.active_stage.canvas).removeClass("z-depth-3")
-    }
+  }
+
+  get defaultDragger() {
+    return {
+      active: false,
+      piece: null,
+      move: () => {},
+      spin: () => {},
+      resetSpin: () => {},
+      attempt: () => this.defaultDragger,
+      end: () => this.defaultDragger,
+      continue: pt => this.dragStart(pt)
+    };
   }
 
   constructor(puzzle) {
@@ -105,7 +117,7 @@ export default class Game {
       let pt0 = new Point(x, y).to(this.puzzle.container);
       let deg0 = 0;
       this.capture(piece, pt0);
-      return {
+      const dragger = {
         active: true,
         piece,
         move: ({ x: x_, y: y_ }) => {
@@ -121,17 +133,42 @@ export default class Game {
         resetSpin: () => {
           deg0 = 0;
         },
+        attempt: () => {
+          const p_ = piece.findMergeableOn(pt0);
+          if (p_) {
+            this.release(piece);
+            new MergeCommand(p_, piece).commit();
+            return this.defaultDragger;
+          }
+          return dragger;
+        },
         end: () => {
           this.release(piece);
 
           const p_ = piece.findMergeableOn(pt0);
           if (p_) new MergeCommand(p_, piece).commit();
 
-          return Game.default_dragger;
+          return this.defaultDragger;
+        },
+        continue: ({ x: x_, y: y_ }) => {
+          const canvas_ = $(this.active_stage.canvas);
+          const pt = new Point(
+            x_ - canvas_.position().left,
+            y_ - canvas_.position().top
+          ).to(this.active_stage);
+          const obj_ = this.active_stage.getObjectUnderPoint(pt.x, pt.y);
+          const piece_ = obj_ && obj_.piece.getEntity();
+          if (piece_ === piece) {
+            pt0 = new Point(x_, y_).to(this.puzzle.container);
+            return dragger;
+          }
+          dragger.end();
+          return this.dragStart({ x: x_, y: y_ });
         }
       };
+      return dragger;
     }
-    return Game.default_dragger;
+    return this.defaultDragger;
   }
 
   putToActiveLayer(p) {
@@ -237,12 +274,3 @@ export default class Game {
     this.puzzle.stage.update();
   }
 }
-
-Game.default_dragger = {
-  active: false,
-  piece: null,
-  move: () => {},
-  spin: () => {},
-  resetSpin: () => {},
-  end: () => Game.default_dragger
-};

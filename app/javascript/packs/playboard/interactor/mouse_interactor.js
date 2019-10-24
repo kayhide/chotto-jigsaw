@@ -1,21 +1,17 @@
 import { Point } from "@createjs/easeljs";
 
-import Game from "./game";
-
 export default class MouseInteractor {
   constructor(game) {
     this.game = game;
-    this.dragger = Game.default_dragger;
+    this.dragger = game.defaultDragger;
   }
 
   attach() {
     $(this.game.canvas).on("mousewheel", e => {
       e.preventDefault();
-      this.dragger = this.dragger.end();
-
       const e_ = e.originalEvent;
       const pt = new Point(e_.clientX, e_.clientY);
-      this.dragger = this.game.dragStart(pt);
+      this.dragger = this.dragger.continue(pt);
 
       if (this.dragger.active) {
         const delta = e_.wheelDelta / 10;
@@ -30,10 +26,8 @@ export default class MouseInteractor {
     let mover = null;
     $(this.game.canvas).on("mousedown", e => {
       e.preventDefault();
-      this.dragger.end();
-
       const pt = new Point(e.offsetX, e.offsetY);
-      this.dragger = this.game.dragStart(pt);
+      this.dragger = this.dragger.continue(pt);
       if (!this.dragger.active) mover = this.game.getMover(pt);
     });
 
@@ -43,8 +37,9 @@ export default class MouseInteractor {
       else if (e.which > 0) this.dragger.move(pt);
     });
 
-    $(this.game.canvas).on("mouseup", () => {
-      mover = null;
+    $(this.game.canvas).on("mouseup", e => {
+      if (mover) mover = null;
+      else if (e.which > 0) this.dragger = this.dragger.attempt();
     });
   }
 }
