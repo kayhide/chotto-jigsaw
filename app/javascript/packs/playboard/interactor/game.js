@@ -1,4 +1,4 @@
-import { Stage, Point, Shadow } from "@createjs/easeljs";
+import { Stage, Point } from "@createjs/easeljs";
 
 import Logger from "../logger";
 import Command from "../command/command";
@@ -43,24 +43,10 @@ export default class Game {
 
   constructor(puzzle) {
     this.puzzle = puzzle;
-    this.colors = {
-      shadow: "#fff"
-    };
 
     {
-      const canvas_ = document.createElement("canvas");
-      canvas_.id = "active";
-
-      $(canvas_)
-        .addClass("no-interaction")
-        .css("position", "absolute")
-        .css("filter", "drop-shadow(0 8px 6px rgba(0, 0, 0, 0.40)")
-        .hide();
-
+      const canvas_ = $("#active-canvas").get(0);
       this.active_stage = new Stage(canvas_);
-      const blur = 2;
-      const shadow = new Shadow(this.colors.shadow, 0, 0, blur);
-      Object.assign(this.active_stage, { shadow });
       $(this.puzzle.stage.canvas).after(canvas_);
     }
 
@@ -248,7 +234,7 @@ export default class Game {
   fit() {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const rect = this.puzzle.getBoundary();
+    const rect = this.puzzle.getBoundary().inflate(this.puzzle.linear_measure);
     const sx = width / rect.width;
     const sy = height / rect.height;
     const sc = Math.min(sx, sy);
@@ -264,7 +250,7 @@ export default class Game {
   fill() {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const rect = this.puzzle.getBoundary();
+    const rect = this.puzzle.getBoundary().inflate(this.puzzle.linear_measure);
     const sx = width / rect.width;
     const sy = height / rect.height;
     const sc = Math.max(sx, sy);

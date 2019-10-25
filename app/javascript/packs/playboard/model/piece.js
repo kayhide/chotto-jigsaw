@@ -1,4 +1,4 @@
-import { Point, Matrix2D, Container } from "@createjs/easeljs";
+import { Point, Matrix2D, Container, Shape } from "@createjs/easeljs";
 
 export default class Piece {
   static parse(src) {
@@ -165,6 +165,13 @@ export default class Piece {
       g.setStrokeStyle(2)
         .beginFill("#390")
         .drawCircle(center.x, center.y, this.puzzle.linear_measure / 32);
+    }
+    {
+      const area = new Shape();
+      area.graphics
+        .beginFill("#000")
+        .drawRect(boundary.x, boundary.y, boundary.width, boundary.height);
+      this.shape.hitArea = area;
     }
     this.cache(boundary);
   }

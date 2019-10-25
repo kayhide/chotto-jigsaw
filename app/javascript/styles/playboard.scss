@@ -14,6 +14,20 @@
   }
 }
 
+#field {
+  top: 0;
+  left: 0;
+}
+
+#active-canvas {
+  position: absolute;
+  filter:
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.8))
+    drop-shadow(0 8px 6px rgba(0, 0, 0, 0.4));
+
+  @extend .no-interaction;
+}
+
 #back-button {
   position: absolute;
   left: 1em;
