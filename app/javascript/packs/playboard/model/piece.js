@@ -166,20 +166,16 @@ export default class Piece {
         .beginFill("#390")
         .drawCircle(center.x, center.y, this.puzzle.linear_measure / 32);
     }
+    this.cache(boundary);
   }
 
-  cache(padding = 0) {
-    const boundary = this.getLocalBoundary();
-    return this.shape.cache(
-      boundary.x - padding,
-      boundary.y - padding,
-      boundary.width + padding * 2,
-      boundary.height + padding * 2
-    );
-  }
-
-  uncache() {
-    return this.shape.uncache();
+  cache(boundary = null, scale = null) {
+    const { x, y, width, height } = (
+      boundary || this.getLocalBoundary()
+    ).inflate(4);
+    const scale_ =
+      scale || Math.min(Math.max(180 / this.puzzle.linear_measure, 1), 4);
+    this.shape.cache(x, y, width, height, scale_);
   }
 
   enbox(p) {

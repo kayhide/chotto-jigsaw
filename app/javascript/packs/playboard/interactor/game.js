@@ -64,11 +64,14 @@ export default class Game {
       $(this.puzzle.stage.canvas).after(canvas_);
     }
 
+    const rotateHandler = _.throttle(cmd => {
+      this.putToActiveLayer(cmd.piece);
+    }, 100);
     Command.onPost.push(cmd => {
       if (cmd instanceof TransformCommand) {
         if (this.isCaptured(cmd.piece)) {
           if (cmd instanceof RotateCommand) {
-            this.putToActiveLayer(cmd.piece);
+            rotateHandler(cmd);
           } else if (cmd instanceof TranslateCommand) {
             const { canvas } = this.active_stage;
             const { left, top } = $(canvas).offset();
@@ -179,7 +182,7 @@ export default class Game {
         .add(new Point(-10, -10));
       const pt1 = this.puzzle.container
         .localToWindow(x + width, y + height)
-        .add(new Point(10, 10));
+        .add(new Point(10, 20));
       this.active_stage.copyTransform(this.puzzle.container);
       this.active_stage.canvas.width = pt1.x - pt0.x;
       this.active_stage.canvas.height = pt1.y - pt0.y;

@@ -36,16 +36,6 @@ function play() {
       Logger.trace("attached: MouseInteractor");
     }
 
-    puzzle.shuffle();
-    game.fit();
-
-    {
-      const p = document.createElement("p");
-      p.id = "piece-count";
-      $(p).text(puzzle.pieces.length);
-      $("#info").prepend(p);
-    }
-
     Command.onPost.push(cmd => {
       if (cmd instanceof MergeCommand) {
         $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
@@ -58,6 +48,16 @@ function play() {
       }
     });
 
+    puzzle.shuffle();
+    game.fit();
+
+    {
+      const p = document.createElement("p");
+      p.id = "piece-count";
+      $(p).text(puzzle.pieces.length);
+      $("#info").prepend(p);
+    }
+
     {
       const p = document.createElement("p");
       p.id = "ticker";
@@ -67,7 +67,7 @@ function play() {
       Ticker.addEventListener("tick", () => {
         if (puzzle.stage.invalidated) {
           puzzle.stage.update();
-          puzzle.stage.invalidated = null;
+          puzzle.stage.invalidated = false;
         }
         $(p).text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
       });
