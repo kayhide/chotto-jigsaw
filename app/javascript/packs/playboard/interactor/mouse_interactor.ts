@@ -1,30 +1,37 @@
 import { Point } from "@createjs/easeljs";
 
+import Logger from "../logger";
+import Game, { Dragger, Mover } from "./game";
+
 export default class MouseInteractor {
+  game: Game;
+  dragger: Dragger;
+
   constructor(game) {
     this.game = game;
     this.dragger = game.defaultDragger;
   }
 
-  attach() {
-    $(this.game.canvas).on("mousewheel", e => {
+  attach(): void {
+    $(this.game.canvas).on("wheel", e => {
       e.preventDefault();
-      const e_ = e.originalEvent;
+      const e_ = e.originalEvent as WheelEvent;
       const pt = new Point(e_.clientX, e_.clientY);
       this.dragger = this.dragger.continue(pt);
 
       if (this.dragger.active) {
-        const delta = e_.wheelDelta / 10;
+        const delta = -e_.deltaY;
         this.dragger.resetSpin();
         this.dragger.spin(delta);
       } else {
-        const delta = e_.wheelDelta > 0 ? 1.05 : 1 / 1.05;
+        const delta = e_.deltaY < 0 ? 1.02 : 1 / 1.02;
         this.game.getScaler()(e_, delta);
       }
     });
 
-    let mover = null;
+    let mover: Mover = null;
     $(this.game.canvas).on("mousedown", e => {
+      Logger.trace(e.type);
       e.preventDefault();
       const pt = new Point(e.offsetX, e.offsetY);
       this.dragger = this.dragger.continue(pt);
@@ -38,6 +45,7 @@ export default class MouseInteractor {
     });
 
     $(this.game.canvas).on("mouseup", e => {
+      Logger.trace(e.type);
       if (mover) mover = null;
       else if (e.which > 0) this.dragger = this.dragger.attempt();
     });

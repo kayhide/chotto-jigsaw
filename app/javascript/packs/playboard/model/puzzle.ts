@@ -9,30 +9,46 @@ import {
 
 import Piece from "./piece";
 import DrawingConfig from "./drawing_config";
-import Command from "../command/command";
 import TranslateCommand from "../command/translate_command";
 import RotateCommand from "../command/rotate_command";
-import MergeCommand from "../command/merge_command";
 
 export default class Puzzle {
-  constructor(canvas) {
+  stage: Stage;
+  container: Container;
+  wrapper: Container;
+
+  image: HTMLImageElement;
+  pieces: Array<Piece>;
+  drawingConfig: DrawingConfig;
+
+  linearMeasure: number;
+  rotationTolerance: number;
+
+  containerGuide: Shape;
+  wrapperGuide: Shape;
+
+  constructor(canvas: HTMLCanvasElement) {
     this.stage = new Stage(canvas);
     this.image = null;
     this.pieces = [];
-    this.rotation_tolerance = 24;
-    this.translation_tolerance = 0;
-    this.drawing_config = new DrawingConfig();
+    this.rotationTolerance = 24;
+    this.drawingConfig = new DrawingConfig();
   }
 
-  parse(content) {
+  parse(content): void {
     this.pieces = content.pieces.map(Piece.parse);
-    this.piece_count = this.pieces.length;
-    this.linear_measure = content.linear_measure;
-    this.translation_tolerance = content.linear_measure / 4;
-    return this;
+    this.linearMeasure = content.linear_measure;
   }
 
-  initizlize(image) {
+  get piecesCount(): number {
+    return this.pieces.length;
+  }
+
+  get translationTolerance(): number {
+    return this.linearMeasure / 4;
+  }
+
+  initizlize(image): void {
     this.image = image;
     this.wrapper = new Container();
     this.stage.addChild(this.wrapper);
@@ -49,18 +65,9 @@ export default class Puzzle {
       p.draw();
       this.container.addChild(p.shape);
     });
-
-    this.foreground = new Container();
-    this.stage.addChild(this.foreground);
-
-    Command.onPost.unshift(cmd => {
-      if (cmd instanceof MergeCommand) {
-        this.updateProgress();
-      }
-    });
   }
 
-  buildGuide() {
+  buildGuide(): void {
     {
       const guide = new Shape();
       guide.graphics
@@ -88,33 +95,33 @@ export default class Puzzle {
     }
   }
 
-  toggleGuide() {
+  toggleGuide(): void {
     this.wrapperGuide.visible = !this.wrapperGuide.visible;
     this.containerGuide.visible = !this.containerGuide.visible;
     this.invalidate();
   }
 
-  updateProgress() {
+  get progress(): number {
     const i = this.pieces.filter(p => !p.isAlive()).length;
-    this.progress = i / (this.pieces.length - 1);
+    return i / (this.pieces.length - 1);
   }
 
-  getBoundary() {
+  get boundary(): Rectangle {
     const rect = Rectangle.createEmpty();
     this.pieces
       .filter(p => p.isAlive())
       .forEach(p => {
-        rect.addRectangle(p.getBoundary());
+        rect.addRectangle(p.boundary);
       });
     return rect;
   }
 
-  shuffle() {
+  shuffle(): void {
     const s = Math.max(this.image.width, this.image.height) * 2;
     this.pieces
       .filter(p => p.isAlive())
       .forEach(p => {
-        const { x, y } = p.getCenter();
+        const { x, y } = p.center;
         const center = p.shape.localToParent(x, y);
         new RotateCommand(p, center, Math.random() * 360).post();
         const vec = new Point(Math.random() * s, Math.random() * s);
@@ -122,7 +129,7 @@ export default class Puzzle {
       });
   }
 
-  zoom(x, y, scale) {
+  zoom(x, y, scale): void {
     this.container.scaleX = this.container.scaleX * scale;
     this.container.scaleY = this.container.scaleX;
     const pt0 = new Point(x, y).fromWindow().to(this.wrapper);
@@ -136,15 +143,14 @@ export default class Puzzle {
     this.stage.update();
   }
 
-  get currentScale() {
+  get currentScale(): number {
     return this.container.scaleX;
   }
 
-  scale(x, y, scale) {
+  scale(x, y, scale): void {
     const pt0 = new Point(x, y).fromWindow().to(this.container);
     const delta = scale / this.currentScale;
-    const mtx = this.container
-      .matrix()
+    const mtx = this.container.matrix
       .translate(pt0.x, pt0.y)
       .scale(delta, delta)
       .translate(-pt0.x, -pt0.y);
@@ -152,7 +158,7 @@ export default class Puzzle {
     this.stage.update();
   }
 
-  invalidate() {
+  invalidate(): void {
     this.stage.invalidate();
   }
 }

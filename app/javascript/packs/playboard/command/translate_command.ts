@@ -1,14 +1,21 @@
+import { Point } from "@createjs/easeljs";
+
+import Piece from "../model/piece";
+import Command from "./command";
 import TransformCommand from "./transform_command";
 
 export default class TranslateCommand extends TransformCommand {
-  constructor(piece, vector) {
+  piece: Piece;
+  vector: Point;
+
+  constructor(piece: Piece, vector: Point) {
     super();
     Object.assign(this, { piece, vector });
-    this.position = piece.position().add(vector);
-    this.rotation = piece.rotation();
+    this.position = piece.position.add(vector);
+    this.rotation = piece.rotation;
   }
 
-  squash(cmd) {
+  squash(cmd: Command): boolean {
     if (cmd instanceof TranslateCommand && cmd.piece === this.piece) {
       this.vector = this.vector.add(cmd.vector);
       const { position, rotation } = cmd;
@@ -19,7 +26,7 @@ export default class TranslateCommand extends TransformCommand {
     return false;
   }
 
-  isValid() {
+  isValid(): boolean {
     return this.piece && this.piece.isAlive();
   }
 }

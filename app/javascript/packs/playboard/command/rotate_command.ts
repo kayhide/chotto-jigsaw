@@ -1,20 +1,25 @@
-import { Matrix2D } from "@createjs/easeljs";
+import { Point, Matrix2D } from "@createjs/easeljs";
 
+import Piece from "../model/piece";
+import Command from "./command";
 import TransformCommand from "./transform_command";
 
 export default class RotateCommand extends TransformCommand {
-  constructor(piece, center, degree) {
+  center: Point;
+  degree: number;
+
+  constructor(piece: Piece, center: Point, degree: number) {
     super();
     Object.assign(this, { piece, center, degree });
     const mtx = new Matrix2D()
       .translate(center.x, center.y)
       .rotate(degree)
       .translate(-center.x, -center.y);
-    this.position = piece.position().apply(mtx);
-    this.rotation = piece.rotation() + degree;
+    this.position = piece.position.apply(mtx);
+    this.rotation = piece.rotation + degree;
   }
 
-  squash(cmd) {
+  squash(cmd: Command): boolean {
     if (
       cmd instanceof RotateCommand &&
       cmd.piece === this.piece &&
@@ -29,7 +34,7 @@ export default class RotateCommand extends TransformCommand {
     return false;
   }
 
-  isValid() {
+  isValid(): boolean {
     return this.piece && this.piece.isAlive() && this.center;
   }
 }

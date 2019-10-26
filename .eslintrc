@@ -1,7 +1,12 @@
 {
-  "extends": ["eslint-config-airbnb-base", "prettier"],
+  "extends": [
+    "eslint-config-airbnb-base",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
 
-  "plugins": ["prettier"],
+  "plugins": ["@typescript-eslint", "prettier"],
 
   "env": {
     "browser": true
@@ -13,19 +18,24 @@
   },
 
   "rules": {
-    "prettier/prettier": "error",
+    "@typescript-eslint/no-unused-vars": "off",
     "class-methods-use-this": 0,
+    "func-names": ["error", "never"],
+    "lines-between-class-members": "off",
+    "no-nested-ternary": "off",
+    "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": 0,
-    "no-param-reassign": ["error", { "props": false }]
+    "prettier/prettier": "error"
   },
 
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
 
   "settings": {
     "import/resolver": {
       "webpack": {
         "config": {
           "resolve": {
+		        "extensions": [".js", ".jsx", ".scss", ".ts", ".tsx"],
             "modules": ["app/javascript", "node_modules"]
           }
         }

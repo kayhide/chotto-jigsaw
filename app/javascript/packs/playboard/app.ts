@@ -9,17 +9,17 @@ import BrowserInteractor from "./interactor/browser_interactor";
 import TouchInteractor from "./interactor/touch_interactor";
 import MouseInteractor from "./interactor/mouse_interactor";
 
-function isTouchScreen() {
+function isTouchScreen(): boolean {
   return "ontouchstart" in window;
 }
 
-function play() {
-  const puzzle = new Puzzle($("#field")[0]);
+function play(): void {
+  const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
   puzzle.parse($("#puzzle").data("content"));
   const game = new Game(puzzle);
 
   const sounds = {
-    merge: $("#sound-list > .merge")[0]
+    merge: $("#sound-list > .merge")[0] as HTMLAudioElement
   };
 
   const image = new Image();
