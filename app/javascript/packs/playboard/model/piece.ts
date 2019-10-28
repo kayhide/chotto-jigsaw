@@ -13,11 +13,7 @@ export default class Piece {
 
   id: number;
   shape: Shape = null;
-  merger: Piece = null;
-
-  // FIXME Refactor and drop the reference to Puzzle
-  // Cannot type Puzzle for cyclic reference
-  puzzle = null;
+  private _merger: Piece = null;
 
   loops: Array<Array<Point>> = [];
   private _position: Point = new Point();
@@ -86,38 +82,24 @@ export default class Piece {
     _(this.loops).pull(lp);
   }
 
-  getEntity(): Shape {
-    if (this.merger != null) {
-      return this.getMerger();
-    }
-    return this;
+  get entity(): Piece {
+    return this.merger || this;
   }
 
-  getMerger(): Shape {
-    let { merger } = this;
-    while (merger && merger.merger) {
-      merger = merger.merger;
+  get merger(): Piece {
+    let merger = this._merger;
+    while (merger && merger._merger) {
+      merger = merger._merger;
     }
     return merger;
   }
 
+  set merger(p: Piece) {
+    this._merger = p;
+  }
+
   isAlive(): boolean {
     return !this.merger;
-  }
-
-  findMergeableOn(point: Point): Piece {
-    return this.getAdjacentPieces().find(p => this.isWithinTolerance(p, point));
-  }
-
-  isWithinTolerance(target: Piece, pt: Point): boolean {
-    if (Math.abs(this.getDegreeTo(target)) < this.puzzle.rotationTolerance) {
-      const pt0 = pt.apply(this.matrix.invert());
-      const pt1 = pt.apply(target.matrix.invert());
-      if (pt0.distanceTo(pt1) < this.puzzle.translationTolerance) {
-        return true;
-      }
-    }
-    return false;
   }
 
   getDegreeTo(target): number {
@@ -134,7 +116,7 @@ export default class Piece {
   getAdjacentPieces(): Array<Piece> {
     return _(this.neighborIds)
       .map(Piece.find)
-      .map(p => p.getEntity())
+      .map(p => p.entity)
       .uniq()
       .value();
   }
@@ -155,54 +137,9 @@ export default class Piece {
     return this.boundary.center;
   }
 
-  draw(): void {
-    const g = this.shape.graphics;
-    g.clear();
-    if (this.puzzle.drawingConfig.draws_image) {
-      g.beginBitmapFill(this.puzzle.image);
-    } else {
-      g.beginFill("#9fa");
-    }
-    if (this.puzzle.drawingConfig.draws_stroke) {
-      g.setStrokeStyle(2).beginStroke("#f0f");
-    } else {
-      g.setStrokeStyle(2).beginBitmapStroke(this.puzzle.image, "no-repeat");
-    }
-    this.loops.forEach(this.drawCurve.bind(this));
-    g.endFill().endStroke();
-
-    if (this.puzzle.drawingConfig.draws_boundary) {
-      const { x, y, width, height } = this.localBoundary;
-      g.setStrokeStyle(2)
-        .beginStroke("#0f0")
-        .rect(x, y, width, height);
-    }
-    if (this.puzzle.drawingConfig.draws_control_line) {
-      g.setStrokeStyle(2).beginStroke("#fff");
-      this.loops.forEach(this.drawPolyline.bind(this));
-    }
-    if (this.puzzle.drawingConfig.draws_center) {
-      const { x, y } = this.localBoundary.center;
-      g.setStrokeStyle(2)
-        .beginFill("#390")
-        .drawCircle(x, y, this.puzzle.linearMeasure / 32);
-    }
-    {
-      const { x, y, width, height } = this.localBoundary;
-      const area = new Shape();
-      area.graphics.beginFill("#000").drawRect(x, y, width, height);
-      this.shape.hitArea = area;
-    }
-    this.cache();
-  }
-
-  get cacheScale(): number {
-    return Math.min(Math.max(180 / this.puzzle.linearMeasure, 1), 4);
-  }
-
-  cache(): void {
+  cache(scale = 1): void {
     const { x, y, width, height } = this.localBoundary.inflate(4);
-    this.shape.cache(x, y, width, height, this.cacheScale);
+    this.shape.cache(x, y, width, height, scale);
   }
 
   enbox(p): void {
@@ -240,43 +177,6 @@ export default class Piece {
       this.shape.copyTransform(container);
       container.parent.addChild(this.shape);
       container.remove();
-      this.draw();
     }
-  }
-
-  drawCurve(points): void {
-    const g = this.shape.graphics;
-    g.moveTo(points[0].x, points[0].y);
-
-    _(points)
-      .drop(1)
-      .chunk(3)
-      .forEach(pts => {
-        if (pts[0] && pts[1]) {
-          g.bezierCurveTo(
-            pts[0].x,
-            pts[0].y,
-            pts[1].x,
-            pts[1].y,
-            pts[2].x,
-            pts[2].y
-          );
-        } else {
-          g.lineTo(...pts[2].toArray());
-        }
-      });
-  }
-
-  drawPolyline(points): void {
-    const g = this.shape.graphics;
-    g.moveTo(points[0].x, points[0].y);
-
-    _(points)
-      .drop(1)
-      .forEach(pt => {
-        if (pt != null) {
-          g.lineTo(pt.x, pt.y);
-        }
-      });
   }
 }

@@ -1,6 +1,7 @@
 import { Ticker } from "@createjs/easeljs";
 
 import Logger from "./logger";
+import Action from "./action";
 import Puzzle from "./model/puzzle";
 import Command from "./command/command";
 import MergeCommand from "./command/merge_command";
@@ -8,9 +9,41 @@ import Game from "./interactor/game";
 import BrowserInteractor from "./interactor/browser_interactor";
 import TouchInteractor from "./interactor/touch_interactor";
 import MouseInteractor from "./interactor/mouse_interactor";
+import PuzzleDrawer from "./drawer/puzzle_drawer";
 
 function isTouchScreen(): boolean {
   return "ontouchstart" in window;
+}
+
+class Guider {
+  _guide = false;
+  puzzle: Puzzle;
+  drawer: PuzzleDrawer;
+
+  constructor(puzzle: Puzzle) {
+    this.puzzle = puzzle;
+    this.drawer = new PuzzleDrawer();
+  }
+
+  get guide(): boolean {
+    return this._guide;
+  }
+
+  set guide(f: boolean) {
+    this._guide = f;
+    if (this._guide) {
+      $("#active-canvas").addClass("z-depth-3");
+    } else {
+      $("#active-canvas").removeClass("z-depth-3");
+    }
+    this.drawer.drawsGuide = this._guide;
+    this.drawer.draw(this.puzzle, this.puzzle.shape.graphics);
+    this.puzzle.invalidate();
+  }
+
+  toggle(): void {
+    this.guide = !this.guide;
+  }
 }
 
 function play(): void {
@@ -26,6 +59,7 @@ function play(): void {
   image.crossOrigin = "anonymous";
   $(image).on("load", () => {
     puzzle.initizlize(image);
+    new PuzzleDrawer().draw(puzzle, puzzle.shape.graphics);
 
     new BrowserInteractor(game).attach();
     if (isTouchScreen()) {
@@ -49,7 +83,7 @@ function play(): void {
     });
 
     puzzle.shuffle();
-    game.fit();
+    Action.fit(game.puzzle);
 
     {
       const p = document.createElement("p");
@@ -77,13 +111,14 @@ function play(): void {
 
     $("#playboard").fadeIn("slow");
 
+    const guider = new Guider(puzzle);
     $(window).on("keydown", e => {
       if (e.key === "F1") {
         if ($("#log").is(":hidden")) $("#log-button .open").trigger("click");
         else $("#log-button .close").trigger("click");
       }
       if (e.key === "F2") {
-        game.guide = !game.guide;
+        guider.toggle();
       }
     });
   });
@@ -101,7 +136,7 @@ function play(): void {
   });
 
   $("#fit").on("click", () => {
-    game.fit();
+    Action.fit(puzzle);
     return false;
   });
 

@@ -27,24 +27,9 @@ export default class Game {
   puzzle: Puzzle;
 
   private activeStage: Container;
-  private _guide = false;
 
   get canvas(): HTMLCanvasElement {
     return this.puzzle.stage.canvas;
-  }
-
-  get guide(): boolean {
-    return this._guide;
-  }
-
-  set guide(f: boolean) {
-    this._guide = f;
-    this.puzzle.toggleGuide();
-    if (this._guide) {
-      $(this.activeStage.canvas).addClass("z-depth-3");
-    } else {
-      $(this.activeStage.canvas).removeClass("z-depth-3");
-    }
   }
 
   get defaultDragger(): Dragger {
@@ -123,7 +108,7 @@ export default class Game {
 
   dragStart({ x, y }: Point): Dragger {
     const obj = this.puzzle.stage.getObjectUnderPoint(x, y);
-    const piece = obj && obj.piece.getEntity();
+    const piece = obj && obj.piece && obj.piece.entity;
     if (piece) {
       let pt0 = new Point(x, y).to(this.puzzle.container);
       let deg0 = 0;
@@ -145,7 +130,7 @@ export default class Game {
           deg0 = 0;
         },
         attempt: () => {
-          const p_ = piece.findMergeableOn(pt0);
+          const p_ = this.findMergeableOn(piece, pt0);
           if (p_) {
             this.release(piece);
             new MergeCommand(p_, piece).commit();
@@ -156,7 +141,7 @@ export default class Game {
         end: () => {
           this.release(piece);
 
-          const p_ = piece.findMergeableOn(pt0);
+          const p_ = this.findMergeableOn(piece, pt0);
           if (p_) new MergeCommand(p_, piece).commit();
 
           return this.defaultDragger;
@@ -168,7 +153,7 @@ export default class Game {
             y_ - canvas_.position().top
           ).to(this.activeStage);
           const obj_ = this.activeStage.getObjectUnderPoint(pt.x, pt.y);
-          const piece_ = obj_ && obj_.piece.getEntity();
+          const piece_ = obj_ && obj_.piece.entity;
           if (piece_ === piece) {
             pt0 = new Point(x_, y_).to(this.puzzle.container);
             return dragger;
@@ -241,14 +226,34 @@ export default class Game {
     this.puzzle.invalidate();
   }
 
-  fit(): void {
-    const { innerWidth: width, innerHeight: height } = window;
-    const rect = this.puzzle.boundary.inflate(this.puzzle.linearMeasure);
-    const sc = Math.min(width / rect.width, height / rect.height);
-    this.puzzle.container.x = -rect.x * sc + (width - sc * rect.width) / 2;
-    this.puzzle.container.y = -rect.y * sc + (height - sc * rect.height) / 2;
-    this.puzzle.container.scaleX = sc;
-    this.puzzle.container.scaleY = sc;
-    this.puzzle.stage.update();
+  findMergeableOn(p: Piece, point: Point): Piece {
+    return p
+      .getAdjacentPieces()
+      .find(p1 => this.isWithinTolerance(p, p1, point));
+  }
+
+  isWithinTolerance(source: Piece, target: Piece, pt: Point): boolean {
+    if (
+      Math.abs(this.getDegreeBetween(source, target)) <
+      this.puzzle.rotationTolerance
+    ) {
+      const pt0 = pt.apply(source.matrix.invert());
+      const pt1 = pt.apply(target.matrix.invert());
+      if (pt0.distanceTo(pt1) < this.puzzle.translationTolerance) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getDegreeBetween(source: Piece, target: Piece): number {
+    const deg = (target.rotation - source.rotation) % 360;
+    if (deg > 180) {
+      return deg - 360;
+    }
+    if (deg <= -180) {
+      return deg + 360;
+    }
+    return deg;
   }
 }

@@ -6,7 +6,7 @@ export default class MergeCommand extends Command {
 
   constructor(piece, mergee) {
     super();
-    this.piece = piece.getEntity();
+    this.piece = piece.entity;
     this.mergee = mergee;
   }
 

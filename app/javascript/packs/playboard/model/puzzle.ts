@@ -8,7 +8,6 @@ import {
 } from "@createjs/easeljs";
 
 import Piece from "./piece";
-import DrawingConfig from "./drawing_config";
 import TranslateCommand from "../command/translate_command";
 import RotateCommand from "../command/rotate_command";
 
@@ -18,19 +17,16 @@ export default class Puzzle {
 
   image: HTMLImageElement;
   pieces: Array<Piece>;
-  drawingConfig: DrawingConfig;
+  shape: Shape = null;
 
   linearMeasure: number;
   rotationTolerance: number;
-
-  containerGuide: Shape;
 
   constructor(canvas: HTMLCanvasElement) {
     this.stage = new Stage(canvas);
     this.image = null;
     this.pieces = [];
     this.rotationTolerance = 24;
-    this.drawingConfig = new DrawingConfig();
   }
 
   parse(content): void {
@@ -52,40 +48,14 @@ export default class Puzzle {
     this.container = new Container();
     this.stage.addChild(this.container);
 
-    this.buildGuide();
+    this.shape = new Shape();
+    this.container.addChild(this.shape);
 
     this.pieces.forEach(p => {
-      p.puzzle = this;
       p.shape = new Shape();
       p.shape.piece = p;
-      p.draw();
       this.container.addChild(p.shape);
     });
-  }
-
-  buildGuide(): void {
-    const guide = new Shape();
-    guide.graphics
-      .setStrokeStyle(1)
-      .beginStroke("rgba(127,255,255,0.7)")
-      .beginFill("rgba(127,255,255,0.5)")
-      .drawCircle(0, 0, 5);
-    guide.graphics.setStrokeStyle(1).beginStroke("rgba(127,255,255,0.7)");
-    for (let i = -5; i < 6; i += 1) {
-      guide.graphics
-        .moveTo(-500, i * 100)
-        .lineTo(500, i * 100)
-        .moveTo(i * 100, -500)
-        .lineTo(i * 100, 500);
-    }
-    guide.visible = false;
-    this.container.addChild(guide);
-    this.containerGuide = guide;
-  }
-
-  toggleGuide(): void {
-    this.containerGuide.visible = !this.containerGuide.visible;
-    this.invalidate();
   }
 
   get progress(): number {
