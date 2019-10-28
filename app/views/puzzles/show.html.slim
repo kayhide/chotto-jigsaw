@@ -1,13 +1,20 @@
 h2
   = @puzzle.difficulty.to_s.camelize
 
-.text-sm = @puzzle.picture.filename
-.text-sm
-  = @puzzle.pieces_count
-  span< pcs
-
 - width, height = @puzzle.picture.metadata.values_at("width", "height")
 - aspect_ratio = width.to_f / height.to_f
+
+.text-sm = @puzzle.picture.filename
+.text-sm
+  span = @puzzle.pieces_count
+  span< pcs
+  span<> size:
+  span = width
+  span<> x
+  span = height
+  span<> aspect ratio:
+  span = "%0.2f" % aspect_ratio
+
 - if 1.33 < aspect_ratio
   - display_width = 800
   - display_scale = display_width.to_f / width.to_f
