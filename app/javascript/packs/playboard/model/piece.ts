@@ -153,7 +153,6 @@ export default class Piece {
   }
 
   draw(): void {
-    this.shape.uncache();
     const g = this.shape.graphics;
     g.clear();
     if (this.puzzle.drawingConfig.draws_image) {
@@ -205,6 +204,7 @@ export default class Piece {
   enbox(p): void {
     if (!(this.shape instanceof Container)) {
       const shape_ = this.shape;
+      shape_.uncache();
       const container = new Container();
       container.copyTransform(shape_);
       shape_.clearTransform();
@@ -213,19 +213,19 @@ export default class Piece {
       container.piece = this;
       this.shape = container;
     }
-    if (p) {
-      if (p.shape instanceof Container) {
-        while (p.shape.numChildren > 0) {
-          const s = p.shape.getChildAt(0);
-          this.shape.addChild(s);
-        }
-        p.shape.remove();
-      } else {
-        p.shape.clearTransform();
-        this.shape.addChild(p.shape);
+    p.shape.uncache();
+    if (p.shape instanceof Container) {
+      while (p.shape.numChildren > 0) {
+        const s = p.shape.getChildAt(0);
+        this.shape.addChild(s);
       }
+      p.shape.remove();
+    } else {
+      p.shape.clearTransform();
+      this.shape.addChild(p.shape);
     }
     this._boundary = null;
+    this.cache();
   }
 
   unbox(): void {
