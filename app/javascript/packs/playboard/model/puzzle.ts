@@ -15,7 +15,6 @@ import RotateCommand from "../command/rotate_command";
 export default class Puzzle {
   stage: Stage;
   container: Container;
-  wrapper: Container;
 
   image: HTMLImageElement;
   pieces: Array<Piece>;
@@ -25,7 +24,6 @@ export default class Puzzle {
   rotationTolerance: number;
 
   containerGuide: Shape;
-  wrapperGuide: Shape;
 
   constructor(canvas: HTMLCanvasElement) {
     this.stage = new Stage(canvas);
@@ -50,11 +48,9 @@ export default class Puzzle {
 
   initizlize(image): void {
     this.image = image;
-    this.wrapper = new Container();
-    this.stage.addChild(this.wrapper);
 
     this.container = new Container();
-    this.wrapper.addChild(this.container);
+    this.stage.addChild(this.container);
 
     this.buildGuide();
 
@@ -68,35 +64,26 @@ export default class Puzzle {
   }
 
   buildGuide(): void {
-    {
-      const guide = new Shape();
+    const guide = new Shape();
+    guide.graphics
+      .setStrokeStyle(1)
+      .beginStroke("rgba(127,255,255,0.7)")
+      .beginFill("rgba(127,255,255,0.5)")
+      .drawCircle(0, 0, 5);
+    guide.graphics.setStrokeStyle(1).beginStroke("rgba(127,255,255,0.7)");
+    for (let i = -5; i < 6; i += 1) {
       guide.graphics
-        .setStrokeStyle(1)
-        .beginStroke("rgba(127,255,255,0.7)")
-        .beginFill("rgba(127,255,255,0.5)")
-        .drawCircle(0, 0, 5);
-      guide.visible = false;
-      this.wrapper.addChild(guide);
-      this.wrapperGuide = guide;
+        .moveTo(-500, i * 100)
+        .lineTo(500, i * 100)
+        .moveTo(i * 100, -500)
+        .lineTo(i * 100, 500);
     }
-    {
-      const guide = new Shape();
-      guide.graphics.setStrokeStyle(1).beginStroke("rgba(127,255,255,0.7)");
-      for (let i = 0; i < 6; i += 1) {
-        guide.graphics
-          .moveTo(0, i * 100)
-          .lineTo(500, i * 100)
-          .moveTo(i * 100, 0)
-          .lineTo(i * 100, 500);
-      }
-      guide.visible = false;
-      this.container.addChild(guide);
-      this.containerGuide = guide;
-    }
+    guide.visible = false;
+    this.container.addChild(guide);
+    this.containerGuide = guide;
   }
 
   toggleGuide(): void {
-    this.wrapperGuide.visible = !this.wrapperGuide.visible;
     this.containerGuide.visible = !this.containerGuide.visible;
     this.invalidate();
   }
@@ -127,20 +114,6 @@ export default class Puzzle {
         const vec = new Point(Math.random() * s, Math.random() * s);
         new TranslateCommand(p, vec.subtract(center)).post();
       });
-  }
-
-  zoom(x, y, scale): void {
-    this.container.scaleX = this.container.scaleX * scale;
-    this.container.scaleY = this.container.scaleX;
-    const pt0 = new Point(x, y).fromWindow().to(this.wrapper);
-    const mtx = new Matrix2D()
-      .translate(pt0.x, pt0.y)
-      .scale(scale, scale)
-      .translate(-pt0.x, -pt0.y);
-    const pt1 = this.container.position().apply(mtx);
-    this.container.x = pt1.x;
-    this.container.y = pt1.y;
-    this.stage.update();
   }
 
   get currentScale(): number {

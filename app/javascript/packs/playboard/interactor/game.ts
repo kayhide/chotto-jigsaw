@@ -111,9 +111,12 @@ export default class Game {
   }
 
   getMover({ x, y }: Point): Mover {
-    const pt0 = new Point(x - this.puzzle.wrapper.x, y - this.puzzle.wrapper.y);
+    const pt0 = new Point(
+      x - this.puzzle.container.x,
+      y - this.puzzle.container.y
+    );
     return ({ x: x_, y: y_ }): void => {
-      Object.assign(this.puzzle.wrapper, { x: x_ - pt0.x, y: y_ - pt0.y });
+      Object.assign(this.puzzle.container, { x: x_ - pt0.x, y: y_ - pt0.y });
       this.puzzle.invalidate();
     };
   }
@@ -255,8 +258,6 @@ export default class Game {
     const sx = width / rect.width;
     const sy = height / rect.height;
     const sc = Math.min(sx, sy);
-    this.puzzle.wrapper.x = 0;
-    this.puzzle.wrapper.y = 0;
     this.puzzle.container.x = -rect.x * sc + (width - sc * rect.width) / 2;
     this.puzzle.container.y = -rect.y * sc + (height - sc * rect.height) / 2;
     this.puzzle.container.scaleX = sc;
@@ -271,8 +272,6 @@ export default class Game {
     const sx = width / rect.width;
     const sy = height / rect.height;
     const sc = Math.max(sx, sy);
-    this.puzzle.wrapper.x = 0;
-    this.puzzle.wrapper.y = 0;
     this.puzzle.container.x = -rect.x * sc + (width - sc * rect.width) / 2;
     this.puzzle.container.y = -rect.y * sc + (height - sc * rect.height) / 2;
     this.puzzle.container.scaleX = sc;
