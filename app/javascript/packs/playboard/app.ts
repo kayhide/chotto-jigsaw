@@ -79,9 +79,11 @@ function play(): void {
 
     $(window).on("keydown", e => {
       if (e.key === "F1") {
-        game.guide = !game.guide;
-        if (game.guide) $("#log-button .open").trigger("click");
+        if ($("#log").is(":hidden")) $("#log-button .open").trigger("click");
         else $("#log-button .close").trigger("click");
+      }
+      if (e.key === "F2") {
+        game.guide = !game.guide;
       }
     });
   });

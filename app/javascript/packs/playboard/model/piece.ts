@@ -24,6 +24,8 @@ export default class Piece {
   private _rotation = 0;
 
   neighborIds: Array<number>;
+
+  private _localBoundary: Rectangle;
   private _boundary: Rectangle;
 
   static parse(src): Piece {
@@ -61,6 +63,17 @@ export default class Piece {
     return new Matrix2D()
       .translate(this._position.x, this._position.y)
       .rotate(this._rotation);
+  }
+
+  get localPoints(): Array<Point> {
+    return this.loops.flatMap(lp => lp.filter(pt => pt));
+  }
+
+  get localBoundary(): Rectangle {
+    if (!this._localBoundary) {
+      this._localBoundary = Point.boundary(this.localPoints);
+    }
+    return this._localBoundary;
   }
 
   addLoop(lp): void {
@@ -126,24 +139,14 @@ export default class Piece {
       .value();
   }
 
-  getLocalPoints(): Array<Point> {
-    return this.loops.flatMap(lp => lp.filter(pt => pt));
-  }
-
-  getLocalBoundary(): Rectangle {
-    return Point.boundary(this.getLocalPoints());
-  }
-
-  getPoints(): Array<Point> {
+  get points(): Array<Point> {
     const mtx = this.matrix;
-    return this.getLocalPoints()
-      .filter(pt => pt)
-      .map(pt => pt.apply(mtx));
+    return this.localPoints.filter(pt => pt).map(pt => pt.apply(mtx));
   }
 
   get boundary(): Rectangle {
     if (!this._boundary) {
-      this._boundary = Point.boundary(this.getPoints());
+      this._boundary = Point.boundary(this.points);
     }
     return this._boundary;
   }
@@ -162,49 +165,50 @@ export default class Piece {
     }
     if (this.puzzle.drawingConfig.draws_stroke) {
       g.setStrokeStyle(2).beginStroke("#f0f");
+    } else {
+      g.setStrokeStyle(2).beginBitmapStroke(this.puzzle.image, "no-repeat");
     }
     this.loops.forEach(this.drawCurve.bind(this));
     g.endFill().endStroke();
 
-    const boundary = this.getLocalBoundary();
     if (this.puzzle.drawingConfig.draws_boundary) {
+      const { x, y, width, height } = this.localBoundary;
       g.setStrokeStyle(2)
         .beginStroke("#0f0")
-        .rect(boundary.x, boundary.y, boundary.width, boundary.height);
+        .rect(x, y, width, height);
     }
     if (this.puzzle.drawingConfig.draws_control_line) {
       g.setStrokeStyle(2).beginStroke("#fff");
       this.loops.forEach(this.drawPolyline.bind(this));
     }
     if (this.puzzle.drawingConfig.draws_center) {
-      const { x, y } = boundary.center;
+      const { x, y } = this.localBoundary.center;
       g.setStrokeStyle(2)
         .beginFill("#390")
         .drawCircle(x, y, this.puzzle.linearMeasure / 32);
     }
     {
+      const { x, y, width, height } = this.localBoundary;
       const area = new Shape();
-      area.graphics
-        .beginFill("#000")
-        .drawRect(boundary.x, boundary.y, boundary.width, boundary.height);
+      area.graphics.beginFill("#000").drawRect(x, y, width, height);
       this.shape.hitArea = area;
     }
-    this.cache(boundary);
+    this.cache();
   }
 
-  cache(boundary = null, scale = null): void {
-    const { x, y, width, height } = (
-      boundary || this.getLocalBoundary()
-    ).inflate(4);
-    const scale_ =
-      scale || Math.min(Math.max(180 / this.puzzle.linearMeasure, 1), 4);
-    this.shape.cache(x, y, width, height, scale_);
+  get cacheScale(): number {
+    return Math.min(Math.max(180 / this.puzzle.linearMeasure, 1), 4);
+  }
+
+  cache(): void {
+    const { x, y, width, height } = this.localBoundary.inflate(4);
+    this.shape.cache(x, y, width, height, this.cacheScale);
   }
 
   enbox(p): void {
     if (!(this.shape instanceof Container)) {
       const shape_ = this.shape;
-      shape_.uncache();
+      // shape_.uncache();
       const container = new Container();
       container.copyTransform(shape_);
       shape_.clearTransform();
@@ -213,7 +217,8 @@ export default class Piece {
       container.piece = this;
       this.shape = container;
     }
-    p.shape.uncache();
+    // p.shape.uncache();
+    this.localBoundary.addRectangle(p.localBoundary);
     if (p.shape instanceof Container) {
       while (p.shape.numChildren > 0) {
         const s = p.shape.getChildAt(0);
@@ -225,7 +230,7 @@ export default class Piece {
       this.shape.addChild(p.shape);
     }
     this._boundary = null;
-    this.cache();
+    // this.cache();
   }
 
   unbox(): void {

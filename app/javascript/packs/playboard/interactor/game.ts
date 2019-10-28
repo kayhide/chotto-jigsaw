@@ -25,9 +25,9 @@ export type Mover = (Point) => void;
 
 export default class Game {
   puzzle: Puzzle;
-  activeStage: Container;
 
-  _guide = false;
+  private activeStage: Container;
+  private _guide = false;
 
   get canvas(): HTMLCanvasElement {
     return this.puzzle.stage.canvas;
@@ -48,16 +48,17 @@ export default class Game {
   }
 
   get defaultDragger(): Dragger {
-    return {
+    const dragger: Dragger = {
       active: false,
       piece: null,
-      move: (_pt: Point): void => {},
-      spin: (_deg: number): void => {},
-      resetSpin: (): void => {},
-      attempt: (): Dragger => this.defaultDragger,
-      end: (): Dragger => this.defaultDragger,
-      continue: (pt: Point): Dragger => this.dragStart(pt)
+      move: (_pt: Point) => {},
+      spin: (_deg: number) => {},
+      resetSpin: () => {},
+      attempt: () => this.defaultDragger,
+      end: () => this.defaultDragger,
+      continue: pt => this.dragStart(pt)
     };
+    return dragger;
   }
 
   constructor(puzzle) {
@@ -66,7 +67,6 @@ export default class Game {
     {
       const canvas_ = $("#active-canvas").get(0);
       this.activeStage = new Stage(canvas_);
-      $(this.puzzle.stage.canvas).after(canvas_);
     }
 
     const rotateHandler = _.throttle(cmd => {
@@ -215,7 +215,7 @@ export default class Game {
     while (this.activeStage.numChildren > 0) {
       const p = this.activeStage.getChildAt(0).piece;
       const { x, y } = p.position;
-      Object.assign(p.shape, { x, y, rotation: p.rotation, shadow: null });
+      Object.assign(p.shape, { x, y, rotation: p.rotation });
       this.puzzle.container.addChild(p.shape);
     }
     $(this.activeStage.canvas).hide();
@@ -241,37 +241,10 @@ export default class Game {
     this.puzzle.invalidate();
   }
 
-  centerize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const rect = this.puzzle.boundary;
-    const { scaleX: sx, scaleY: sy } = this.puzzle.container;
-    this.puzzle.container.x = -rect.x * sx + (width - sx * rect.width) / 2;
-    this.puzzle.container.y = -rect.y * sy + (height - sy * rect.height) / 2;
-    this.puzzle.stage.update();
-  }
-
   fit(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const { innerWidth: width, innerHeight: height } = window;
     const rect = this.puzzle.boundary.inflate(this.puzzle.linearMeasure);
-    const sx = width / rect.width;
-    const sy = height / rect.height;
-    const sc = Math.min(sx, sy);
-    this.puzzle.container.x = -rect.x * sc + (width - sc * rect.width) / 2;
-    this.puzzle.container.y = -rect.y * sc + (height - sc * rect.height) / 2;
-    this.puzzle.container.scaleX = sc;
-    this.puzzle.container.scaleY = sc;
-    this.puzzle.stage.update();
-  }
-
-  fill(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const rect = this.puzzle.boundary.inflate(this.puzzle.linearMeasure);
-    const sx = width / rect.width;
-    const sy = height / rect.height;
-    const sc = Math.max(sx, sy);
+    const sc = Math.min(width / rect.width, height / rect.height);
     this.puzzle.container.x = -rect.x * sc + (width - sc * rect.width) / 2;
     this.puzzle.container.y = -rect.y * sc + (height - sc * rect.height) / 2;
     this.puzzle.container.scaleX = sc;
