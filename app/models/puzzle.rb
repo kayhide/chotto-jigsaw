@@ -26,4 +26,12 @@ class Puzzle < ApplicationRecord
   def load_content!
     @pieces = Marshal.load content.download
   end
+
+  def width
+    picture.metadata["width"]
+  end
+
+  def height
+    picture.metadata["height"]
+  end
 end

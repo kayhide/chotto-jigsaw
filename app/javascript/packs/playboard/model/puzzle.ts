@@ -80,7 +80,7 @@ export default class Puzzle {
       .forEach(p => {
         const { x, y } = p.center;
         const center = p.shape.localToParent(x, y);
-        new RotateCommand(p, center, Math.random() * 360).post();
+        new RotateCommand(p, center, Math.random() * 360 - 180).post();
         const vec = new Point(Math.random() * s, Math.random() * s);
         new TranslateCommand(p, vec.subtract(center)).post();
       });
