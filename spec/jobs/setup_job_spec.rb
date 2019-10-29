@@ -2,15 +2,7 @@ require 'rails_helper'
 
 RSpec.describe SetupJob, type: :job do
   describe '#perform' do
-    let(:puzzle) { create :puzzle }
-    let(:file) { fixture_path.join('pictures/mountain.jpg') }
-
-    before do
-      perform_enqueued_jobs do
-        puzzle.picture.attach(io: file.open, filename: file.basename)
-      end
-      puzzle.reload
-    end
+    let(:puzzle) { create :puzzle, :with_picture }
 
     it 'creates content' do
       subject.perform puzzle, 3
