@@ -6,6 +6,6 @@ class PublicController < ApplicationController
         .group(:puzzle_id)
         .maximum(:id)
         .values
-    @games = Game.where(id: ids)
+    @games = Game.where(id: ids).order(id: :desc)
   end
 end
