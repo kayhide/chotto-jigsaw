@@ -66,20 +66,21 @@
   }
 }
 
+.rotate-180 {
+  transform: rotate(180deg);
+  transition: transform .2s;
+}
+
 #log-button {
   position: absolute;
   bottom: 6em;
-
-  .close {
-    display: none;
-  }
 }
 
 #log {
   display: none;
   position: absolute;
   bottom: 8em;
-  width: 50%;
+  max-width: 100%;
   padding: 1em;
   background-color: rgba(0, 0, 0, 0.2);
   overflow-y: auto;

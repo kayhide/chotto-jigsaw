@@ -2,28 +2,24 @@
   canvas#field
   canvas#active-canvas
 
+  #game-progress.progress
+    #progressbar.determinate style="width:0%"
+
+  #info.white-text
+
 
 #back-button
   = link_to :root, class: %w(btn-floating waves-effect waves-light) do
     i.material-icons chevron_left
 
-#game-progress.progress
-  #progressbar.determinate style="width:0%"
-
-#info.white-text
-
-#log-button
-  .open.btn-floating.btn-flat.btn-s
-    i.material-icons arrow_drop_up
-  .close.btn-floating.btn-flat.btn-s
-    i.material-icons arrow_drop_down
+#log-button.btn-floating.btn-flat.btn-s
+  i.material-icons arrow_drop_up
 
 #log.white-text
 
-
 #buttons
   #fit.btn-floating.waves-effect.waves-light
-    i.material-icons center_focus_strong
+    i.material-icons fullscreen
 
 #sound-list
   audio.merge src="/sounds/merge.mp3"

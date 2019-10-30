@@ -114,8 +114,7 @@ function play(): void {
     const guider = new Guider(puzzle);
     $(window).on("keydown", e => {
       if (e.key === "F1") {
-        if ($("#log").is(":hidden")) $("#log-button .open").trigger("click");
-        else $("#log-button .close").trigger("click");
+        $("#log-button").trigger("click");
       }
       if (e.key === "F2") {
         guider.toggle();
@@ -123,21 +122,13 @@ function play(): void {
     });
   });
 
-  $("#log-button .open").on("click", () => {
-    $("#log").fadeIn();
-    $("#log-button .open").hide();
-    $("#log-button .close").show();
-  });
-
-  $("#log-button .close").on("click", () => {
-    $("#log").fadeOut();
-    $("#log-button .open").show();
-    $("#log-button .close").hide();
+  $("#log-button").on("click", () => {
+    $("#log").fadeToggle();
+    $("#log-button").toggleClass("rotate-180");
   });
 
   $("#fit").on("click", () => {
-    Action.fit(puzzle);
-    return false;
+    ($("#playboard")[0] as HTMLCanvasElement).requestFullscreen();
   });
 
   image.src = $("#picture").data("url");
