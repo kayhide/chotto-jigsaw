@@ -23,7 +23,6 @@ export default class PieceDrawer {
     g.clear();
     if (this.drawsImage) {
       g.beginBitmapFill(this.image);
-      g.setStrokeStyle(2).beginBitmapStroke(this.image, "no-repeat");
     } else {
       g.beginFill("#9fa");
     }

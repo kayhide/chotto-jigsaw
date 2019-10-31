@@ -1,8 +1,9 @@
-@import "~materialize-css/sass/materialize";
+@import "./common";
 
 html {
   min-height: 100%;
 }
+
 body {
   min-height: 100%;
   background-image: url("/images/private-holiday-beach.jpg");

@@ -4,7 +4,6 @@
 // that code so it'll be compiled.
 
 import "materialize-css";
-import "../styles/application";
 import "../styles/playboard";
 
 import "./easeljs-ext";

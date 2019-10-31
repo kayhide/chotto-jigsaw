@@ -48,7 +48,7 @@ class Guider {
 
 function play(): void {
   const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
-  puzzle.parse($("#puzzle").data("content"));
+  puzzle.parse(JSON.parse($($("#playboard").data("puzzle")).text()));
   const game = new Game(puzzle);
 
   const sounds = {
@@ -58,6 +58,7 @@ function play(): void {
   const image = new Image();
   image.crossOrigin = "anonymous";
   $(image).on("load", () => {
+    Logger.trace(`image loaded: ${image.src}`);
     puzzle.initizlize(image);
     new PuzzleDrawer().draw(puzzle, puzzle.shape.graphics);
 
@@ -86,30 +87,19 @@ function play(): void {
     Action.fit(game.puzzle);
 
     {
-      const p = document.createElement("p");
-      p.id = "piece-count";
-      $(p).text(puzzle.pieces.length);
-      $("#info").prepend(p);
-    }
-
-    {
-      const p = document.createElement("p");
-      p.id = "ticker";
-      $("#info").prepend(p);
-
       Ticker.framerate = 60;
       Ticker.addEventListener("tick", () => {
         if (puzzle.stage.invalidated) {
           puzzle.stage.update();
           puzzle.stage.invalidated = false;
         }
-        $(p).text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
+        $("#info .fps").text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
       });
     }
 
     $("body").css("overflow", "hidden");
 
-    $("#playboard").fadeIn("slow");
+    $("#field").fadeIn("slow");
 
     const guider = new Guider(puzzle);
     $(window).on("keydown", e => {
@@ -131,7 +121,7 @@ function play(): void {
     ($("#playboard")[0] as HTMLCanvasElement).requestFullscreen();
   });
 
-  image.src = $("#picture").data("url");
+  image.src = $("#playboard").data("picture");
 }
 
 $(document).ready(play);

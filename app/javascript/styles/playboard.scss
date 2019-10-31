@@ -1,5 +1,9 @@
+@import "./common";
+
 #playboard {
   position: absolute;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
 
@@ -15,8 +19,9 @@
 }
 
 #field {
-  top: 0;
+  position: absolute;
   left: 0;
+  top: 0;
 }
 
 #active-canvas {
@@ -40,11 +45,6 @@
   bottom: 1em;
 }
 
-.no-interaction {
-  pointer-events: none;
-  user-select: none;
-}
-
 #game-progress {
   position: absolute;
   left: 1em;
@@ -66,18 +66,16 @@
   }
 }
 
-.rotate-180 {
-  transform: rotate(180deg);
-  transition: transform .2s;
-}
-
 #log-button {
   position: absolute;
-  bottom: 6em;
+  bottom: 4em;
+  transition: transform .2s;
+  &:focus, &:hover {
+    background-color: transparent;
+  }
 }
 
 #log {
-  display: none;
   position: absolute;
   bottom: 8em;
   max-width: 100%;
