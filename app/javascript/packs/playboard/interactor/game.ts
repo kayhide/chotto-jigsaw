@@ -14,7 +14,7 @@ export interface Dragger {
   piece: Piece;
   move: (Point) => void;
   spin: (number) => void;
-  resetSpin: () => void;
+  resetSpin: (number) => void;
   attempt: () => Dragger;
   end: () => Dragger;
   continue: (Point) => Dragger;
@@ -38,7 +38,7 @@ export default class Game {
       piece: null,
       move: (_pt: Point) => {},
       spin: (_deg: number) => {},
-      resetSpin: () => {},
+      resetSpin: (_deb: number) => {},
       attempt: () => this.defaultDragger,
       end: () => this.defaultDragger,
       continue: pt => this.dragStart(pt)
@@ -54,21 +54,16 @@ export default class Game {
       this.activeStage = new Stage(canvas_);
     }
 
-    const rotateHandler = _.throttle(cmd => {
+    const throttleRotate = _.throttle(cmd => {
       this.putToActiveLayer(cmd.piece);
     }, 100);
     Command.onPost.push(cmd => {
       if (cmd instanceof TransformCommand) {
         if (this.isCaptured(cmd.piece)) {
           if (cmd instanceof RotateCommand) {
-            rotateHandler(cmd);
+            throttleRotate(cmd);
           } else if (cmd instanceof TranslateCommand) {
-            const { canvas } = this.activeStage;
-            const { left, top } = $(canvas).offset();
-            $(canvas).offset({
-              left: left + cmd.vector.x * this.puzzle.container.scaleX,
-              top: top + cmd.vector.y * this.puzzle.container.scaleY
-            });
+            this.handleTranslate(cmd);
           }
         } else {
           const p = cmd.piece;
@@ -85,6 +80,15 @@ export default class Game {
           this.release(cmd.mergee);
         }
       }
+    });
+  }
+
+  handleTranslate(cmd: TranslateCommand): void {
+    const { canvas } = this.activeStage;
+    const { left, top } = $(canvas).offset();
+    $(canvas).offset({
+      left: left + cmd.vector.x * this.puzzle.container.scaleX,
+      top: top + cmd.vector.y * this.puzzle.container.scaleY
     });
   }
 
@@ -126,8 +130,8 @@ export default class Game {
           new RotateCommand(piece, pt0, deg - deg0).post();
           deg0 = deg;
         },
-        resetSpin: () => {
-          deg0 = 0;
+        resetSpin: deg => {
+          deg0 = deg;
         },
         attempt: () => {
           const p_ = this.findMergeableOn(piece, pt0);
@@ -169,7 +173,9 @@ export default class Game {
 
   putToActiveLayer(p: Piece): void {
     {
-      const { x, y, width, height } = p.boundary;
+      const mtx = p.matrix;
+      const pts = p.localBoundary.cornerPoints.map(pt => pt.apply(mtx));
+      const { x, y, width, height } = Point.boundary(pts);
       const pt0 = this.puzzle.container
         .localToWindow(x, y)
         .add(new Point(-10, -10));

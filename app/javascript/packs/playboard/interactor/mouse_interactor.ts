@@ -21,7 +21,7 @@ export default class MouseInteractor {
 
       if (this.dragger.active) {
         const delta = -e_.deltaY;
-        this.dragger.resetSpin();
+        this.dragger.resetSpin(0);
         this.dragger.spin(delta);
       } else {
         const delta = e_.deltaY < 0 ? 1.02 : 1 / 1.02;

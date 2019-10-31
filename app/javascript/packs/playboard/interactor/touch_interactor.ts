@@ -41,11 +41,10 @@ export default class TouchInteractor {
       })
     );
     this.hammer.add(
-      new Hammer.Pan({
+      new Hammer.Rotate({
         event: "spin",
         enable: false,
-        pointers: 2,
-        direction: Hammer.DIRECTION_ALL
+        pointers: 2
       })
     );
     this.hammer.get("spin").recognizeWith(this.hammer.get("tap"));
@@ -67,6 +66,7 @@ export default class TouchInteractor {
       let scaler: Scaler = null;
       this.hammer.on("pinchstart", e => {
         Logger.trace(e.type);
+        this.dragger = this.dragger.end();
         scaler = this.game.getScaler();
       });
       this.hammer.on("pinchmove", e => {
@@ -99,10 +99,10 @@ export default class TouchInteractor {
     this.hammer.on("spinstart", e => {
       Logger.trace(e.type);
       this.hammer.get("drag").set({ enable: false });
-      this.dragger.resetSpin();
+      this.dragger.resetSpin(e.rotation * 3);
     });
     this.hammer.on("spinmove", e => {
-      this.dragger.spin(e.deltaY);
+      this.dragger.spin(e.rotation * 3);
     });
     this.hammer.on("spinend", () => {
       window.setTimeout(() => {
