@@ -2,6 +2,8 @@ import { Ticker } from "@createjs/easeljs";
 
 import Logger from "./logger";
 import Action from "./action";
+import Screen from "./screen";
+import Bridge from "./bridge";
 import Puzzle from "./model/puzzle";
 import Command from "./command/command";
 import MergeCommand from "./command/merge_command";
@@ -10,28 +12,6 @@ import BrowserInteractor from "./interactor/browser_interactor";
 import TouchInteractor from "./interactor/touch_interactor";
 import MouseInteractor from "./interactor/mouse_interactor";
 import PuzzleDrawer from "./drawer/puzzle_drawer";
-
-function isTouchScreen(): boolean {
-  return "ontouchstart" in window;
-}
-
-function isFullscreenAvailable(): boolean {
-  return document.fullscreenEnabled;
-}
-
-function toggleFullScreen(element: JQuery) {
-  if (document.fullscreenElement) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  } else {
-    const fs = element[0] as HTMLElement;
-    if (fs.requestFullscreen) {
-      Logger.trace(`requestFullscreen`);
-      fs.requestFullscreen();
-    }
-  }
-}
 
 class Guider {
   _guide = false;
@@ -64,70 +44,28 @@ class Guider {
   }
 }
 
-function play(): void {
-  const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
-  puzzle.parse(JSON.parse($($("#playboard").data("puzzle")).text()));
-  const game = new Game(puzzle);
-
-  const sounds = {
-    merge: $("#sound-list > .merge")[0] as HTMLAudioElement
-  };
-
-  const image = new Image();
-  image.crossOrigin = "anonymous";
-  $(image).on("load", () => {
-    Logger.trace(`image loaded: ${image.src}`);
-    puzzle.initizlize(image);
-    new PuzzleDrawer().draw(puzzle, puzzle.shape.graphics);
-
-    new BrowserInteractor(game).attach();
-    if (isTouchScreen()) {
-      new TouchInteractor(game).attach();
-      Logger.trace("attached: TouchInteractor");
-    } else {
-      new MouseInteractor(game).attach();
-      Logger.trace("attached: MouseInteractor");
+function setupUi(puzzle: Puzzle): void {
+  Ticker.framerate = 60;
+  Ticker.addEventListener("tick", () => {
+    if (puzzle.stage.invalidated) {
+      puzzle.stage.update();
+      puzzle.stage.invalidated = false;
     }
+    $("#info .fps").text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
+  });
 
-    Command.onPost.push(cmd => {
-      if (cmd instanceof MergeCommand) {
-        $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
-        if (sounds.merge) sounds.merge.play();
-        if (puzzle.progress === 1) {
-          $("#finished").fadeIn("slow", () =>
-            $("#finished").css("opacity", 0.99)
-          );
-        }
-      }
-    });
+  $("body").css("overflow", "hidden");
 
-    puzzle.shuffle();
-    Action.fit(game.puzzle);
+  $("#field").fadeIn("slow");
 
-    {
-      Ticker.framerate = 60;
-      Ticker.addEventListener("tick", () => {
-        if (puzzle.stage.invalidated) {
-          puzzle.stage.update();
-          puzzle.stage.invalidated = false;
-        }
-        $("#info .fps").text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
-      });
+  const guider = new Guider(puzzle);
+  $(window).on("keydown", e => {
+    if (e.key === "F1") {
+      $("#log-button").trigger("click");
     }
-
-    $("body").css("overflow", "hidden");
-
-    $("#field").fadeIn("slow");
-
-    const guider = new Guider(puzzle);
-    $(window).on("keydown", e => {
-      if (e.key === "F1") {
-        $("#log-button").trigger("click");
-      }
-      if (e.key === "F2") {
-        guider.toggle();
-      }
-    });
+    if (e.key === "F2") {
+      guider.toggle();
+    }
   });
 
   $("#log-button").on("click", () => {
@@ -135,13 +73,70 @@ function play(): void {
     $("#log-button").toggleClass("rotate-180");
   });
 
-  if (isFullscreenAvailable()) {
+  if (Screen.isFullscreenAvailable()) {
     $("#fullscreen")
       .removeClass("hidden")
-      .on("click", () => toggleFullScreen($("#playboard")));
+      .on("click", () => Screen.toggleFullScreen($("#playboard")));
   }
 
-  image.src = $("#playboard").data("picture");
+  Command.onPost.push(cmd => {
+    if (cmd instanceof MergeCommand) {
+      $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
+    }
+  });
+}
+
+function setupSound(): void {
+  const sounds = {
+    merge: $("#sound-list > .merge")[0] as HTMLAudioElement
+  };
+
+  Command.onPost.push(cmd => {
+    if (cmd instanceof MergeCommand) {
+      if (sounds.merge) sounds.merge.play();
+    }
+  });
+}
+
+function loadCommands(): void {
+  const commands = JSON.parse($("#commands").text());
+  commands.forEach(cmd => Bridge.decode(cmd).post());
+}
+
+function play(): void {
+  const $playboard = $("#playboard");
+  const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
+  puzzle.parse(JSON.parse($($playboard.data("puzzle")).text()));
+
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  $(image).on("load", () => {
+    Logger.trace(`image loaded: ${image.src}`);
+    puzzle.initizlize(image);
+    new PuzzleDrawer().draw(puzzle, puzzle.shape.graphics);
+    setupUi(puzzle);
+    setupSound();
+
+    const game = new Game(puzzle);
+
+    if (typeof $playboard.data("standalone") !== "undefined") {
+      puzzle.shuffle();
+    } else {
+      loadCommands();
+    }
+    Action.fit(puzzle);
+
+    new BrowserInteractor(game).attach();
+    if (Screen.isTouchScreen()) {
+      new TouchInteractor(game).attach();
+      Logger.trace("attached: TouchInteractor");
+    } else {
+      new MouseInteractor(game).attach();
+      Logger.trace("attached: MouseInteractor");
+    }
+  });
+
+  image.src = $playboard.data("picture");
 }
 
 $(document).ready(play);

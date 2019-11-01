@@ -48,16 +48,31 @@
 #game-progress {
   position: absolute;
   left: 1em;
-  bottom: 0.5em;
-  width: 60%;
+  right: 5em;
+  bottom: 0;
+  width: auto;
 
   @extend .no-interaction;
+
+  &.online {
+    background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
+    .determinate {
+      background-color: adjust-hue($progress-bar-color, -30deg);
+    }
+  }
+
+  &.offline {
+    background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
+    .determinate {
+      background-color: adjust-hue($progress-bar-color, 30deg);
+    }
+  }
 }
 
 #info {
   position: absolute;
   left: 1em;
-  bottom: 2em;
+  bottom: 1.5em;
 
   @extend .no-interaction;
 

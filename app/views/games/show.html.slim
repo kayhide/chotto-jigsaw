@@ -1,8 +1,8 @@
-#playboard.green data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle"
+#playboard.green data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-standalone=(@game.standalone?)
   canvas#field.hidden
   canvas#active-canvas.hidden
 
-  #game-progress.progress
+  #game-progress.progress class=(@game.standalone? ? "offline" : "online")
     #progressbar.determinate style="width:0%"
 
   #info.white-text
@@ -28,3 +28,7 @@ button#log-button.btn-floating.btn-flat.btn-s
 
 script#puzzle type="application/json"
   == @puzzle.slice(:pieces, :linear_measure).to_json
+
+- unless @game.standalone?
+  script#commands type="application/json"
+    == @game.commands.order(:id).map(&:command_attributes).to_json

@@ -63,3 +63,5 @@ h2 Games
       - @puzzle.games.order(id: :desc).each do |game|
         = link_to game, class: %w(collection-item waves-effect waves-light) do
           =l game.created_at
+          br
+          = '.' * (game.commands.count / 10)
