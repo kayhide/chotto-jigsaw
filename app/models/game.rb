@@ -9,4 +9,8 @@ class Game < ApplicationRecord
   def ready?
     shuffled_at?
   end
+
+  def standalone?
+    commands.empty?
+  end
 end

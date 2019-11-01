@@ -14,8 +14,8 @@ class GamesController < ApplicationController
 
   def create
     @game = Game.new(puzzle: @puzzle)
-
     if @game.save
+      ShuffleJob.perform_later(@game)
       redirect_to @game, notice: 'Game was successfully created.'
     else
       render :new

@@ -9,6 +9,10 @@ class RotateCommand < TransformCommand
   validates :pivot_y, presence: true
   validates :delta_degree, presence: true
 
+  def command_attributes
+    super.merge(pivot_x: pivot_x, pivot_y: pivot_y, delta_degree: delta_degree)
+  end
+
   def pivot
     Vector[pivot_x, pivot_y]
   end

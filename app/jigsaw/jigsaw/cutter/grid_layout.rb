@@ -1,3 +1,5 @@
+require 'matrix'
+
 module Jigsaw::Cutter::GridLayout
   attr_accessor :nx, :ny
 

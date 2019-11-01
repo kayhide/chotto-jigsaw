@@ -1,3 +1,5 @@
+require 'matrix'
+
 class Jigsaw::Piece < Struct.new(:number, :points, :neighbors)
   class << self
     def from_facet fac
