@@ -11,6 +11,7 @@ export default abstract class Command {
   static commit(): void {
     const cmds = Command.squash();
     Command.commands.concat(cmds);
+    Command.currentCommands = [];
     Command.onCommit.forEach(fnc => fnc(cmds));
   }
 
@@ -30,7 +31,7 @@ export default abstract class Command {
     return _(Command.currentCommands).reduce((acc, cmd) => {
       if (!(last && last.squash(cmd))) {
         last = cmd;
-        return [cmd, ...acc];
+        return [...acc, last];
       }
       return acc;
     }, []);
@@ -38,6 +39,7 @@ export default abstract class Command {
 
   piece: Piece;
   rejected = false;
+  extrinsic = false;
 
   abstract execute(): void;
 

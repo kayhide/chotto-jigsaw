@@ -66,9 +66,12 @@ export default class Game {
             this.handleTranslate(cmd);
           }
         } else {
-          const p = cmd.piece;
-          const { x, y } = p.position;
-          Object.assign(p.shape, { x, y, rotation: p.rotation });
+          const {
+            piece,
+            position: { x, y },
+            rotation
+          } = cmd;
+          Object.assign(piece.shape, { x, y, rotation });
           this.puzzle.invalidate();
         }
       }

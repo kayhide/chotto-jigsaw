@@ -12,6 +12,7 @@ import BrowserInteractor from "./interactor/browser_interactor";
 import TouchInteractor from "./interactor/touch_interactor";
 import MouseInteractor from "./interactor/mouse_interactor";
 import PuzzleDrawer from "./drawer/puzzle_drawer";
+import GameChannel from "../channel/game_channel";
 
 class Guider {
   _guide = false;
@@ -103,6 +104,11 @@ function loadCommands(): void {
   commands.forEach(cmd => Bridge.decode(cmd).post());
 }
 
+function connectGameChannel(game_id: number): void {
+  const channel = GameChannel.subscribe(game_id);
+  Command.onCommit.push(cmd => channel.commit(cmd));
+}
+
 function play(): void {
   const $playboard = $("#playboard");
   const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
@@ -123,6 +129,8 @@ function play(): void {
       puzzle.shuffle();
     } else {
       loadCommands();
+      Command.commit();
+      connectGameChannel($playboard.data("game-id"));
     }
     Action.fit(puzzle);
 

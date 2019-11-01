@@ -8,5 +8,3 @@ import "../styles/playboard";
 
 import "./easeljs-ext";
 import "./playboard/app";
-
-require("channels");

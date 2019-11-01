@@ -1,4 +1,4 @@
-#playboard.green data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-standalone=(@game.standalone?)
+#playboard.green data-game-id=@game.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-standalone=(@game.standalone?)
   canvas#field.hidden
   canvas#active-canvas.hidden
 

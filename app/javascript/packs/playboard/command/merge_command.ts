@@ -1,3 +1,4 @@
+import Logger from "../logger";
 import Piece from "../model/piece";
 import Command from "./command";
 

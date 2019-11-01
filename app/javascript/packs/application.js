@@ -15,7 +15,6 @@ import "../styles/application";
 
 require("@rails/ujs").start();
 require("@rails/activestorage").start();
-require("channels");
 
 document.addEventListener("DOMContentLoaded", function() {
   const elems = document.querySelectorAll(".dropdown-trigger");
