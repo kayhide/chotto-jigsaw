@@ -15,6 +15,24 @@ function isTouchScreen(): boolean {
   return "ontouchstart" in window;
 }
 
+function isFullscreenAvailable(): boolean {
+  return document.fullscreenEnabled;
+}
+
+function toggleFullScreen(element: JQuery) {
+  if (document.fullscreenElement) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  } else {
+    const fs = element[0] as HTMLElement;
+    if (fs.requestFullscreen) {
+      Logger.trace(`requestFullscreen`);
+      fs.requestFullscreen();
+    }
+  }
+}
+
 class Guider {
   _guide = false;
   puzzle: Puzzle;
@@ -117,9 +135,11 @@ function play(): void {
     $("#log-button").toggleClass("rotate-180");
   });
 
-  $("#fit").on("click", () => {
-    ($("#playboard")[0] as HTMLCanvasElement).requestFullscreen();
-  });
+  if (isFullscreenAvailable()) {
+    $("#fullscreen")
+      .removeClass("hidden")
+      .on("click", () => toggleFullScreen($("#playboard")));
+  }
 
   image.src = $("#playboard").data("picture");
 }
