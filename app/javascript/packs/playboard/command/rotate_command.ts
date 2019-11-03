@@ -23,7 +23,8 @@ export default class RotateCommand extends TransformCommand {
     if (
       cmd instanceof RotateCommand &&
       cmd.piece === this.piece &&
-      cmd.center === this.center
+      cmd.center.x === this.center.x &&
+      cmd.center.y === this.center.y
     ) {
       this.degree += cmd.degree;
       const { position, rotation } = cmd;

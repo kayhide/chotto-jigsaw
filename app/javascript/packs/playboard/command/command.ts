@@ -9,7 +9,7 @@ export default abstract class Command {
   static onReject: Array<(Command) => void> = [];
 
   static commit(): void {
-    const cmds = Command.squash();
+    const cmds = Command.currentCommands;
     Command.commands.concat(cmds);
     Command.currentCommands = [];
     Command.onCommit.forEach(fnc => fnc(cmds));
@@ -18,23 +18,13 @@ export default abstract class Command {
   static post(cmd: Command): void {
     if (cmd.isValid()) {
       cmd.execute();
-      Command.currentCommands.push(cmd);
+      const last = _.last(Command.currentCommands);
+      (last && last.squash(cmd)) || Command.currentCommands.push(cmd);
       Command.onPost.forEach(fnc => fnc(cmd));
     } else {
       cmd.rejected = true;
       Command.onReject.forEach(fnc => fnc(cmd));
     }
-  }
-
-  static squash(): Array<Command> {
-    let last = null;
-    return _(Command.currentCommands).reduce((acc, cmd) => {
-      if (!(last && last.squash(cmd))) {
-        last = cmd;
-        return [...acc, last];
-      }
-      return acc;
-    }, []);
   }
 
   piece: Piece;
