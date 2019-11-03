@@ -1,8 +1,8 @@
-import { Ticker } from "@createjs/easeljs";
+import { Ticker, Rectangle } from "@createjs/easeljs";
 
 import Logger from "../common/logger";
 import Screen from "../common/screen";
-import Action from "./action";
+import View from "./view";
 import Bridge from "./bridge";
 import Puzzle from "./model/puzzle";
 import Command from "./command/command";
@@ -53,12 +53,7 @@ function setupLogger(): void {
 }
 
 function setupUi(puzzle: Puzzle): void {
-  Ticker.framerate = 60;
   Ticker.addEventListener("tick", () => {
-    if (puzzle.stage.invalidated) {
-      puzzle.stage.update();
-      puzzle.stage.invalidated = false;
-    }
     $("#info .fps").text(`FPS: ${Math.round(Ticker.getMeasuredFPS())}`);
   });
 
@@ -106,11 +101,6 @@ function setupSound(): void {
   });
 }
 
-function loadCommands(): void {
-  const commands = JSON.parse($("#commands").text());
-  commands.forEach(cmd => Bridge.decode(cmd).post());
-}
-
 function connectGameChannel(game_id: number): void {
   const channel = GameChannel.subscribe(game_id);
   Command.onCommit(cmd => channel.commit(cmd));
@@ -134,14 +124,16 @@ function play(): void {
 
     const game = new Game(puzzle);
 
+    if (typeof $playboard.data("initial-view") !== "undefined") {
+      const { width, height } = $playboard.data("initial-view");
+      View.contain(puzzle, new Rectangle(0, 0, width, height));
+    }
     if (typeof $playboard.data("standalone") !== "undefined") {
       puzzle.shuffle();
-    } else {
-      loadCommands();
       Command.commit();
+    } else {
       connectGameChannel($playboard.data("game-id"));
     }
-    Action.fit(puzzle);
 
     new BrowserInteractor(game).attach();
     if (Screen.isTouchScreen()) {

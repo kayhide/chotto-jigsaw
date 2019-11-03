@@ -1,9 +1,9 @@
 class GameChannel < ApplicationCable::Channel
   def subscribed
-    game = Game.find(params[:game_id])
     stream_for game
     @connection_token = generate_connection_token
     logger.info @connection_token
+
     transmit action: :init, token: @connection_token
   end
 
@@ -11,11 +11,31 @@ class GameChannel < ApplicationCable::Channel
   end
 
   def commit data
-    game = Game.find(params[:game_id])
-    broadcast_to game, action: :commit, token: @connection_token, commands: data["commands"]
+    broadcast_to(
+      game,
+      action: :commit,
+      token: @connection_token,
+      commands: data["commands"]
+    )
+  end
+
+  def request_update data
+    commands = game.commands.order(:id)
+    if since = data["since"]
+      commands = commands.where(created_at: since .. DateTime.current)
+    end
+    transmit(
+      action: :commit,
+      token: nil,
+      commands: commands.map(&:command_attributes)
+    )
   end
 
   private
+
+  def game
+    Game.find(params[:game_id])
+  end
 
   def generate_connection_token
     SecureRandom.hex(36)

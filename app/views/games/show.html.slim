@@ -1,4 +1,6 @@
-#playboard.green data-game-id=@game.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-standalone=(@game.standalone?)
+- longer = [@puzzle.width, @puzzle.height].max
+- view = { width: longer * 2, height: longer * 2 }
+#playboard.green data-game-id=@game.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=(@game.standalone?)
   canvas#field.hidden
   canvas#active-canvas.hidden
 
@@ -28,7 +30,3 @@ button#log-button.btn-floating.btn-flat.btn-s
 
 script#puzzle type="application/json"
   == @puzzle.slice(:pieces, :linear_measure).to_json
-
-- unless @game.standalone?
-  script#commands type="application/json"
-    == @game.commands.order(:id).map(&:command_attributes).to_json

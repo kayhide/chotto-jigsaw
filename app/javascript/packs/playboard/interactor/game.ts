@@ -1,4 +1,4 @@
-import { Point, Container, Stage } from "@createjs/easeljs";
+import { Ticker, Point, Container, Stage } from "@createjs/easeljs";
 
 import Logger from "../../common/logger";
 import Puzzle from "../model/puzzle";
@@ -65,23 +65,37 @@ export default class Game {
           } else if (cmd instanceof TranslateCommand) {
             this.handleTranslate(cmd);
           }
-        } else {
-          const {
-            piece,
-            position: { x, y },
-            rotation
-          } = cmd;
-          Object.assign(piece.shape, { x, y, rotation });
-          this.puzzle.invalidate();
         }
       }
-      if (cmd instanceof MergeCommand) {
-        if (this.isCaptured(cmd.piece)) {
-          this.release(cmd.piece);
+    });
+    Command.onCommit(cmds => {
+      cmds.forEach(cmd => {
+        if (cmd instanceof TransformCommand) {
+          if (cmd.piece.isAlive()) {
+            const {
+              piece,
+              position: { x, y },
+              rotation
+            } = cmd;
+            Object.assign(piece.shape, { x, y, rotation });
+          }
+        } else if (cmd instanceof MergeCommand) {
+          if (this.isCaptured(cmd.piece)) {
+            this.release(cmd.piece);
+          }
+          if (this.isCaptured(cmd.mergee)) {
+            this.release(cmd.mergee);
+          }
         }
-        if (this.isCaptured(cmd.mergee)) {
-          this.release(cmd.mergee);
-        }
+        this.puzzle.invalidate();
+      });
+    });
+
+    Ticker.framerate = 60;
+    Ticker.addEventListener("tick", () => {
+      if (puzzle.stage.invalidated) {
+        puzzle.stage.update();
+        puzzle.stage.invalidated = false;
       }
     });
   }

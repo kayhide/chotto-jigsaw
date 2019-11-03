@@ -17,6 +17,6 @@ export default class CommandGroup extends Array<Command> {
 
   squash(cmd: Command): void {
     const last = _.last(this);
-    (last && last.squash(cmd)) || this.push(cmd);
+    if (!(last && last.squash(cmd))) this.push(cmd);
   }
 }

@@ -1,7 +1,7 @@
 import Hammer from "hammerjs";
 
 import Logger from "../../common/logger";
-import Action from "../action";
+import View from "../view";
 import Game, { Dragger, Mover, Scaler } from "./game";
 
 export default class TouchInteractor {
@@ -59,7 +59,7 @@ export default class TouchInteractor {
     this.hammer.on("doubletap", e => {
       Logger.trace(e.type);
       this.dragger = this.dragger.end();
-      Action.fit(this.game.puzzle);
+      View.fit(this.game.puzzle);
     });
 
     {

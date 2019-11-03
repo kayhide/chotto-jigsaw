@@ -1,3 +1,4 @@
+import Logger from "../../common/logger";
 import EventHandler from "../../common/event_handler";
 import Piece from "../model/piece";
 import CommandGroup from "./command_group";
@@ -9,11 +10,11 @@ export default abstract class Command {
   static postHandler = new EventHandler<Command>();
   static commitHandler = new EventHandler<CommandGroup>();
 
-  static onPost(handler: (Command) => void) {
+  static onPost(handler: (Command) => void): void {
     this.postHandler.append(handler);
   }
 
-  static onCommit(handler: (CommandGroup) => void) {
+  static onCommit(handler: (CommandGroup) => void): void {
     this.commitHandler.append(handler);
   }
 
@@ -34,9 +35,7 @@ export default abstract class Command {
 
   static receive(cmds: CommandGroup): void {
     cmds.extrinsic = true;
-    cmds.forEach(cmd => {
-      this.postHandler.fire(cmd);
-    });
+    cmds.forEach(cmd => cmd.execute());
     this.history.push(cmds);
     this.commitHandler.fire(cmds);
   }

@@ -15,13 +15,15 @@ export default class GameChannel {
       },
       {
         received(data: any): void {
+          Logger.trace(`received: ${data.action}`);
           if (data.action === "init") {
             this.token = data.token;
+            this.perform("request_update", {});
           } else if (data.token !== this.token) {
             if (data.action === "commit") {
               const cmds = CommandGroup.create();
-              data.commands.map(Bridge.decode).forEach(cmd => {
-                cmds.squash(cmd);
+              data.commands.forEach(x => {
+                cmds.squash(Bridge.decode(x));
               });
               Command.receive(cmds);
             }
