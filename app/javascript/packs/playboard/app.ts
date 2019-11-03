@@ -1,8 +1,8 @@
 import { Ticker } from "@createjs/easeljs";
 
-import Logger from "./logger";
+import Logger from "../common/logger";
+import Screen from "../common/screen";
 import Action from "./action";
-import Screen from "./screen";
 import Bridge from "./bridge";
 import Puzzle from "./model/puzzle";
 import Command from "./command/command";
@@ -43,6 +43,13 @@ class Guider {
   toggle(): void {
     this.guide = !this.guide;
   }
+}
+
+function setupLogger(): void {
+  Logger.append(message => {
+    $("#log").append($(document.createElement("p")).text(message));
+    window.console.log(message);
+  });
 }
 
 function setupUi(puzzle: Puzzle): void {
@@ -110,6 +117,8 @@ function connectGameChannel(game_id: number): void {
 }
 
 function play(): void {
+  setupLogger();
+
   const $playboard = $("#playboard");
   const puzzle = new Puzzle($("#field")[0] as HTMLCanvasElement);
   puzzle.parse(JSON.parse($($playboard.data("puzzle")).text()));

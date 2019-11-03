@@ -6,7 +6,7 @@ import {
   Shape
 } from "@createjs/easeljs";
 
-import Logger from "../logger";
+import Logger from "../../common/logger";
 
 export default class Piece {
   static pieces: Array<Piece> = [];

@@ -1,6 +1,6 @@
 import { Point } from "@createjs/easeljs";
 
-import Logger from "../logger";
+import Logger from "../../common/logger";
 import Game, { Dragger, Mover } from "./game";
 
 export default class MouseInteractor {

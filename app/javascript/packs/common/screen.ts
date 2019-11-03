@@ -7,7 +7,7 @@ export default class Screen {
     return document.fullscreenEnabled;
   }
 
-  static toggleFullScreen(element: JQuery) {
+  static toggleFullScreen(element: JQuery): void {
     if (document.fullscreenElement) {
       if (document.exitFullscreen) {
         document.exitFullscreen();

@@ -1,6 +1,6 @@
 import Hammer from "hammerjs";
 
-import Logger from "../logger";
+import Logger from "../../common/logger";
 import Action from "../action";
 import Game, { Dragger, Mover, Scaler } from "./game";
 

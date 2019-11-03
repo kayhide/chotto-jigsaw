@@ -1,4 +1,4 @@
-import Logger from "../logger";
+import Logger from "../../common/logger";
 import Piece from "../model/piece";
 import Command from "./command";
 
