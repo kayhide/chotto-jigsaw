@@ -15,15 +15,15 @@ export default class TranslateCommand extends TransformCommand {
     this.rotation = piece.rotation;
   }
 
-  squash(cmd: Command): boolean {
+  squash(cmd: Command): Command | null {
     if (cmd instanceof TranslateCommand && cmd.piece === this.piece) {
       this.vector = this.vector.add(cmd.vector);
       const { position, rotation } = cmd;
       Object.assign(this, { position, rotation });
-      return true;
+      return this;
     }
 
-    return false;
+    return null;
   }
 
   isValid(): boolean {

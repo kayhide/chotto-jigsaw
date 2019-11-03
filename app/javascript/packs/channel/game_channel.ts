@@ -4,6 +4,7 @@ import consumer from "./consumer";
 import Logger from "../playboard/logger";
 import Bridge from "../playboard/bridge";
 import Command from "../playboard/command/command";
+import CommandGroup from "../playboard/command/command_group";
 
 export default class GameChannel {
   static subscribe(game_id: number): Subscriptions {
@@ -18,19 +19,19 @@ export default class GameChannel {
             this.token = data.token;
           } else if (data.token !== this.token) {
             if (data.action === "commit") {
-              const cmds = data.commands.map(Bridge.decode);
-              cmds.forEach(cmd => {
-                cmd.extrinsic = true;
-                Command.post(cmd);
+              const cmds = CommandGroup.create();
+              data.commands.map(Bridge.decode).forEach(cmd => {
+                cmds.squash(cmd);
               });
-              Command.commit();
+              Command.receive(cmds);
             }
           }
         },
-        commit(cmds: Array<Command>): void {
-          const cmds_ = cmds.filter(cmd => !cmd.extrinsic);
-          if (0 < cmds_.length) {
-            this.perform("commit", { commands: cmds_.map(Bridge.encode) });
+        commit(cmds: CommandGroup): void {
+          if (cmds.intrinsic) {
+            this.perform("commit", {
+              commands: cmds.map(Bridge.encode)
+            });
           }
         }
       }

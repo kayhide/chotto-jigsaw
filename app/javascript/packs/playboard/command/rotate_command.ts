@@ -19,7 +19,7 @@ export default class RotateCommand extends TransformCommand {
     this.rotation = piece.rotation + degree;
   }
 
-  squash(cmd: Command): boolean {
+  squash(cmd: Command): Command | null {
     if (
       cmd instanceof RotateCommand &&
       cmd.piece === this.piece &&
@@ -29,10 +29,10 @@ export default class RotateCommand extends TransformCommand {
       this.degree += cmd.degree;
       const { position, rotation } = cmd;
       Object.assign(this, { position, rotation });
-      return true;
+      return this;
     }
 
-    return false;
+    return null;
   }
 
   isValid(): boolean {

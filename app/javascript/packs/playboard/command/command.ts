@@ -1,35 +1,41 @@
 import Piece from "../model/piece";
+import CommandGroup from "./command_group";
 
 export default abstract class Command {
-  static commands: Array<Command> = [];
-  static currentCommands: Array<Command> = [];
+  static history: Array<CommandGroup> = [];
+  static current: CommandGroup = CommandGroup.create();
 
   static onPost: Array<(Command) => void> = [];
   static onCommit: Array<(Command) => void> = [];
   static onReject: Array<(Command) => void> = [];
 
   static commit(): void {
-    const cmds = Command.currentCommands;
-    Command.commands.concat(cmds);
-    Command.currentCommands = [];
-    Command.onCommit.forEach(fnc => fnc(cmds));
+    const cmds = this.current;
+    this.current = CommandGroup.create();
+    this.history.push(cmds);
+    this.onCommit.forEach(fnc => fnc(cmds));
   }
 
   static post(cmd: Command): void {
     if (cmd.isValid()) {
       cmd.execute();
-      const last = _.last(Command.currentCommands);
-      (last && last.squash(cmd)) || Command.currentCommands.push(cmd);
-      Command.onPost.forEach(fnc => fnc(cmd));
+      this.current.squash(cmd);
+      this.onPost.forEach(fnc => fnc(cmd));
     } else {
       cmd.rejected = true;
-      Command.onReject.forEach(fnc => fnc(cmd));
+      this.onReject.forEach(fnc => fnc(cmd));
     }
+  }
+
+  static receive(cmds: CommandGroup): void {
+    cmds.extrinsic = true;
+    cmds.forEach(cmd => this.onPost.forEach(fnc => fnc(cmd)));
+    this.history.push(cmds);
+    this.onCommit.forEach(fnc => fnc(cmds));
   }
 
   piece: Piece;
   rejected = false;
-  extrinsic = false;
 
   abstract execute(): void;
 
@@ -43,8 +49,8 @@ export default abstract class Command {
     return this;
   }
 
-  squash(_cmd: Command): boolean {
-    return false;
+  squash(_cmd: Command): Command | null {
+    return null;
   }
 
   isValid(): boolean {
