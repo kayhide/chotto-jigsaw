@@ -57,7 +57,7 @@ export default class Game {
     const throttleRotate = _.throttle(cmd => {
       this.putToActiveLayer(cmd.piece);
     }, 100);
-    Command.onPost.push(cmd => {
+    Command.onPost(cmd => {
       if (cmd instanceof TransformCommand) {
         if (this.isCaptured(cmd.piece)) {
           if (cmd instanceof RotateCommand) {

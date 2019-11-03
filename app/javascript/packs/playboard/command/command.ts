@@ -1,3 +1,4 @@
+import EventHandler from "../../common/event_handler";
 import Piece from "../model/piece";
 import CommandGroup from "./command_group";
 
@@ -5,33 +6,39 @@ export default abstract class Command {
   static history: Array<CommandGroup> = [];
   static current: CommandGroup = CommandGroup.create();
 
-  static onPost: Array<(Command) => void> = [];
-  static onCommit: Array<(Command) => void> = [];
-  static onReject: Array<(Command) => void> = [];
+  static postHandler = new EventHandler<Command>();
+  static commitHandler = new EventHandler<CommandGroup>();
+
+  static onPost(handler: (Command) => void) {
+    this.postHandler.append(handler);
+  }
+
+  static onCommit(handler: (CommandGroup) => void) {
+    this.commitHandler.append(handler);
+  }
 
   static commit(): void {
     const cmds = this.current;
     this.current = CommandGroup.create();
     this.history.push(cmds);
-    this.onCommit.forEach(fnc => fnc(cmds));
+    this.commitHandler.fire(cmds);
   }
 
   static post(cmd: Command): void {
     if (cmd.isValid()) {
       cmd.execute();
       this.current.squash(cmd);
-      this.onPost.forEach(fnc => fnc(cmd));
-    } else {
-      cmd.rejected = true;
-      this.onReject.forEach(fnc => fnc(cmd));
+      this.postHandler.fire(cmd);
     }
   }
 
   static receive(cmds: CommandGroup): void {
     cmds.extrinsic = true;
-    cmds.forEach(cmd => this.onPost.forEach(fnc => fnc(cmd)));
+    cmds.forEach(cmd => {
+      this.postHandler.fire(cmd);
+    });
     this.history.push(cmds);
-    this.onCommit.forEach(fnc => fnc(cmds));
+    this.commitHandler.fire(cmds);
   }
 
   piece: Piece;

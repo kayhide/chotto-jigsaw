@@ -80,7 +80,7 @@ function setupUi(puzzle: Puzzle): void {
       .on("click", () => Screen.toggleFullScreen($("#playboard")));
   }
 
-  Command.onPost.push(cmd => {
+  Command.onPost(cmd => {
     if (cmd instanceof MergeCommand) {
       $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
     }
@@ -92,7 +92,7 @@ function setupSound(): void {
     merge: $("#sound-list > .merge")[0] as HTMLAudioElement
   };
 
-  Command.onPost.push(cmd => {
+  Command.onPost(cmd => {
     if (cmd instanceof MergeCommand) {
       if (sounds.merge) sounds.merge.play();
     }
@@ -106,7 +106,7 @@ function loadCommands(): void {
 
 function connectGameChannel(game_id: number): void {
   const channel = GameChannel.subscribe(game_id);
-  Command.onCommit.push(cmd => channel.commit(cmd));
+  Command.onCommit(cmd => channel.commit(cmd));
 }
 
 function play(): void {
