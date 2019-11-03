@@ -9,8 +9,7 @@ module ApplicationCable
     private
 
     def find_user
-      user = User.find_by(id: cookies.encrypted[:user_id])
-      user
+      User.find_by(id: cookies.encrypted[:user_id])
     end
   end
 end

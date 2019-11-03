@@ -10,6 +10,7 @@ class GamesController < ApplicationController
 
   def show
     @puzzle.load_content!
+    cookies.encrypted[:user_id] = current_user_id
   end
 
   def create

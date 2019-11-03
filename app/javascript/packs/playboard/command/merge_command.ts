@@ -8,7 +8,7 @@ export default class MergeCommand extends Command {
   constructor(piece, mergee) {
     super();
     this.piece = piece.entity;
-    this.mergee = mergee;
+    this.mergee = mergee.entity;
   }
 
   execute(): void {

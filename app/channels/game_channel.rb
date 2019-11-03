@@ -2,7 +2,6 @@ class GameChannel < ApplicationCable::Channel
   def subscribed
     stream_for game
     @connection_token = generate_connection_token
-    logger.info @connection_token
 
     transmit action: :init, token: @connection_token
   end
@@ -11,11 +10,14 @@ class GameChannel < ApplicationCable::Channel
   end
 
   def commit data
+    commands = data["commands"].map do |x|
+      game.commands.create!(x.merge(user: current_user))
+    end
     broadcast_to(
       game,
       action: :commit,
       token: @connection_token,
-      commands: data["commands"]
+      commands: commands.map(&:command_attributes)
     )
   end
 

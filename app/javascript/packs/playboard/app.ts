@@ -82,8 +82,8 @@ function setupUi(puzzle: Puzzle): void {
       .on("click", () => Screen.toggleFullScreen($("#playboard")));
   }
 
-  Command.onPost(cmd => {
-    if (cmd instanceof MergeCommand) {
+  Command.onCommit(cmds => {
+    if (_(cmds).some(cmd => cmd instanceof MergeCommand)) {
       $("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`);
     }
   });

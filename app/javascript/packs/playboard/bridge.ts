@@ -30,7 +30,7 @@ export default class Bridge {
         piece: { id: piece_id },
         position: { x: position_x, y: position_y },
         rotation,
-        center: { x: pivot_x, pivot_y },
+        center: { x: pivot_x, y: pivot_y },
         degree: delta_degree
       } = cmd;
       return {
