@@ -10,6 +10,7 @@ import {
 import Piece from "./piece";
 import TranslateCommand from "../command/translate_command";
 import RotateCommand from "../command/rotate_command";
+import * as Point_ from "../../easeljs-ext/Point.bs";
 
 export default class Puzzle {
   stage: Stage;
@@ -82,7 +83,7 @@ export default class Puzzle {
         const center = p.shape.localToParent(x, y);
         new RotateCommand(p, center, Math.random() * 360 - 180).post();
         const vec = new Point(Math.random() * s, Math.random() * s);
-        new TranslateCommand(p, vec.subtract(center)).post();
+        new TranslateCommand(p, Point_.subtract(center, vec)).post();
       });
   }
 
@@ -91,7 +92,7 @@ export default class Puzzle {
   }
 
   scale(x, y, scale): void {
-    const pt0 = new Point(x, y).fromWindow().to(this.container);
+    const pt0 = Point_.to_(this.container, Point_.fromWindow(new Point(x, y)));
     const delta = scale / this.currentScale;
     const mtx = this.container.matrix
       .translate(pt0.x, pt0.y)

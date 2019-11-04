@@ -3,6 +3,7 @@ import { Point, Matrix2D } from "@createjs/easeljs";
 import Piece from "../model/piece";
 import Command from "./command";
 import TransformCommand from "./transform_command";
+import * as Point_ from "../../easeljs-ext/Point.bs";
 
 export default class RotateCommand extends TransformCommand {
   center: Point;
@@ -15,7 +16,7 @@ export default class RotateCommand extends TransformCommand {
       .translate(center.x, center.y)
       .rotate(degree)
       .translate(-center.x, -center.y);
-    this.position = piece.position.apply(mtx);
+    this.position = Point_.apply(mtx, piece.position);
     this.rotation = piece.rotation + degree;
   }
 

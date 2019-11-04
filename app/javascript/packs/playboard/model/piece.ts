@@ -7,6 +7,7 @@ import {
 } from "@createjs/easeljs";
 
 import Logger from "../../common/logger";
+import * as Point_ from "../../easeljs-ext/Point.bs";
 
 export default class Piece {
   static pieces: Array<Piece> = [];
@@ -67,7 +68,7 @@ export default class Piece {
 
   get localBoundary(): Rectangle {
     if (!this._localBoundary) {
-      this._localBoundary = Point.boundary(this.localPoints);
+      this._localBoundary = Point_.boundary(this.localPoints);
     }
     return this._localBoundary;
   }
@@ -123,12 +124,12 @@ export default class Piece {
 
   get points(): Array<Point> {
     const mtx = this.matrix;
-    return this.localPoints.filter(pt => pt).map(pt => pt.apply(mtx));
+    return this.localPoints.filter(pt => pt).map(pt => Point_.apply(mtx, pt));
   }
 
   get boundary(): Rectangle {
     if (!this._boundary) {
-      this._boundary = Point.boundary(this.points);
+      this._boundary = Point_.boundary(this.points);
     }
     return this._boundary;
   }

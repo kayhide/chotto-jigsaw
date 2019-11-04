@@ -8,6 +8,7 @@ import TransformCommand from "../command/transform_command";
 import TranslateCommand from "../command/translate_command";
 import RotateCommand from "../command/rotate_command";
 import MergeCommand from "../command/merge_command";
+import * as Point_ from "../../easeljs-ext/Point.bs";
 
 export interface Dragger {
   active: boolean;
@@ -131,15 +132,15 @@ export default class Game {
     const obj = this.puzzle.stage.getObjectUnderPoint(x, y);
     const piece = obj && obj.piece && obj.piece.entity;
     if (piece) {
-      let pt0 = new Point(x, y).to(this.puzzle.container);
+      let pt0 = Point_.to_(this.puzzle.container, new Point(x, y));
       let deg0 = 0;
       this.capture(piece, pt0);
       const dragger: Dragger = {
         active: true,
         piece,
         move: ({ x: x_, y: y_ }) => {
-          const pt1 = new Point(x_, y_).to(this.puzzle.container);
-          const vec = pt1.subtract(pt0);
+          const pt1 = Point_.to_(this.puzzle.container, new Point(x_, y_));
+          const vec = Point_.subtract(pt0, pt1);
           new TranslateCommand(piece, vec).post();
           pt0 = pt1;
         },
@@ -169,14 +170,17 @@ export default class Game {
         },
         continue: ({ x: x_, y: y_ }) => {
           const canvas_ = $(this.activeStage.canvas);
-          const pt = new Point(
-            x_ - canvas_.position().left,
-            y_ - canvas_.position().top
-          ).to(this.activeStage);
+          const pt = Point_.to_(
+            this.activeStage,
+            Point_.from_(
+              this.puzzle.container,
+              Point_.to_(this.puzzle.container, new Point(x_, y_))
+            )
+          );
           const obj_ = this.activeStage.getObjectUnderPoint(pt.x, pt.y);
           const piece_ = obj_ && obj_.piece.entity;
           if (piece_ === piece) {
-            pt0 = new Point(x_, y_).to(this.puzzle.container);
+            pt0 = Point_.to_(this.puzzle.container, new Point(x_, y_));
             return dragger;
           }
           dragger.end();
@@ -191,14 +195,16 @@ export default class Game {
   putToActiveLayer(p: Piece): void {
     {
       const mtx = p.matrix;
-      const pts = p.localBoundary.cornerPoints.map(pt => pt.apply(mtx));
-      const { x, y, width, height } = Point.boundary(pts);
-      const pt0 = this.puzzle.container
-        .localToWindow(x, y)
-        .add(new Point(-10, -10));
-      const pt1 = this.puzzle.container
-        .localToWindow(x + width, y + height)
-        .add(new Point(10, 20));
+      const pts = p.localBoundary.cornerPoints.map(pt => Point_.apply(mtx, pt));
+      const { x, y, width, height } = Point_.boundary(pts);
+      const pt0 = Point_.add(
+        this.puzzle.container.localToWindow(x, y),
+        new Point(-10, -10)
+      );
+      const pt1 = Point_.add(
+        this.puzzle.container.localToWindow(x + width, y + height),
+        new Point(10, 20)
+      );
       this.activeStage.copyTransform(this.puzzle.container);
       this.activeStage.canvas.width = pt1.x - pt0.x;
       this.activeStage.canvas.height = pt1.y - pt0.y;
@@ -208,9 +214,10 @@ export default class Game {
         .show();
     }
     {
-      const { x, y } = p.position
-        .from(this.puzzle.container)
-        .to(this.activeStage);
+      const { x, y } = Point_.to_(
+        this.activeStage,
+        Point_.from_(this.puzzle.container, p.position)
+      );
       Object.assign(p.shape, { x, y, rotation: p.rotation });
       this.activeStage.addChild(p.shape);
     }
@@ -260,9 +267,9 @@ export default class Game {
       Math.abs(this.getDegreeBetween(source, target)) <
       this.puzzle.rotationTolerance
     ) {
-      const pt0 = pt.apply(source.matrix.invert());
-      const pt1 = pt.apply(target.matrix.invert());
-      if (pt0.distanceTo(pt1) < this.puzzle.translationTolerance) {
+      const pt0 = Point_.apply(source.matrix.invert(), pt);
+      const pt1 = Point_.apply(target.matrix.invert(), pt);
+      if (Point_.distanceTo(pt1, pt0) < this.puzzle.translationTolerance) {
         return true;
       }
     }

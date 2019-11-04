@@ -72,7 +72,7 @@ export default class PieceDrawer {
             pts[2].y
           );
         } else {
-          g.lineTo(...pts[2].toArray());
+          g.lineTo(pts[2].x, pts[2].y);
         }
       });
   }
