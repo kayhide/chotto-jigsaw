@@ -1,5 +1,5 @@
-import Logger from "../../common/logger";
-import EventHandler from "../../common/event_handler";
+import * as Logger from "../../common/Logger.bs";
+import * as EventHandler from "../../common/EventHandler.bs";
 import Piece from "../model/piece";
 import CommandGroup from "./command_group";
 
@@ -7,29 +7,29 @@ export default abstract class Command {
   static history: Array<CommandGroup> = [];
   static current: CommandGroup = CommandGroup.create();
 
-  static postHandler = new EventHandler<Command>();
-  static commitHandler = new EventHandler<CommandGroup>();
+  static postHandler = EventHandler.create();
+  static commitHandler = EventHandler.create();
 
   static onPost(handler: (Command) => void): void {
-    this.postHandler.append(handler);
+    this.postHandler = EventHandler.append(handler, this.postHandler);
   }
 
   static onCommit(handler: (CommandGroup) => void): void {
-    this.commitHandler.append(handler);
+    this.commitHandler = EventHandler.append(handler, this.commitHandler);
   }
 
   static commit(): void {
     const cmds = this.current;
     this.current = CommandGroup.create();
     this.history.push(cmds);
-    this.commitHandler.fire(cmds);
+    EventHandler.fire(cmds, this.commitHandler);
   }
 
   static post(cmd: Command): void {
     if (cmd.isValid()) {
       cmd.execute();
       this.current.squash(cmd);
-      this.postHandler.fire(cmd);
+      EventHandler.fire(cmd, this.postHandler);
     }
   }
 
@@ -37,7 +37,7 @@ export default abstract class Command {
     cmds.extrinsic = true;
     cmds.forEach(cmd => cmd.execute());
     this.history.push(cmds);
-    this.commitHandler.fire(cmds);
+    EventHandler.fire(cmds, this.commitHandler);
   }
 
   piece: Piece;

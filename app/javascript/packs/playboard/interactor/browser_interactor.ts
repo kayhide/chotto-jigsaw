@@ -1,4 +1,4 @@
-import Logger from "../../common/logger";
+import * as Logger from "../../common/Logger.bs";
 import Game from "./game";
 
 export default class BrowserInteractor {

@@ -1,6 +1,6 @@
 import { Ticker, Rectangle } from "@createjs/easeljs";
 
-import Logger from "../common/logger";
+import * as Logger from "../common/Logger.bs";
 import Screen from "../common/screen";
 import View from "./view";
 import Bridge from "./bridge";

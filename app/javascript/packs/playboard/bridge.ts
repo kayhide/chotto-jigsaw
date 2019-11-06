@@ -1,6 +1,6 @@
 import { Point } from "@createjs/easeljs";
 
-import Logger from "../common/logger";
+import * as Logger from "../common/Logger.bs";
 import Piece from "./model/piece";
 import Command from "./command/command";
 import MergeCommand from "./command/merge_command";

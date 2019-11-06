@@ -1,6 +1,6 @@
 import { Ticker, Point, Container, Stage } from "@createjs/easeljs";
 
-import Logger from "../../common/logger";
+import * as Logger from "../../common/Logger.bs";
 import Puzzle from "../model/puzzle";
 import Piece from "../model/piece";
 import Command from "../command/command";

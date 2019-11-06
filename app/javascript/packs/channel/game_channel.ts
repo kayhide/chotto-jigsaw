@@ -1,7 +1,7 @@
 import { Subscriptions } from "@rails/actioncable";
 import consumer from "./consumer";
 
-import Logger from "../common/logger";
+import * as Logger from "../common/Logger.bs";
 import Bridge from "../playboard/bridge";
 import Command from "../playboard/command/command";
 import CommandGroup from "../playboard/command/command_group";

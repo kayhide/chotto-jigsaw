@@ -1,6 +1,6 @@
 import Hammer from "hammerjs";
 
-import Logger from "../../common/logger";
+import * as Logger from "../../common/Logger.bs";
 import View from "../view";
 import Game, { Dragger, Mover, Scaler } from "./game";
 

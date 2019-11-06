@@ -6,7 +6,7 @@ import {
   Shape
 } from "@createjs/easeljs";
 
-import Logger from "../../common/logger";
+import * as Logger from "../../common/Logger.bs";
 import * as Point_ from "../../easeljs-ext/Point.bs";
 import * as Rectangle_ from "../../easeljs-ext/Rectangle.bs";
 
