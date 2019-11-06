@@ -9,6 +9,7 @@ import TranslateCommand from "../command/translate_command";
 import RotateCommand from "../command/rotate_command";
 import MergeCommand from "../command/merge_command";
 import * as Point_ from "../../easeljs-ext/Point.bs";
+import * as Rectangle_ from "../../easeljs-ext/Rectangle.bs";
 
 export interface Dragger {
   active: boolean;
@@ -195,8 +196,10 @@ export default class Game {
   putToActiveLayer(p: Piece): void {
     {
       const mtx = p.matrix;
-      const pts = p.localBoundary.cornerPoints.map(pt => Point_.apply(mtx, pt));
-      const { x, y, width, height } = Point_.boundary(pts);
+      const pts = Rectangle_.cornerPoints(p.localBoundary).map(pt =>
+        Point_.apply(mtx, pt)
+      );
+      const { x, y, width, height } = Rectangle_.fromPoints(pts);
       const pt0 = Point_.add(
         this.puzzle.container.localToWindow(x, y),
         new Point(-10, -10)

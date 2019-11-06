@@ -6,53 +6,34 @@ type point =
   {.
    [@bs.set] "x": float,
    [@bs.set] "y": float,
-   [@bs.set] "on": option(display_object)
-  };
-type rectangle =
-  {.
-   [@bs.set] "empty": bool
+   [@bs.set] "on": option(display_object),
   };
 type matrix2d;
 
-
-[@bs.module "@createjs/easeljs"] [@bs.new] external createPoint : (float, float) => point = "Point";
-[@bs.module "@createjs/easeljs"] [@bs.new] external createRectangle : unit => rectangle = "Rectangle";
+[@bs.module "@createjs/easeljs"] [@bs.new] external create : (float, float) => point = "Point";
 
 [@bs.send] external clone : (point) => point = "clone";
-[@bs.send] external addPoint : (rectangle, point) => rectangle = "addPoint";
 [@bs.send] external transformPoint : (matrix2d, float, float) => point = "transformPoint";
 [@bs.send] external localToLocal : (display_object, float, float, display_object) => point = "localToLocal";
 [@bs.send] external windowToLocal : (display_object, float, float) => point = "windowToLocal";
 [@bs.send] external localToWindow : (display_object, float, float) => point = "localToWindow";
 [@bs.send] external globalToWindow : (display_object, float, float) => point = "globalToWindow";
 
-module Rectangle_ {
-  let createEmpty = () : rectangle => {
-    let rect = createRectangle();
-    rect##empty #= true;
-    rect;
-  };
-}
-
-let boundary = (points : array(point)) : rectangle => {
-  let rect = Rectangle_.createEmpty();
-  points |> Array.fold_left(addPoint, rect);
-};
 
 let isZero = (pt : point) : bool => {
   pt##x == 0.0 && pt##y == 0.0;
 };
 
 let add = (pt' : point, pt : point) : point => {
-  createPoint(pt##x +. pt'##x, pt##y +. pt'##y);
+  create(pt##x +. pt'##x, pt##y +. pt'##y);
 };
 
 let subtract = (pt' : point, pt : point) : point => {
-  createPoint(pt##x -. pt'##x, pt##y -. pt'##y);
+  create(pt##x -. pt'##x, pt##y -. pt'##y);
 };
 
 let scale = (d: float, pt : point) : point => {
-  createPoint(pt##x *. d, pt##y *. d);
+  create(pt##x *. d, pt##y *. d);
 };
 
 let apply = (mtx : matrix2d, pt : point) : point => {

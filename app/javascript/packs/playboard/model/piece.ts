@@ -8,6 +8,7 @@ import {
 
 import Logger from "../../common/logger";
 import * as Point_ from "../../easeljs-ext/Point.bs";
+import * as Rectangle_ from "../../easeljs-ext/Rectangle.bs";
 
 export default class Piece {
   static pieces: Array<Piece> = [];
@@ -68,7 +69,7 @@ export default class Piece {
 
   get localBoundary(): Rectangle {
     if (!this._localBoundary) {
-      this._localBoundary = Point_.boundary(this.localPoints);
+      this._localBoundary = Rectangle_.fromPoints(this.localPoints);
     }
     return this._localBoundary;
   }
@@ -129,17 +130,17 @@ export default class Piece {
 
   get boundary(): Rectangle {
     if (!this._boundary) {
-      this._boundary = Point_.boundary(this.points);
+      this._boundary = Rectangle_.fromPoints(this.points);
     }
     return this._boundary;
   }
 
   get center(): Point {
-    return this.boundary.center;
+    return Rectangle_.center(this.boundary);
   }
 
   cache(scale = 1): void {
-    const { x, y, width, height } = this.localBoundary.inflate(4);
+    const { x, y, width, height } = Rectangle_.inflate(4, this.localBoundary);
     this.shape.cache(x, y, width, height, scale);
   }
 
