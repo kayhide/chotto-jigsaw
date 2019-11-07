@@ -1,7 +1,7 @@
 import { Ticker, Rectangle } from "@createjs/easeljs";
 
 import * as Logger from "../common/Logger.bs";
-import Screen from "../common/screen";
+import * as Screen from "../common/Screen.bs";
 import View from "./view";
 import Bridge from "./bridge";
 import Puzzle from "./model/puzzle";
@@ -79,7 +79,7 @@ function setupUi(puzzle: Puzzle): void {
   if (Screen.isFullscreenAvailable()) {
     $("#fullscreen")
       .removeClass("hidden")
-      .on("click", () => Screen.toggleFullScreen($("#playboard")));
+      .on("click", () => Screen.toggleFullScreen($("#playboard")[0]));
   }
 
   Command.onCommit(cmds => {
