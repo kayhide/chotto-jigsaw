@@ -6,5 +6,4 @@
 import "materialize-css";
 import "../styles/playboard";
 
-import "./easeljs-ext";
-import "./playboard/app";
+import "./playboard/App.bs";
