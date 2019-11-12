@@ -1,10 +1,10 @@
 - longer = [@puzzle.width, @puzzle.height].max
 - view = { width: longer * 2, height: longer * 2 }
-#playboard.green data-game-id=@game.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=(@game.standalone?)
+#playboard.green data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=@standalone
   canvas#field.hidden
   canvas#active-canvas.hidden
 
-  #game-progress.progress class=(@game.standalone? ? "offline" : "online")
+  #game-progress.progress class=(@standalone ? "offline" : "online")
     #progressbar.determinate style="width:0%"
 
   #info.white-text

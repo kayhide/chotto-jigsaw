@@ -10,7 +10,7 @@ class Game < ApplicationRecord
     shuffled_at?
   end
 
-  def standalone?
-    commands.empty?
+  def progress
+    merge_commands.count.to_f / (puzzle.pieces_count - 1)
   end
 end

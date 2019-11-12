@@ -1,12 +1,15 @@
 .row
   - @games.each do |game|
+    - puzzle = game.puzzle
     .col.s12.m6.l3
-      .card.game.hoverable id=dom_id(game)
+      .card.puzzle.hoverable id=dom_id(game)
         .card-image
           = link_to game, class: %w(waves-effect waves-light) do
-            = image_tag game.puzzle.picture.variant(resize_to_fill: [600, 600])
+            = image_tag puzzle.picture.variant(resize_to_fill: [600, 600])
+        .progress.online
+          .determinate style="width:#{game.progress * 100}%"
         .card-content
-          = game.puzzle.pieces_count
+          = puzzle.pieces_count
           span< pcs
           .right
-            = game.puzzle.difficulty
+            = puzzle.difficulty
