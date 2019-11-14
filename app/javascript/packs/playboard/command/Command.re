@@ -37,3 +37,21 @@ let translate = (piece_id: int, vector: Point.t): t =>
 
 let rotate = (piece_id: int, center: Point.t, degree: float): t =>
   Rotate(RotateCommand.create(piece_id, center, degree));
+
+let isMerge = (cmd: t): bool =>
+  switch (cmd) {
+  | Merge(_) => true
+  | _ => false
+  };
+
+let isTranslate = (cmd: t): bool =>
+  switch (cmd) {
+  | Translate(_) => true
+  | _ => false
+  };
+
+let isRotate = (cmd: t): bool =>
+  switch (cmd) {
+  | Rotate(_) => true
+  | _ => false
+  };

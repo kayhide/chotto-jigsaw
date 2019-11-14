@@ -18,8 +18,8 @@ type jquery('a) = Js.t('a);
 [@bs.send] external show: (jquery('a), unit) => 'b = "show";
 [@bs.send] external hide: (jquery('a), unit) => 'b = "hide";
 [@bs.send] external css: (jquery('a), string, 'a) => 'b = "css";
-[@bs.send] external setWidth: (jquery('a), float) => 'b = "width";
-[@bs.send] external setHeight: (jquery('a), float) => 'b = "height";
+[@bs.send] external setWidth: (jquery('a), 'v) => 'b = "width";
+[@bs.send] external setHeight: (jquery('a), 'v) => 'b = "height";
 
 type offset = {
   .

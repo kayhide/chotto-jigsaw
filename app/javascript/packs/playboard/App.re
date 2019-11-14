@@ -81,18 +81,26 @@ let setupUi = (puzzle: puzzle): unit => {
         ();
       });
 
-  /* if (Screen.isFullscreenAvailable()) { */
-  /*   jquery("#fullscreen") */
-  /*     .removeClass("hidden") */
-  /*     ->on("click", () => Screen.toggleFullScreen(jquery("#playboard")[0])); */
-  /* } */
+  if (Screen.isFullscreenAvailable()) {
+    jquery("#fullscreen")
+      ->removeClass("hidden")
+      ->on("click", () => Screen.toggleFullScreen(jquery("#playboard")->get()[0]));
+  };
 
-  /* command->onCommit(cmds => { */
-  /*   if (_(cmds).some(cmd => cmd instanceof MergeCommand)) { */
-  /*     jquery("#progressbar").width(`${(puzzle.progress * 100).toFixed(0)}%`); */
-  /*   } */
-  /* }); */
-  ();
+  CommandManager.onCommit(cmds =>
+    if (cmds.commands |> Js.Array.some(Command.isMerge)) {
+      jquery("#progressbar")
+      ->setWidth(
+          (
+            (puzzle |> Puzzle.progress)
+            *. 100.0
+            |> Js.Math.floor_int
+            |> Js.Int.toString
+          )
+          ++ "%",
+        );
+    }
+  );
 };
 
 [@bs.send] external play: (HtmlElement.t, unit) => unit = "play";
@@ -144,8 +152,8 @@ let play = (): unit => {
           );
         };
         if (playboard->data("standalone") !== Js.Nullable.undefined) {
-          /* game |> Game.shuffle; */
-          CommandManager.commit();
+          game |> Game.shuffle;
+          /* CommandManager.commit(); */
           puzzle |> View.fit;
         } else {
           connectGameChannel(puzzle, playboard->data("game-id"));
