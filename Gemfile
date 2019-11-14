@@ -12,7 +12,6 @@ gem 'pry-doc'
 gem 'pry-rails'
 gem 'puma', '~> 3.11'
 gem 'redis', '~> 4.0'
-gem 'sass-rails', '~> 5'
 gem 'slim-rails'
 gem 'webpacker', '~> 4.0'
 
