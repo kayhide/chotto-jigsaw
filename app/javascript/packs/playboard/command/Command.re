@@ -29,6 +29,15 @@ let isValid = (puzzle: Puzzle.t, cmd: t): bool =>
   | Rotate(cmd') => cmd' |> RotateCommand.isValid(puzzle)
   };
 
+/* Helper functions */
+
+let pieceId = (cmd: t): int =>
+  switch (cmd) {
+  | Merge(cmd') => cmd'.piece_id
+  | Translate(cmd') => cmd'.piece_id
+  | Rotate(cmd') => cmd'.piece_id
+  };
+
 let merge = (piece_id: int, mergee_id: int): t =>
   Merge(MergeCommand.create(piece_id, mergee_id));
 

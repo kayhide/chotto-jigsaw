@@ -116,15 +116,27 @@ let create = (puzzle: puzzle): t => {
      );
   let game = {puzzle, activeStage, shapeToPiece, activePiece: None};
 
-  CommandManager.onPost(cmd =>
-    switch (cmd) {
-    | Command.Rotate(cmd') =>
-      let piece = puzzle |> Puzzle.findPiece(cmd'.piece_id);
-      game |> putToActiveLayer(piece);
-    | Command.Translate(cmd') => game |> handleTranslate(cmd')
-    | _ => ()
-    }
-  );
+  CommandManager.onPost(cmd => {
+    let piece_id = cmd |> Command.pieceId;
+    if (game |> isCaptured(piece_id)) {
+      switch (cmd) {
+      | Command.Rotate(_) =>
+        game |> putToActiveLayer(puzzle |> Puzzle.findPiece(piece_id))
+      | Command.Translate(cmd') => game |> handleTranslate(cmd')
+      | _ => ()
+      };
+    } else {
+      let piece = puzzle |> Puzzle.findPiece(piece_id);
+      piece
+      |> Piece.withShape(s => {
+           let pt = piece |> Piece.position;
+           s##x #= pt##x;
+           s##y #= pt##y;
+           s##rotation #= (piece |> Piece.rotation);
+         });
+      ();
+    };
+  });
 
   CommandManager.onCommit(cmds => {
     cmds.commands
@@ -339,12 +351,9 @@ let shuffle = ({puzzle}: t): unit =>
            |> Js.Array.filter(Piece.isAlive)
            |> Array.iter(p => {
                 let center = p |> Piece.center;
-                let center' = p |> Piece.unwrapShape |> localToParent(center);
-                Command.rotate(
-                  p.id,
-                  center',
-                  Js.Math.random() *. 360.0 -. 180.0,
-                )
+                let center' = center |> toGlobalFrom(p |> Piece.unwrapShape);
+                let degree = Js.Math.random() *. 360.0 -. 180.0;
+                Command.rotate(p.id, center', degree)
                 |> CommandManager.post(puzzle);
                 let vec =
                   Point.create(Js.Math.random() *. s, Js.Math.random() *. s);
