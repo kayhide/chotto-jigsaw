@@ -36,7 +36,7 @@ include ActionCable.Make(X);
 
 let subscription: ref(option(subscription)) = ref(None);
 
-let _received = (puzzle: Puzzle.puzzle, data: X.data): unit => {
+let _received = (puzzle: Puzzle.t, data: X.data): unit => {
   let this = subscription^ |> Maybe.fromJust;
   Logger.trace("received: " ++ data##action);
   switch (data##action) {
@@ -71,7 +71,7 @@ let _commit = (cmds: CommandGroup.t): unit => {
   };
 };
 
-let subscribe = (puzzle: Puzzle.puzzle, game_id: int): subscription => {
+let subscribe = (puzzle: Puzzle.t, game_id: int): subscription => {
   let identifier = {"channel": "GameChannel", "game_id": game_id};
   let funcs = {"received": _received(puzzle), "commit": _commit};
   let consumer = createConsumer();

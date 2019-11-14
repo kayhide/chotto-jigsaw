@@ -1,8 +1,8 @@
 open JQuery;
 
-type point = Point.point;
-type piece = Piece.piece;
-type puzzle = Puzzle.puzzle;
+type point = Point.t;
+type piece = Piece.t;
+type puzzle = Puzzle.t;
 
 type t = {
   puzzle,

@@ -7,8 +7,7 @@ external create: unit => t = "Container";
 [@bs.send] external getChildAt: (t, int) => t = "getChildAt";
 [@bs.send] external removeChild: (t, t) => unit = "removeChild";
 
-let numChilcren = (obj: t): int =>
-  obj##numChildren;
+let numChilcren = (obj: t): int => obj##numChildren;
 
 let transportTo = (dst: t, src: t): unit =>
   while (0 < src##numChildren) {

@@ -1,23 +1,25 @@
-type point = Point.point;
-type rectangle = Rectangle.rectangle;
+type point = Point.t;
+type rectangle = Rectangle.t;
 
 type shape =
   | Unboxed(DisplayObject.t)
   | Boxed(DisplayObject.t);
+
 type loop = list(option(point));
-type piece = {
+
+type t = {
   id: int,
   mutable loops: list(loop),
   mutable shape,
   mutable neighborIds: IntSet.t,
   mutable _position: point,
   mutable _rotation: float,
-  mutable _merger: option(piece),
+  mutable _merger: option(t),
   mutable _localBoundary: option(rectangle),
   mutable _boundary: option(rectangle),
 };
 
-let parse = src: piece => {
+let parse = src: t => {
   let loop =
     src##points
     |> Array.to_list
@@ -41,21 +43,21 @@ let parse = src: piece => {
   piece;
 };
 
-let position = (piece: piece): point => piece._position;
+let position = (piece: t): point => piece._position;
 
-let setPosition = (pt: point, piece: piece): unit => {
+let setPosition = (pt: point, piece: t): unit => {
   piece._position = pt;
   piece._boundary = None;
 };
 
-let rotation = (piece: piece): float => piece._rotation;
+let rotation = (piece: t): float => piece._rotation;
 
-let setRotation = (deg: float, piece: piece): unit => {
+let setRotation = (deg: float, piece: t): unit => {
   piece._rotation = deg;
   piece._boundary = None;
 };
 
-let matrix = piece: Matrix2D.matrix2d =>
+let matrix = piece: Matrix2D.t =>
   Matrix2D.create()
   ->Matrix2D.translate(piece._position##x, piece._position##y)
   ->Matrix2D.rotate(piece._rotation);
@@ -77,12 +79,11 @@ let addLoop = (lp, piece): unit => piece.loops = [lp, ...piece.loops];
 let removeLoop = (lp, piece): unit =>
   piece.loops = piece.loops |> List.filter(lp' => lp' !== lp);
 
-let rec entity = piece: piece => piece._merger |> Maybe.maybe(piece, entity);
+let rec entity = piece: t => piece._merger |> Maybe.maybe(piece, entity);
 
-let merger = piece: option(piece) => piece._merger |> Maybe.map(entity);
+let merger = piece: option(t) => piece._merger |> Maybe.map(entity);
 
-let setMerger = (merger: piece, piece: piece): unit =>
-  piece._merger = Some(merger);
+let setMerger = (merger: t, piece: t): unit => piece._merger = Some(merger);
 
 let isAlive = piece: bool => piece._merger |> Maybe.isNone;
 
@@ -129,16 +130,16 @@ let cache = (~scale=1.0, piece): unit => {
   };
 };
 
-let unwrapShape = (piece: piece): DisplayObject.t =>
+let unwrapShape = (piece: t): DisplayObject.t =>
   switch (piece.shape) {
   | Boxed(c) => c
   | Unboxed(s) => s
   };
 
-let withShape = (f: DisplayObject.t => 'a, piece: piece): 'a =>
+let withShape = (f: DisplayObject.t => 'a, piece: t): 'a =>
   piece |> unwrapShape |> f;
 
-let enbox = (p: piece, piece: piece): unit => {
+let enbox = (p: t, piece: t): unit => {
   open DisplayObject;
   let container =
     switch (piece.shape) {

@@ -1,4 +1,4 @@
-module IntOrd {
+module IntOrd = {
   type t = int;
   let compare = compare;
 };

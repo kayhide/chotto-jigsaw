@@ -1,5 +1,5 @@
-type piece = Piece.piece;
-type puzzle = Puzzle.puzzle;
+type piece = Piece.t;
+type puzzle = Puzzle.t;
 
 type t = {
   piece_id: int,

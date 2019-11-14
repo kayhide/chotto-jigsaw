@@ -3,7 +3,7 @@ open Document;
 
 open JQuery;
 
-type puzzle = Puzzle.puzzle;
+type puzzle = Puzzle.t;
 
 module Guider = {
   type t = {
@@ -62,21 +62,24 @@ let setupUi = (puzzle: puzzle): unit => {
   let _ = jquery("#field")->fadeIn("slow");
 
   let guider = Guider.create(puzzle);
-  let _ = jquery(window)
-  ->on("keydown", e => {
-      if (e##key === "F1") {
-        jquery("#log-button")->trigger("click");
-      };
-      if (e##key === "F2") {
-        guider |> Guider.toggle;
-      };
-    });
+  let _ =
+    jquery(window)
+    ->on("keydown", e => {
+        if (e##key === "F1") {
+          jquery("#log-button")->trigger("click");
+        };
+        if (e##key === "F2") {
+          guider |> Guider.toggle;
+        };
+      });
 
-  let _ = jquery("#log-button")
-  ->on("click", _e => {
-      let _ = jquery("#log")->fadeToggle();
-      let _ = jquery("#log-button")->toggleClass("rotate-180");
-    });
+  let _ =
+    jquery("#log-button")
+    ->on("click", _e => {
+        let _ = jquery("#log")->fadeToggle();
+        let _ = jquery("#log-button")->toggleClass("rotate-180");
+        ();
+      });
 
   /* if (Screen.isFullscreenAvailable()) { */
   /*   jquery("#fullscreen") */

@@ -15,14 +15,14 @@ let squash = (cmd1: t, cmd: t): bool =>
   | _ => false
   };
 
-let execute = (puzzle: Puzzle.puzzle, cmd: t): unit =>
+let execute = (puzzle: Puzzle.t, cmd: t): unit =>
   switch (cmd) {
   | Merge(cmd') => cmd' |> MergeCommand.execute(puzzle)
   | Translate(cmd') => cmd' |> TranslateCommand.execute(puzzle)
   | Rotate(cmd') => cmd' |> RotateCommand.execute(puzzle)
   };
 
-let isValid = (puzzle: Puzzle.puzzle, cmd: t): bool =>
+let isValid = (puzzle: Puzzle.t, cmd: t): bool =>
   switch (cmd) {
   | Merge(cmd') => cmd' |> MergeCommand.isValid(puzzle)
   | Translate(cmd') => cmd' |> TranslateCommand.isValid(puzzle)
@@ -32,8 +32,8 @@ let isValid = (puzzle: Puzzle.puzzle, cmd: t): bool =>
 let merge = (piece_id: int, mergee_id: int): t =>
   Merge(MergeCommand.create(piece_id, mergee_id));
 
-let translate = (piece_id: int, vector: Point.point): t =>
+let translate = (piece_id: int, vector: Point.t): t =>
   Translate(TranslateCommand.create(piece_id, vector));
 
-let rotate = (piece_id: int, center: Point.point, degree: float): t =>
+let rotate = (piece_id: int, center: Point.t, degree: float): t =>
   Rotate(RotateCommand.create(piece_id, center, degree));

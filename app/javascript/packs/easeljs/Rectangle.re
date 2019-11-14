@@ -1,4 +1,4 @@
-type rectangle = {
+type t = {
   .
   [@bs.set] "x": float,
   [@bs.set] "y": float,
@@ -8,44 +8,43 @@ type rectangle = {
 };
 
 [@bs.module "@createjs/easeljs"] [@bs.new]
-external create: (float, float, float, float) => rectangle = "Rectangle";
+external create: (float, float, float, float) => t = "Rectangle";
 
-[@bs.send] external toString: (rectangle, unit) => string = "toString";
+[@bs.send] external toString: (t, unit) => string = "toString";
 
-let topLeft = (rect: rectangle): Point.point =>
-  Point.create(rect##x, rect##y);
+let topLeft = (rect: t): Point.t => Point.create(rect##x, rect##y);
 
-let topRight = (rect: rectangle): Point.point =>
+let topRight = (rect: t): Point.t =>
   Point.create(rect##x +. rect##width, rect##y);
 
-let bottomLeft = (rect: rectangle): Point.point =>
+let bottomLeft = (rect: t): Point.t =>
   Point.create(rect##x, rect##y +. rect##height);
 
-let bottomRight = (rect: rectangle): Point.point =>
+let bottomRight = (rect: t): Point.t =>
   Point.create(rect##x +. rect##width, rect##y +. rect##height);
 
-let center = (rect: rectangle): Point.point =>
+let center = (rect: t): Point.t =>
   Point.create(rect##x +. rect##width /. 2.0, rect##y +. rect##height /. 2.0);
 
-let cornerPoints = (rect: rectangle): list(Point.point) => [
+let cornerPoints = (rect: t): list(Point.t) => [
   rect |> topLeft,
   rect |> topRight,
   rect |> bottomLeft,
   rect |> bottomRight,
 ];
 
-let empty = (): rectangle => {
+let empty = (): t => {
   let rect = create(0.0, 0.0, 0.0, 0.0);
   rect##empty #= true;
   rect;
 };
 
-let clear = (rect: rectangle): rectangle => {
+let clear = (rect: t): t => {
   rect##empty #= true;
   rect;
 };
 
-let addPoint = (rect: rectangle, pt: Point.point): rectangle => {
+let addPoint = (rect: t, pt: Point.t): t => {
   if (rect##empty) {
     rect##x #= pt##x;
     rect##y #= pt##y;
@@ -77,13 +76,13 @@ let addPoint = (rect: rectangle, pt: Point.point): rectangle => {
   rect;
 };
 
-let addRectangle = (rect': rectangle, rect: rectangle): rectangle =>
+let addRectangle = (rect': t, rect: t): t =>
   rect' |> cornerPoints |> List.fold_left(addPoint, rect);
 
-let fromPoints = (points: list(Point.point)): rectangle =>
+let fromPoints = (points: list(Point.t)): t =>
   points |> List.fold_left(addPoint, empty());
 
-let inflate = (offset: float, rect: rectangle): rectangle => {
+let inflate = (offset: float, rect: t): t => {
   rect##x #= (rect##x -. offset);
   rect##y #= (rect##y -. offset);
   rect##width #= (rect##width +. offset *. 2.0);

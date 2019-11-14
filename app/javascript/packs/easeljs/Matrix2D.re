@@ -1,15 +1,13 @@
-type matrix2d;
+type t;
 
 [@bs.module "@createjs/easeljs"] [@bs.new]
-external create: unit => matrix2d = "Matrix2D";
-[@bs.send] external toString: (matrix2d, unit) => string = "toString";
+external create: unit => t = "Matrix2D";
+[@bs.send] external toString: (t, unit) => string = "toString";
+[@bs.send] external translate: (t, float, float) => t = "translate";
+[@bs.send] external rotate: (t, float) => t = "rotate";
+[@bs.send] external scale: (t, float, float) => t = "scale";
+[@bs.send] external invert: t => t = "invert";
+[@bs.send] external decompose: (t, unit) => 'obj = "decompose";
 [@bs.send]
-external translate: (matrix2d, float, float) => matrix2d = "translate";
-[@bs.send] external rotate: (matrix2d, float) => matrix2d = "rotate";
-[@bs.send] external scale: (matrix2d, float, float) => matrix2d = "scale";
-[@bs.send] external invert: matrix2d => matrix2d = "invert";
-[@bs.send] external decompose: (matrix2d, unit) => 'obj = "decompose";
-[@bs.send]
-external appendTransform:
-  (matrix2d, float, float, float, float, float) => matrix2d =
+external appendTransform: (t, float, float, float, float, float) => t =
   "appendTransform";

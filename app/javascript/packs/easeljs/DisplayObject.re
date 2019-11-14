@@ -1,5 +1,5 @@
-type point = Point.point;
-type matrix2d = Matrix2D.matrix2d;
+type point = Point.t;
+type matrix2d = Matrix2D.t;
 
 type t = {
   .

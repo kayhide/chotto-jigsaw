@@ -1,10 +1,10 @@
-type point = Point.point;
-type rectangle = Rectangle.rectangle;
-type matrix2d = Matrix2D.matrix2d;
-type piece = Piece.piece;
+type point = Point.t;
+type rectangle = Rectangle.t;
+type matrix2d = Matrix2D.t;
+type piece = Piece.t;
 type shape = DisplayObject.t;
 
-type puzzle = {
+type t = {
   stage: shape,
   container: shape,
   shape,
@@ -15,7 +15,7 @@ type puzzle = {
   mutable translationTolerance: float,
 };
 
-let create = canvas: puzzle => {
+let create = canvas: t => {
   let stage = Stage.create(canvas);
   let container = Container.create();
   let shape = Shape.create();
@@ -43,7 +43,7 @@ type puzzle_data('a) = {
 [@bs.scope "JSON"] [@bs.val]
 external parseData: string => puzzle_data('a) = "parse";
 
-let parse = (puzzle: puzzle, data: string): unit => {
+let parse = (puzzle: t, data: string): unit => {
   let content: puzzle_data('a) = parseData(data);
   puzzle.pieces = content |> piecesGet |> Array.map(Piece.parse);
   puzzle.pieces
@@ -54,9 +54,9 @@ let parse = (puzzle: puzzle, data: string): unit => {
   puzzle.translationTolerance = puzzle.linearMeasure /. 4.0;
 };
 
-let piecesCount = (puzzle: puzzle): int => puzzle.pieces |> Array.length;
+let piecesCount = (puzzle: t): int => puzzle.pieces |> Array.length;
 
-let initizlize = (image, puzzle: puzzle): unit => puzzle.image = Some(image);
+let initizlize = (image, puzzle: t): unit => puzzle.image = Some(image);
 
 let progress = puzzle: float => {
   let i =
@@ -66,7 +66,7 @@ let progress = puzzle: float => {
   Js.Int.toFloat(i) /. Js.Int.toFloat((puzzle.pieces |> Array.length) - 1);
 };
 
-let boundary = (puzzle: puzzle): rectangle =>
+let boundary = (puzzle: t): rectangle =>
   puzzle.pieces
   |> Js.Array.filter(Piece.isAlive)
   |> Array.map(p => p |> Piece.boundary)
@@ -74,16 +74,16 @@ let boundary = (puzzle: puzzle): rectangle =>
        (acc, rect) => acc |> Rectangle.addRectangle(rect),
        Rectangle.empty(),
      );
-let currentScale = (puzzle: puzzle): float => puzzle.container##scaleX;
+let currentScale = (puzzle: t): float => puzzle.container##scaleX;
 
 [@bs.send] external update: (shape, unit) => unit = "update";
 [@bs.send] external invalidate: (shape, unit) => unit = "invalidate";
 
 let invalidate = puzzle: unit => puzzle.stage->invalidate();
 
-let findPiece = (id: int, puzzle: puzzle): piece => puzzle.pieces[id];
+let findPiece = (id: int, puzzle: t): piece => puzzle.pieces[id];
 
-let getAdjacentPieces = (piece: piece, puzzle: puzzle): list(piece) =>
+let getAdjacentPieces = (piece: piece, puzzle: t): list(piece) =>
   piece.neighborIds
   |> IntSet.elements
   |> List.map(p => puzzle |> findPiece(p) |> Piece.entity);
