@@ -54,8 +54,10 @@ nav {
   .progress {
     margin: 0;
     padding: 0;
+
     &.online {
       background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
+
       .determinate {
         background-color: adjust-hue($progress-bar-color, -30deg);
       }
@@ -63,6 +65,7 @@ nav {
 
     &.offline {
       background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
+
       .determinate {
         background-color: adjust-hue($progress-bar-color, 30deg);
       }

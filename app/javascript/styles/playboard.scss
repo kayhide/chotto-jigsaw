@@ -56,6 +56,7 @@
 
   &.online {
     background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
+
     .determinate {
       background-color: adjust-hue($progress-bar-color, -30deg);
     }
@@ -63,6 +64,7 @@
 
   &.offline {
     background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
+
     .determinate {
       background-color: adjust-hue($progress-bar-color, 30deg);
     }
@@ -84,8 +86,10 @@
 #log-button {
   position: absolute;
   bottom: 4em;
-  transition: transform .2s;
-  &:focus, &:hover {
+  transition: transform 0.2s;
+
+  &:focus,
+  &:hover {
     background-color: transparent;
   }
 }
