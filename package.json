@@ -7,31 +7,15 @@
     "@rails/activestorage": "^6.0.0-alpha",
     "@rails/ujs": "^6.0.0-alpha",
     "@rails/webpacker": "^4.0.7",
-    "@types/actioncable": "^5.2.3",
-    "@types/jquery": "^3.3.31",
-    "@types/lodash": "^4.14.144",
     "bs-platform": "^5.2.1",
     "bs-webapi": "^0.15.5",
     "hammerjs": "^2.0.8",
     "jquery": "^3.4.1",
     "lodash": "^4.17.15",
-    "materialize-css": "^1.0.0",
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4"
+    "materialize-css": "^1.0.0"
   },
   "version": "0.1.0",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.5.0",
-    "@typescript-eslint/parser": "^2.5.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^6.5.1",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.4.0",
-    "eslint-import-resolver-webpack": "^0.11.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.1",
-    "lint-staged": "^9.4.2",
-    "prettier": "^1.18.2",
     "stylelint": "^11.1.1",
     "stylelint-config-css-modules": "^1.5.0",
     "stylelint-config-standard": "^19.0.0",
@@ -40,24 +24,6 @@
   },
   "scripts": {
     "postinstall": "$(yarn bin)/bsb -make-world",
-    "lint": "$(yarn bin)/eslint app/javascript --ext ts,tsx",
-    "lint-staged": "$(yarn bin)/lint-staged"
-  },
-  "lint-staged": {
-    "config/webpack/**/*.js": [
-      "prettier --write",
-      "eslint",
-      "git add"
-    ],
-    "app/javascript/**/*.js": [
-      "prettier --write",
-      "eslint",
-      "git add"
-    ],
-    "app/javascript/**/*.scss": [
-      "prettier --write",
-      "stylelint --fix",
-      "git add"
-    ]
+    "lint": "$(yarn bin)/stylelint 'app/javascript/**/*.scss'"
   }
 }
