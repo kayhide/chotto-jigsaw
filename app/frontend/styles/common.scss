@@ -1,20 +1,12 @@
-@import "~materialize-css/sass/materialize";
+@import "~bootstrap/scss/bootstrap";
 
-.primary-color {
-  background-color: $primary-color;
-}
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 
-.secondary-color {
-  background-color: $secondary-color;
-}
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+@import "~@fortawesome/fontawesome-free/scss/regular.scss";
 
-.primary-color-text {
-  color: $primary-color;
-}
-
-.secondary-color-text {
-  color: $secondary-color;
-}
+$progress-bar-color: $cyan;
 
 .hidden {
   display: none;

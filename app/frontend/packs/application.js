@@ -10,17 +10,15 @@
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
 
-import "materialize-css";
-import "../styles/application";
-
 require("@rails/ujs").start();
 require("@rails/activestorage").start();
 
-document.addEventListener("DOMContentLoaded", function() {
-  const elems = document.querySelectorAll(".dropdown-trigger");
-  const instances = M.Dropdown.init(elems, {
-    alignment: "right",
-    constrainWidth: false,
-    coverTrigger: false
-  });
-});
+import $ from "jquery";
+import "bootstrap";
+import bsCustomFileInput from "bs-custom-file-input";
+
+import "../styles/application";
+
+$(document).ready(function () {
+  bsCustomFileInput.init()
+})
