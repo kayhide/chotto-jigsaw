@@ -86,4 +86,5 @@ let findPiece = (id: int, puzzle: t): piece => puzzle.pieces[id];
 let getAdjacentPieces = (piece: piece, puzzle: t): list(piece) =>
   piece.neighborIds
   |> IntSet.elements
-  |> List.map(p => puzzle |> findPiece(p) |> Piece.entity);
+  |> List.map(p => puzzle |> findPiece(p) |> Piece.entity)
+  |> List.filter((p: piece) => p.id !== piece.id);
