@@ -24,6 +24,6 @@
   },
   "scripts": {
     "postinstall": "$(yarn bin)/bsb -make-world",
-    "lint": "$(yarn bin)/stylelint 'app/javascript/**/*.scss'"
+    "lint": "$(yarn bin)/stylelint 'app/frontend/**/*.scss'"
   }
 }

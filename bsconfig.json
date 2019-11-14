@@ -2,7 +2,7 @@
   "name": "chotto-jigsaw",
   "version": "0.1.0",
   "sources": {
-    "dir" : "app/javascript",
+    "dir" : "app/frontend",
     "subdirs" : true
   },
   "package-specs": {
