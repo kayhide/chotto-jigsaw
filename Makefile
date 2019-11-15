@@ -4,7 +4,7 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	@$$($(MAKE) --no-print-directory envs) && hivemind
+	@$$($(MAKE) --no-print-directory envs) && hivemind Procfile.dev
 .PHONY: dev
 
 guard:
