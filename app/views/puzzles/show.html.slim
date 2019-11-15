@@ -1,32 +1,33 @@
-h2
-  = @puzzle.difficulty.to_s.camelize
+h2 = @puzzle.difficulty.to_s.camelize
 
 - width, height = @puzzle.picture.metadata.values_at("width", "height")
 - aspect_ratio = width.to_f / height.to_f
 
-.text-sm = @puzzle.picture.filename
-.text-sm
-  span = @puzzle.pieces_count
-  span< pcs
-  span<> size:
-  span = width
-  span<> x
-  span = height
-  span<> aspect ratio:
-  span = "%0.2f" % aspect_ratio
+.row.justify-content-md-center
+  .col-md-auto
+    .text-sm = @puzzle.picture.filename
+    .text-sm
+      span = @puzzle.pieces_count
+      span< pcs
+      span<> size:
+      span = width
+      span<> x
+      span = height
+      span<> aspect ratio:
+      span = "%0.2f" % aspect_ratio
 
-- if 1.33 < aspect_ratio
-  - display_width = 800
-  - display_scale = display_width.to_f / width.to_f
-  - display_height = height * display_scale
-- else
-  - display_height = 600
-  - display_scale = display_height.to_f / height.to_f
-  - display_width = width * display_scale
+    - if 1.33 < aspect_ratio
+      - display_width = 800
+      - display_scale = display_width.to_f / width.to_f
+      - display_height = height * display_scale
+    - else
+      - display_height = 600
+      - display_scale = display_height.to_f / height.to_f
+      - display_width = width * display_scale
 
-.puzzle-show.center
-  = image_tag @puzzle.picture.variant(resize_to_fit: [display_width, display_height])
-  canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
+    .puzzle-show.mx-auto
+      = image_tag @puzzle.picture.variant(resize_to_fit: [display_width, display_height])
+      canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
 
 - gen = Random.new @puzzle.id
 
@@ -57,11 +58,8 @@ javascript:
 
 h2 Games
 
-.row
-  .col.s12.m8
-    ul.collection
-      - @puzzle.games.order(id: :desc).each do |game|
-        = link_to game, class: %w(collection-item waves-effect waves-light) do
-          =l game.created_at
-          br
-          = '.' * (game.commands.count / 10)
+.list-group
+  - @puzzle.games.order(id: :desc).each do |game|
+    = link_to game, class: %w(list-group-item list-group-item-action) do
+      .text-sm =l game.created_at
+      .text-info = '.' * (game.commands.count / 10)

@@ -5,24 +5,24 @@
   canvas#active-canvas.hidden
 
   #game-progress.progress class=(@standalone ? "offline" : "online")
-    #progressbar.determinate style="width:0%"
+    #progressbar.progress-bar style="width:0%"
 
   #info.white-text
     p.fps
     p = @puzzle.pieces_count
 
 #back-button
-  = link_to :root, class: %w(btn-floating waves-effect waves-light) do
-    i.material-icons chevron_left
+  = link_to :root, class: %w(btn btn-outline-info btn-sm rounded-circle) do
+    i.fas.fa-fw.fa-chevron-left
 
-button#log-button.btn-floating.btn-flat.btn-s
-  i.material-icons arrow_drop_up
+a#log-button.btn.rounded-circle
+  i.fas.fa-caret-up
 
 #log.white-text.hidden
 
 #buttons
-  #fullscreen.btn-floating.waves-effect.waves-light.hidden
-    i.material-icons fullscreen
+  #fullscreen.btn.btn-outline-info.btn-sm.rounded-circle.hidden
+    i.fas.fa-expand.fa-fw
 
 #sound-list
   audio.merge src="/sounds/merge.mp3"

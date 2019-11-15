@@ -1,22 +1,25 @@
-h1 Listing users
-.card.m-3
-  .card-body
-    table.table
+h2.float-left Users
+
+= link_to 'New', new_user_path, class: %w(btn btn-success float-right)
+
+.clearfix
+
+.card.mt-1.mb-3
+  table.table
       thead
         tr
           th Username
           th Email
-          th
-          th
-          th
+          th style="width: 15%"
+          th style="width: 15%"
+          th style="width: 15%"
 
       tbody
         - @users.each do |user|
           tr
             td = user.username
             td = user.email
-            td = link_to 'Show', user, class: %w(btn btn-outline-primary btn-sm)
-            td = link_to 'Edit', [:edit, user], class: %w(btn btn-outline btn-sm)
-            td = link_to 'Destroy', user, data: { confirm: 'Are you sure?' }, method: :delete, class: %w(btn btn-outline-danger btn-sm)
+            td = link_to 'Show', user, class: %w(btn btn-outline-primary btn-block btn-sm)
+            td = link_to 'Edit', [:edit, user], class: %w(btn btn-outline-secondary btn-block btn-sm)
+            td = link_to 'Destroy', user, data: { confirm: 'Are you sure?' }, method: :delete, class: %w(btn btn-outline-danger btn-block btn-sm)
 
-    = link_to 'New User', new_user_path, class: %w(btn btn-outline-success)

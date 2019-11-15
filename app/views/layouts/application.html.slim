@@ -11,12 +11,15 @@ html
     = javascript_pack_tag 'application'
 
   body
-    nav
-      .nav-wrapper
-        a.brand-logo.left href="/" Chotto Jigsaw
+    nav.navbar.navbar-expand-md.fixed-top
+      a.navbar-brand href="/" Chotto Jigsaw
+      button.navbar-toggler.collapsed type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
+        span.navbar-toggler-icon
+      div.navbar-collapse.collapse id="navbarCollapse" style=""
         - if current_user
           == render 'layouts/menu'
         - else
           == render 'layouts/public_menu'
-    .container
+    .container.rounded
       == yield
+

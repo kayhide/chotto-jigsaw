@@ -1,28 +1,22 @@
-.row
-  .col.s12.m8.offset-m2
+.row.justify-content-center
+  .col-md-8
     .card
       = form_for @puzzle do |f|
-        .card-content
-          span.card-title New puzzle
-          .file-field.input-field
-            .btn
-              span Picture
-              = f.file_field :picture
-            .file-path-wrapper
-              input.file-path.validate type="text"
+        .card-body
+          .card-title New puzzle
+          .custom-file
+            = f.file_field :picture, class: %w(custom-file-input)
+            = f.label :picture, class: %w(custom-file-label)
 
-          .row
-            .col.s2
-              label Difficulty
-            - %w(些 易 並).zip(1 .. 3).each do |label, n|
-              label.col.s2
-                = f.radio_button :difficulty_level, n, class: %w(with-gap)
-                span = label
-            - %w(難 極).zip(4 .. 5).each do |label, n|
-              label.col.s2
-                = f.radio_button :difficulty_level, n, class: %w(with-gap), disabled: true
-                span = label
-        .card-action
-          = f.submit nil, class: %w(btn btn-primary)
+          .form-group.mt-3
+            = f.label :difficulty_level
+            .form-row
+              - %w(些 易 並 難 極).zip(1 .. 5, [false, false, false, true, true]).each do |label, n, disabled|
+                .col
+                  .custom-control.custom-radio.custom-control-inline
+                    = f.radio_button :difficulty_level, n, class: %w(custom-control-input), disabled: disabled
+                    = f.label :difficulty_level, class: %w(custom-control-label) do
+                      = label
+          = f.submit nil, class: %w(btn btn-success)
 
     = link_to 'Back', puzzles_path

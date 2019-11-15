@@ -1,12 +1,11 @@
-.row
-  .col.s12.m6.offset-m3
+.row.justify-content-center
+  .col-md-8
     .card
       = form_for @login, url: [:login] do |f|
-        .card-content
-          span.card-title Login
-          .input-field
-            = f.text_field :email, class: (@login.errors.include?(:email) ? ["invalid"] : [])
+        .card-body
+          .form-group
             = f.label :email
+            = f.email_field :email, class: (%w(form-control) + (@login.errors.include?(:email) ? %w(is-invalid) : %w()))
             - @login.errors.full_messages_for(:email).each do |msg|
-              span.helper-text data-error=msg
-          = f.submit "Login", class: %w(btn btn-default btn-raised)
+              .invalid-feedback = msg
+          = f.submit "Login", class: %w(btn btn-primary)

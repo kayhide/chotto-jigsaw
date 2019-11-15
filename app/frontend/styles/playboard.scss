@@ -1,5 +1,9 @@
 @import "./common";
 
+body {
+  color: $gray-600;
+}
+
 #playboard {
   position: absolute;
   left: 0;
@@ -35,29 +39,31 @@
 
 #back-button {
   position: absolute;
-  left: 1em;
-  top: 1em;
+  left: 1rem;
+  top: 1rem;
 }
 
 #buttons {
   position: absolute;
-  right: 1em;
-  bottom: 1em;
+  right: 1rem;
+  bottom: 1rem;
 }
 
 #game-progress {
   position: absolute;
-  left: 1em;
-  right: 5em;
-  bottom: 0;
+  left: 1rem;
+  right: 5rem;
+  bottom: 1rem;
   width: auto;
+  height: 8px;
+  opacity: 0.7;
 
   @extend .no-interaction;
 
   &.online {
     background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
 
-    .determinate {
+    .progress-bar {
       background-color: adjust-hue($progress-bar-color, -30deg);
     }
   }
@@ -65,7 +71,7 @@
   &.offline {
     background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
 
-    .determinate {
+    .progress-bar {
       background-color: adjust-hue($progress-bar-color, 30deg);
     }
   }
@@ -73,8 +79,8 @@
 
 #info {
   position: absolute;
-  left: 1em;
-  bottom: 1.5em;
+  left: 1rem;
+  bottom: 1.5rem;
 
   @extend .no-interaction;
 
@@ -85,7 +91,7 @@
 
 #log-button {
   position: absolute;
-  bottom: 4em;
+  bottom: 4rem;
   transition: transform 0.2s;
 
   &:focus,
@@ -96,13 +102,16 @@
 
 #log {
   position: absolute;
-  bottom: 8em;
+  bottom: 6rem;
   max-width: 100%;
-  padding: 1em;
+  padding: 1rem;
+  color: $light;
   background-color: rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
   border: 1px lighten(rgba(0, 0, 0, 0.5), 80%) solid;
+  overflow-y: auto;
+  font-size: 9pt;
 
+  @extend .text-monospace;
   @extend .no-interaction;
 
   p {

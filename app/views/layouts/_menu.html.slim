@@ -1,14 +1,11 @@
-ul#user-dropdown.dropdown-content
-  li
-    span = current_user.email
-  li.divider tabindex="-1"
-  li = link_to 'Logout', [:login], method: :delete
-
-ul.right
-  li
-    a.dropdown-trigger href="#" data-target="user-dropdown"
+ul.navbar-nav.ml-auto
+  li.nav-item = link_to 'Standalone', [:public, :puzzles], class: %w(nav-link)
+  li.nav-item = link_to 'Puzzles', [:puzzles], class: %w(nav-link)
+  li.nav-item.dropdown
+    a#navbarDropdown.nav-link.dropdown-toggle href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
       = current_user.username
-      i.material-icons.right arrow_drop_down
-ul.right
-  li = link_to 'Users', [:users]
-  li = link_to 'Puzzles', [:puzzles]
+    .dropdown-menu.dropdown-menu-right aria-labelledby="navbarDropdown"
+      .dropdown-header = current_user.email
+      = link_to 'Users', [:users], class: %w(dropdown-item)
+      .dropdown-divider
+      = link_to 'Logout', [:login], method: :delete, class: %w(dropdown-item)

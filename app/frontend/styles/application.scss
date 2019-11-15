@@ -5,6 +5,8 @@ html {
 }
 
 body {
+  padding-top: 4rem;
+  padding-bottom: 3rem;
   min-height: 100%;
   background-image: url("/images/private-holiday-beach.jpg");
   background-size: cover;
@@ -14,18 +16,23 @@ body {
 }
 
 nav {
-  background-color: transparent;
+  @extend .navbar-light;
+  @extend .bg-light;
+
+  opacity: 0.7;
 }
 
-@media #{$medium-and-up} {
+.container {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+@include media-breakpoint-up(md) {
   .container {
     background-color: rgba(255, 255, 255, 0.5);
-    margin-top: 2em;
-    padding-top: 0.5em;
-    padding-left: 2em;
-    padding-right: 2em;
-    padding-bottom: 2em;
-    border-radius: 1em;
+    margin-top: 1rem;
+    padding-top: 1rem;
   }
 }
 
@@ -47,18 +54,17 @@ nav {
 }
 
 .card.puzzle {
-  .card-content {
-    height: 5em;
-  }
-
   .progress {
     margin: 0;
     padding: 0;
+    height: 5px;
+
+    @extend .rounded-0;
 
     &.online {
       background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
 
-      .determinate {
+      .progress-bar {
         background-color: adjust-hue($progress-bar-color, -30deg);
       }
     }
@@ -66,7 +72,7 @@ nav {
     &.offline {
       background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
 
-      .determinate {
+      .progress-bar {
         background-color: adjust-hue($progress-bar-color, 30deg);
       }
     }
