@@ -83,8 +83,10 @@ let setupUi = (puzzle: puzzle): unit => {
 
   if (Screen.isFullscreenAvailable()) {
     jquery("#fullscreen")
-      ->removeClass("hidden")
-      ->on("click", () => Screen.toggleFullScreen(jquery("#playboard")->get()[0]));
+    ->removeClass("hidden")
+    ->on("click", () =>
+        Screen.toggleFullScreen(jquery("#playboard")->get()[0])
+      );
   };
 
   CommandManager.onCommit(cmds =>
@@ -116,8 +118,13 @@ let setupSound = (): unit => {
 };
 
 let connectGameChannel = (puzzle: puzzle, game_id: int): unit => {
-  let channel = GameChannel.subscribe(puzzle, game_id);
-  CommandManager.onCommit(channel->GameChannel.commit);
+  GameChannel.subscribe(puzzle, game_id);
+  CommandManager.onCommit(GameChannel.commit);
+  CommandManager.onCommit(cmds =>
+    if (!cmds.extrinsic && cmds.commands |> Js.Array.some(Command.isMerge)) {
+      GameChannel.report_progress(puzzle |> Puzzle.progress);
+    }
+  );
 };
 
 let play = (): unit => {

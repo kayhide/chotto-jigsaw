@@ -33,10 +33,14 @@ class GameChannel < ApplicationCable::Channel
     )
   end
 
+  def report_progress data
+    game.update progress: data["progress"]
+  end
+
   private
 
   def game
-    Game.find(params[:game_id])
+    @game ||= Game.find(params[:game_id])
   end
 
   def generate_connection_token

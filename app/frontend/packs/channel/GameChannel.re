@@ -19,6 +19,7 @@ module X = {
     .
     "received": data => unit,
     "commit": CommandGroup.t => unit,
+    "report_progress": float => unit,
   };
 
   type subscription = {
@@ -31,8 +32,7 @@ module X = {
 
 include ActionCable.Make(X);
 
-[@bs.send] external perform: (subscription, string, 'a) => unit = "perform";
-[@bs.send] external commit: (subscription, CommandGroup.t) => unit = "commit";
+[@bs.send] external _perform: (subscription, string, 'a) => unit = "perform";
 
 let subscription: ref(option(subscription)) = ref(None);
 
@@ -42,7 +42,7 @@ let _received = (puzzle: Puzzle.t, data: X.data): unit => {
   switch (data##action) {
   | "init" =>
     this##token #= data##token;
-    this->perform("request_update", Js.Obj.empty());
+    this->_perform("request_update", Js.Obj.empty());
     ();
   | _ => ()
   };
@@ -60,22 +60,32 @@ let _received = (puzzle: Puzzle.t, data: X.data): unit => {
   };
 };
 
-let _commit = (cmds: CommandGroup.t): unit => {
+let commit = (cmds: CommandGroup.t): unit => {
   let this = subscription^ |> Maybe.fromJust;
   if (cmds |> CommandGroup.intrinsic) {
     this
-    ->perform(
+    ->_perform(
         "commit",
         {"commands": cmds.commands |> Array.map(Bridge.encode)},
       );
   };
 };
 
-let subscribe = (puzzle: Puzzle.t, game_id: int): subscription => {
+let report_progress = (x: float): unit => {
+  let this = subscription^ |> Maybe.fromJust;
+  this->_perform("report_progress", {"progress": x});
+};
+
+let subscribe = (puzzle: Puzzle.t, game_id: int): unit => {
   let identifier = {"channel": "GameChannel", "game_id": game_id};
-  let funcs = {"received": _received(puzzle), "commit": _commit};
+  let funcs = {
+    "received": _received(puzzle),
+    "commit": commit,
+    "report_progress": report_progress,
+  };
   let consumer = createConsumer();
   let sub = consumer##subscriptions->create(identifier, funcs);
   subscription := Some(sub);
-  sub;
 };
+
+let isSubscribing = (): bool => subscription^ |> Maybe.isSome;
