@@ -43,6 +43,13 @@ body {
   top: 1rem;
 }
 
+.btn-circle-sm {
+  @extend .btn-sm;
+  @extend .rounded-circle;
+  width: $font-size-sm * 2.3;
+  height: $font-size-sm * 2.3;
+}
+
 #buttons {
   position: absolute;
   right: 1rem;
@@ -91,7 +98,8 @@ body {
 
 #log-button {
   position: absolute;
-  bottom: 4rem;
+  left: 1rem;
+  bottom: 5rem;
   transition: transform 0.2s;
 
   &:focus,

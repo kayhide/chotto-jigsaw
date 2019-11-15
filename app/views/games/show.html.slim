@@ -12,17 +12,17 @@
     p = @puzzle.pieces_count
 
 #back-button
-  = link_to :root, class: %w(btn btn-outline-info btn-sm rounded-circle) do
-    i.fas.fa-fw.fa-chevron-left
+  = link_to :root, class: %w(btn btn-circle-sm btn-dark) do
+    i.fas.fa-chevron-left
 
-a#log-button.btn.rounded-circle
+a#log-button href="#"
   i.fas.fa-caret-up
 
 #log.white-text.hidden
 
 #buttons
-  #fullscreen.btn.btn-outline-info.btn-sm.rounded-circle.hidden
-    i.fas.fa-expand.fa-fw
+  button#fullscreen.btn.btn-circle-sm.btn-info.hidden
+    i.fas.fa-expand
 
 #sound-list
   audio.merge src="/sounds/merge.mp3"
