@@ -9,8 +9,4 @@ class Game < ApplicationRecord
   def ready?
     shuffled_at?
   end
-
-  def progress
-    merge_commands.count.to_f / (puzzle.pieces_count - 1)
-  end
 end
