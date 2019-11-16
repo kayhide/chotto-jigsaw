@@ -1,0 +1,18 @@
+.card
+  = form_for puzzle do |f|
+    .card-body
+      - unless picture
+        .custom-file
+          = f.file_field :picture, class: %w(custom-file-input)
+          = f.label :picture, class: %w(custom-file-label)
+
+      .form-group.mt-3
+        = f.label :difficulty_level
+        .form-row
+          - Puzzle::DIFFICULTIES.take(5).each.with_index do |label, n|
+            .col
+              .custom-control.custom-radio.custom-control-inline
+                = f.radio_button :difficulty_level, n, class: %w(custom-control-input), disabled: 2 < n
+                = f.label "difficulty_level_#{n}", class: %w(custom-control-label) do
+                  = label
+      = f.submit nil, class: %w(btn btn-success)
