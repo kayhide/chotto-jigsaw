@@ -1,0 +1,37 @@
+h2 Picture
+
+.row
+  .col-md-5.pb-1
+    = image_tag @picture.variant(resize_to_limit: [200, 150])
+  .col-md-7.pb-1
+    .row
+      - Puzzle::DIFFICULTIES.take(5).each.with_index do |difficulty, level|
+        .col
+          - puzzle = Puzzle.new(difficulty_level: level + 1)
+          = form_for puzzle, url: [@picture, :puzzles], remote: true do |f|
+            = f.hidden_field :difficulty_level
+            = f.submit t(difficulty, scope: :difficulties), class: %w(btn btn-success btn-block)
+
+
+.card.mt-1.mb-3
+  table.table
+    thead
+      tr
+        th Pieces Count
+        th Difficulty
+        th Games Count
+        th
+        th
+
+    tbody
+      - @puzzles.each do |puzzle|
+        tr
+          td = puzzle.pieces_count
+          td = puzzle.difficulty
+          td = puzzle.games.count
+          td
+            = link_to puzzle, class: %w(text-secondary) do
+              i.fas.fa-list.fa-fw
+          td
+            = link_to [puzzle, :games], method: :post, class: %w(text-warning) do
+              i.fas.fa-play.fa-fw

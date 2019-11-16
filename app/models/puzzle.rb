@@ -19,6 +19,20 @@ class Puzzle < ApplicationRecord
     lunatic: nil
   }
 
+  scope :with_picture_of, -> (blob) {
+    where(
+      id:
+        ActiveStorage::Attachment
+        .where(blob_id: blob.id, record_type: "Puzzle")
+        .select(:record_id)
+    )
+  }
+
+  def initialize(*args)
+    @difficulty_level = 2
+    super
+  end
+
   def ready?
     picture.attached? && picture.analyzed? && content.attached?
   end

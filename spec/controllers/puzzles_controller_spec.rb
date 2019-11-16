@@ -32,7 +32,8 @@ RSpec.describe PuzzlesController, type: :controller do
   end
 
   describe "POST #create" do
-    let(:picture) { fixture_file_upload fixture_path.join('pictures/mountain.jpg') }
+    let(:file) { fixture_path.join('pictures/mountain.jpg') }
+    let(:picture) { fixture_file_upload file }
 
     context "with valid params" do
       it "creates a new Puzzle" do
@@ -50,6 +51,23 @@ RSpec.describe PuzzlesController, type: :controller do
       it "redirects to the created puzzle" do
         post :create, params: { puzzle: valid_attributes }
         expect(response).to redirect_to([:puzzles])
+      end
+    end
+
+    context "with picture" do
+      let!(:blob) { create(:puzzle, :with_picture, user: current_user).picture_blob }
+
+      it "creates a new Puzzle" do
+        expect {
+          post :create, params: { picture_id: blob.id, puzzle: { difficulty_level: 4 } }
+        }.to change(Puzzle, :count).by(1)
+      end
+
+      it "enqueues SetupJob" do
+        assert_enqueued_with job: SetupJob do
+          post :create, params: { picture_id: blob.id, puzzle: { difficulty_level: 4 } }
+        end
+
       end
     end
   end

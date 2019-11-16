@@ -1,6 +1,7 @@
 class PuzzlesController < ApplicationController
   before_action :authenticate!
   before_action :set_puzzle, only: [:show, :edit, :update, :destroy]
+  before_action :set_picture, only: [:create]
 
   def index
     @puzzles = Puzzle.all
@@ -18,6 +19,9 @@ class PuzzlesController < ApplicationController
     @puzzle = Puzzle.new(puzzle_params)
     @puzzle.user = current_user
 
+    if @picture
+      @puzzle.picture = @picture
+    end
     if @puzzle.picture.attached? && @puzzle.save
       SetupJob.perform_later @puzzle, @puzzle.difficulty_level
       redirect_to [:puzzles], notice: 'Puzzle was successfully created.'
@@ -35,6 +39,10 @@ class PuzzlesController < ApplicationController
 
   def set_puzzle
     @puzzle = Puzzle.find(params[:id])
+  end
+
+  def set_picture
+    @picture = params[:picture_id] && Picture.find(params[:picture_id])
   end
 
   def puzzle_params

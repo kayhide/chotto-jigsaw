@@ -1,0 +1,8 @@
+h2 Pictures
+
+.row
+  - @pictures.each do |picture|
+    .col-md-4.col-lg-2.py-3
+      .card.picture.hoverable id=dom_id(picture)
+        = link_to [:picture, {id: picture.id}], class: %w() do
+          = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)

@@ -9,10 +9,11 @@
       .form-group.mt-3
         = f.label :difficulty_level
         .form-row
-          - Puzzle::DIFFICULTIES.take(5).each.with_index do |label, n|
+          - Puzzle::DIFFICULTIES.take(5).each.with_index do |difficulty, n|
             .col
               .custom-control.custom-radio.custom-control-inline
-                = f.radio_button :difficulty_level, n, class: %w(custom-control-input), disabled: 2 < n
-                = f.label "difficulty_level_#{n}", class: %w(custom-control-label) do
-                  = label
+                - level = n + 1
+                = f.radio_button :difficulty_level, level, class: %w(custom-control-input), disabled: 2 < n
+                = f.label "difficulty_level_#{level}", class: %w(custom-control-label) do
+                  =t difficulty, scope: :difficulties
       = f.submit nil, class: %w(btn btn-success)
