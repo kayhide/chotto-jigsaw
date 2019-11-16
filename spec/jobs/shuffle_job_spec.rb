@@ -23,8 +23,8 @@ RSpec.describe ShuffleJob, type: :job do
 
       expect(puzzle.width).to eq 300
       expect(puzzle.height).to eq 200
-      expect(positions.map { |p| p[0] }).to all be_between(0, 600)
-      expect(positions.map { |p| p[1] }).to all be_between(0, 600)
+      expect(positions.map { |p| p[0] }).to all be_between(0, 600 + 1)
+      expect(positions.map { |p| p[1] }).to all be_between(0, 600 + 1)
     end
   end
 end
