@@ -5,7 +5,7 @@
         .card-body
           .form-group
             = f.label :email
-            = f.email_field :email, class: (%w(form-control) + (@login.errors.include?(:email) ? %w(is-invalid) : %w()))
+            = f.email_field :email, class: (%w(form-control) + (@login.errors.include?(:email) ? %w(is-invalid) : %w())), autofocus: true
             - @login.errors.full_messages_for(:email).each do |msg|
               .invalid-feedback = msg
           = f.submit "Login", class: %w(btn btn-primary)
