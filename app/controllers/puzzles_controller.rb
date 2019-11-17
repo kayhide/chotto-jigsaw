@@ -24,9 +24,15 @@ class PuzzlesController < ApplicationController
     end
     if @puzzle.picture.attached? && @puzzle.save
       SetupJob.perform_later @puzzle, @puzzle.difficulty_level
-      redirect_to [:puzzles], notice: 'Puzzle was successfully created.'
+      respond_to do |format|
+        format.js
+        format.html { redirect_to [:puzzles], notice: 'Puzzle was successfully created.' }
+      end
     else
-      render :new
+      respond_to do |format|
+        format.js
+        format.html { render :new }
+      end
     end
   end
 

@@ -1,0 +1,15 @@
+- if puzzle.ready?
+  tr id=dom_id(puzzle)
+    td = puzzle.difficulty
+    td.text-right = puzzle.pieces_count
+    td.text-right = puzzle.games.count
+    td
+      = link_to puzzle, class: %w(text-secondary ml-3) do
+        i.fas.fa-list.fa-fw
+      = link_to [puzzle, :games], method: :post, class: %w(text-secondary ml-3) do
+        i.fas.fa-play.fa-fw
+- else
+  tr id=dom_id(puzzle)
+    td colspan="5"
+      .progress
+        .progress-bar.progress-bar-striped.progress-bar-animated.bg-info style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"

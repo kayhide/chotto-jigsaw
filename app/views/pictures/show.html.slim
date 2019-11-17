@@ -13,25 +13,18 @@ h2 Picture
             = f.submit t(difficulty, scope: :difficulties), class: %w(btn btn-success btn-block)
 
 
+.text-right.puzzles-count
+  = @puzzles.count
+
 .card.mt-1.mb-3
-  table.table
+  table.table.puzzle-list
     thead
       tr
-        th Pieces Count
         th Difficulty
-        th Games Count
-        th
+        th.text-right Pieces Count
+        th.text-right Games Count
         th
 
     tbody
       - @puzzles.each do |puzzle|
-        tr
-          td = puzzle.pieces_count
-          td = puzzle.difficulty
-          td = puzzle.games.count
-          td
-            = link_to puzzle, class: %w(text-secondary) do
-              i.fas.fa-list.fa-fw
-          td
-            = link_to [puzzle, :games], method: :post, class: %w(text-warning) do
-              i.fas.fa-play.fa-fw
+        = render "puzzles/row", puzzle: puzzle

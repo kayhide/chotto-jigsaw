@@ -1,0 +1,11 @@
+(() => {
+  document
+    .querySelector(".puzzle-list tbody")
+    .insertAdjacentHTML(
+      "afterbegin",
+      '<%= render "puzzles/row", puzzle: @puzzle %>'
+    );
+
+  const el = document.querySelector(".puzzles-count")
+  el.innerText = parseInt(el.innerText) + 1;
+})();

@@ -10,6 +10,13 @@ class PicturesController < ApplicationController
     @puzzles = Puzzle.with_picture_of(@picture).order(id: :desc)
   end
 
+  def create
+    current_user.pictures.attach params.require(:picture).require(:file)
+    redirect_to [:pictures], notice: 'Picture was successfully uploaded.'
+  rescue ActionController::ParameterMissing
+    redirect_to [:pictures], alert: 'Failed to upload.'
+  end
+
   private
 
   def set_picture

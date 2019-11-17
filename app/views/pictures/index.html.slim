@@ -1,8 +1,17 @@
 h2 Pictures
 
 .row
+  .col-md-4.col-lg-2.py-3.d-flex.align-items-stretch
+    .card
+      .card-body.mt-4
+        = form_for Picture.new do |f|
+          .custom-file
+            = f.file_field :file, class: %w(custom-file-input)
+            = f.label :file, class: %w(custom-file-label)
+          .mt-4
+            = f.button type: :submit, class: %w(btn btn-success btn-block) do
+              i.fas.fa-upload
   - @pictures.each do |picture|
     .col-md-4.col-lg-2.py-3
-      .card.picture.hoverable id=dom_id(picture)
-        = link_to [:picture, {id: picture.id}], class: %w() do
-          = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
+      = link_to [:picture, {id: picture.id}], class: %w() do
+        = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid rounded)
