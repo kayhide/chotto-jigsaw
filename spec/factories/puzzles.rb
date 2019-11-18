@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :puzzle do
     user
+    difficulty { "trivial" }
     linear_measure { 1.5 }
 
     transient do
@@ -30,7 +31,7 @@ FactoryBot.define do
       end
 
       if options.ready?
-        SetupJob.perform_now(puzzle, 1)
+        SetupJob.perform_now(puzzle)
       end
     end
   end

@@ -4,7 +4,6 @@ class Puzzle < ApplicationRecord
   has_one_attached :picture
   has_one_attached :content
 
-  attr_accessor :difficulty_level
   attr_reader :pieces
 
   DIFFICULTIES = %w(trivial easy normal hard extreme lunatic)
@@ -17,7 +16,7 @@ class Puzzle < ApplicationRecord
     hard: 500,
     extreme: 1000,
     lunatic: nil
-  }
+  }.with_indifferent_access
 
   scope :with_picture_of, -> (blob) {
     where(
@@ -27,11 +26,6 @@ class Puzzle < ApplicationRecord
         .select(:record_id)
     )
   }
-
-  def initialize(*args)
-    @difficulty_level = 2
-    super
-  end
 
   def ready?
     picture.attached? && picture.analyzed? && content.attached?
@@ -47,5 +41,9 @@ class Puzzle < ApplicationRecord
 
   def height
     picture.metadata["height"]
+  end
+
+  def suggested_count
+    Puzzle::DIFFICULTY_THRESHOLDS[difficulty]
   end
 end

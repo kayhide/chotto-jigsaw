@@ -7,13 +7,12 @@
           = f.label :picture, class: %w(custom-file-label)
 
       .form-group.mt-3
-        = f.label :difficulty_level
+        = f.label :difficulty
         .form-row
-          - Puzzle::DIFFICULTIES.take(5).each.with_index do |difficulty, n|
+          - Puzzle::DIFFICULTIES.take(5).each do |difficulty|
             .col
               .custom-control.custom-radio.custom-control-inline
-                - level = n + 1
-                = f.radio_button :difficulty_level, level, class: %w(custom-control-input), disabled: 2 < n
-                = f.label "difficulty_level_#{level}", class: %w(custom-control-label) do
+                = f.radio_button :difficulty, difficulty, class: %w(custom-control-input), disabled: 2 < n
+                = f.label "difficulty_#{difficulty}", class: %w(custom-control-label) do
                   =t difficulty, scope: :difficulties
       = f.submit nil, class: %w(btn btn-success)

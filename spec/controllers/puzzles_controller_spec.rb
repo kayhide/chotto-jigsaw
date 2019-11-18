@@ -6,7 +6,7 @@ RSpec.describe PuzzlesController, type: :controller do
   let(:valid_attributes) {
     {
       picture: picture,
-      difficulty_level: 4
+      difficulty: "normal"
     }
   }
 
@@ -59,13 +59,13 @@ RSpec.describe PuzzlesController, type: :controller do
 
       it "creates a new Puzzle" do
         expect {
-          post :create, params: { picture_id: blob.id, puzzle: { difficulty_level: 4 } }
+          post :create, params: { picture_id: blob.id, puzzle: { difficulty: "normal" } }
         }.to change(Puzzle, :count).by(1)
       end
 
       it "enqueues SetupJob" do
         assert_enqueued_with job: SetupJob do
-          post :create, params: { picture_id: blob.id, puzzle: { difficulty_level: 4 } }
+          post :create, params: { picture_id: blob.id, puzzle: { difficulty: "normal" } }
         end
 
       end

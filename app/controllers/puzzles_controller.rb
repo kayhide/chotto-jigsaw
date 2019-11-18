@@ -12,7 +12,7 @@ class PuzzlesController < ApplicationController
   end
 
   def new
-    @puzzle = Puzzle.new difficulty_level: 2
+    @puzzle = Puzzle.new
   end
 
   def create
@@ -23,7 +23,7 @@ class PuzzlesController < ApplicationController
       @puzzle.picture = @picture
     end
     if @puzzle.picture.attached? && @puzzle.save
-      SetupJob.perform_later @puzzle, @puzzle.difficulty_level
+      SetupJob.perform_later @puzzle
       respond_to do |format|
         format.js
         format.html { redirect_to [:puzzles], notice: 'Puzzle was successfully created.' }
@@ -52,6 +52,6 @@ class PuzzlesController < ApplicationController
   end
 
   def puzzle_params
-    params.require(:puzzle).permit(:picture, :difficulty_level)
+    params.require(:puzzle).permit(:picture, :difficulty)
   end
 end
