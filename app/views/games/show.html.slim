@@ -4,7 +4,7 @@
   canvas#field.hidden
   canvas#active-canvas.hidden
 
-  #game-progress.progress class=(@standalone ? "offline" : "online")
+  #game-progress.progress class=([@puzzle.difficulty] + (@standalone ? %w(offline) : []))
     #progressbar.progress-bar style="width:0%"
 
   #info.white-text

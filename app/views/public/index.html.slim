@@ -5,7 +5,7 @@
       .card.puzzle.hoverable id=dom_id(game)
         = link_to game, class: %w(waves-effect waves-light) do
           = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
-        .progress.online
+        .progress class=puzzle.difficulty
           .progress-bar style="width:#{game.progress * 100}%"
         .card-body
           = puzzle.pieces_count

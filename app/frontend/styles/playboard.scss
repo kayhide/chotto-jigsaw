@@ -66,22 +66,6 @@ body {
   opacity: 0.7;
 
   @extend .no-interaction;
-
-  &.online {
-    background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
-
-    .progress-bar {
-      background-color: adjust-hue($progress-bar-color, -30deg);
-    }
-  }
-
-  &.offline {
-    background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
-
-    .progress-bar {
-      background-color: adjust-hue($progress-bar-color, 30deg);
-    }
-  }
 }
 
 #info {

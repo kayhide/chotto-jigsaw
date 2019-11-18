@@ -61,19 +61,59 @@ nav {
 
     @extend .rounded-0;
 
-    &.online {
-      background-color: adjust-hue(lighten($progress-bar-color, 40%), -30deg);
+    &.trivial {
+      background-color: lighten($color-trivial, 40%);
 
       .progress-bar {
-        background-color: adjust-hue($progress-bar-color, -30deg);
+        background-color: $color-trivial;
+      }
+    }
+
+    &.easy {
+      background-color: lighten($color-easy, 40%);
+
+      .progress-bar {
+        background-color: $color-easy;
+      }
+    }
+
+    &.normal {
+      background-color: lighten($color-normal, 30%);
+
+      .progress-bar {
+        background-color: $color-normal;
+      }
+    }
+
+    &.hard {
+      background-color: lighten($color-hard, 25%);
+
+      .progress-bar {
+        background-color: $color-hard;
+      }
+    }
+
+    &.extreme {
+      background-color: lighten($color-extreme, 30%);
+
+      .progress-bar {
+        background-color: $color-extreme;
+      }
+    }
+
+    &.lunatic {
+      background-color: lighten($color-lunatic, 40%);
+
+      .progress-bar {
+        background-color: $color-lunatic;
       }
     }
 
     &.offline {
-      background-color: adjust-hue(lighten($progress-bar-color, 40%), 30deg);
-
       .progress-bar {
-        background-color: adjust-hue($progress-bar-color, 30deg);
+        width: 100%;
+        @extend .progress-bar-striped;
+        @extend .progress-bar-animated;
       }
     }
   }
