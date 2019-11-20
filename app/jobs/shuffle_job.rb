@@ -27,7 +27,9 @@ class ShuffleJob < ApplicationJob
       ].tap(&TransformCommand.method(:apply))
     end.inject(:+)
 
-    Command.create!(commands.map(&:attributes))
+    Command.transaction do
+      commands.each(&:save!)
+    end
 
     game.touch :shuffled_at
   end
