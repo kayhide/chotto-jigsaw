@@ -1,5 +1,5 @@
 - longer = [@puzzle.width, @puzzle.height].max
-- view = { width: longer * 2, height: longer * 2 }
+- view = { x: @puzzle.width * 0.5 - longer, y: @puzzle.height * 0.5 - longer, width: longer * 2, height: longer * 2 }
 #playboard.green data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=@standalone
   canvas#field.hidden
   canvas#active-canvas.hidden

@@ -8,8 +8,9 @@ class ShuffleJob < ApplicationJob
     puzzle.load_content!
 
     s = [puzzle.width, puzzle.height].max * 2
-    puzzle.pieces.each do |piece|
-      TransformCommand.apply!(
+    c = Vector[puzzle.width, puzzle.height] * 0.5
+    commands = puzzle.pieces.map do |piece|
+      [
         RotateCommand.new(
           user: user,
           game: game,
@@ -21,10 +22,12 @@ class ShuffleJob < ApplicationJob
           user: user,
           game: game,
           piece_id: piece.number,
-          delta: Vector[Random.rand, Random.rand] * s - piece.center
+          delta: Vector[Random.rand - 0.5, Random.rand - 0.5] * s + c - piece.center
         )
-      )
-    end
+      ].tap(&TransformCommand.method(:apply))
+    end.inject(:+)
+
+    Command.create!(commands.map(&:attributes))
 
     game.touch :shuffled_at
   end

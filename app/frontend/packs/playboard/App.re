@@ -155,7 +155,7 @@ let play = (): unit => {
           let size = playboard->data("initial-view");
           View.contain(
             puzzle,
-            Rectangle.create(0.0, 0.0, size##width, size##height),
+            Rectangle.create(size##x, size##y, size##width, size##height),
           );
         };
         if (playboard->data("standalone") !== Js.Nullable.undefined) {
