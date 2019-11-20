@@ -15,18 +15,20 @@ let squash = (cmd1: t, cmd: t): bool =>
   | _ => false
   };
 
-let execute = (puzzle: Puzzle.t, cmd: t): unit =>
-  switch (cmd) {
-  | Merge(cmd') => cmd' |> MergeCommand.execute(puzzle)
-  | Translate(cmd') => cmd' |> TranslateCommand.execute(puzzle)
-  | Rotate(cmd') => cmd' |> RotateCommand.execute(puzzle)
-  };
-
 let isValid = (puzzle: Puzzle.t, cmd: t): bool =>
   switch (cmd) {
   | Merge(cmd') => cmd' |> MergeCommand.isValid(puzzle)
   | Translate(cmd') => cmd' |> TranslateCommand.isValid(puzzle)
   | Rotate(cmd') => cmd' |> RotateCommand.isValid(puzzle)
+  };
+
+let execute = (puzzle: Puzzle.t, cmd: t): unit =>
+  if (cmd |> isValid(puzzle)) {
+    switch (cmd) {
+    | Merge(cmd') => cmd' |> MergeCommand.execute(puzzle)
+    | Translate(cmd') => cmd' |> TranslateCommand.execute(puzzle)
+    | Rotate(cmd') => cmd' |> RotateCommand.execute(puzzle)
+    };
   };
 
 /* Helper functions */
