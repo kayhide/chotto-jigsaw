@@ -1,4 +1,6 @@
 class GameChannel < ApplicationCable::Channel
+  COMMIT_BATCH_SIZE = 200
+
   def subscribed
     stream_for game
     @connection_token = generate_connection_token
@@ -26,11 +28,13 @@ class GameChannel < ApplicationCable::Channel
     if since = data["since"]
       commands = commands.where(created_at: since .. DateTime.current)
     end
-    transmit(
-      action: :commit,
-      token: nil,
-      commands: commands.map(&:command_attributes)
-    )
+    commands.in_batches(of: COMMIT_BATCH_SIZE) do |cmds|
+      transmit(
+        action: :commit,
+        token: nil,
+        commands: cmds.map(&:command_attributes)
+      )
+    end
   end
 
   def report_progress data
