@@ -1,16 +1,18 @@
-h2 Pictures
-
 .row
-  .col-md-4.col-lg-2.py-3.d-flex.align-items-stretch
-    .card
-      .card-body.mt-4
-        = form_for Picture.new do |f|
+  .col-md-6
+    h2.pull-left Pictures
+  .col-md-6.align-self-center
+    = form_for Picture.new do |f|
+      .input-group
           .custom-file
             = f.file_field :file, class: %w(custom-file-input)
             = f.label :file, class: %w(custom-file-label)
-          .mt-4
-            = f.button type: :submit, class: %w(btn btn-success btn-block) do
+          .input-group-append
+            = f.button type: :submit, class: %w(btn btn-success) do
               i.fas.fa-upload
+
+.clearfix
+.row
   - @pictures.each do |picture|
     .col-md-4.col-lg-2.py-3
       = link_to [:picture, {id: picture.id}], class: %w() do
