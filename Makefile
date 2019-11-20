@@ -13,7 +13,7 @@ guard:
 
 infra-up:
 	${COMPOSE_COMMAND} up -d
-	@$$($(MAKE) --no-print-directory envs) && bundle exec spring stop
+	@$$($(MAKE) --no-print-directory envs) && bin/spring stop
 	@$$($(MAKE) --no-print-directory envs) && rails db:setup || rails db:migrate
 .PHONY: infra-up
 
