@@ -12,16 +12,16 @@
     p = @puzzle.pieces_count
 
 #back-button
-  = link_to :root, class: %w(btn btn-circle-sm btn-dark) do
+  = link_to :root, class: %w(btn btn-fab btn-sm btn-dark) do
     i.fas.fa-chevron-left
 
-a#log-button href="#"
+a#log-button.btn.btn-sm.btn-fab.text-muted href="#"
   i.fas.fa-caret-up
 
 #log.white-text.hidden
 
 #buttons
-  button#fullscreen.btn.btn-circle-sm.btn-info.hidden
+  button#fullscreen.btn.btn-fab.btn-sm.btn-info.hidden
     i.fas.fa-expand
 
 #sound-list

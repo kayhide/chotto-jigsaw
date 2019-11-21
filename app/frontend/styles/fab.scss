@@ -1,0 +1,20 @@
+@import "~bootstrap/scss/bootstrap";
+
+.btn-fab {
+  @extend .btn;
+  @extend .rounded-circle;
+  width: $font-size-base * 2.5;
+  height: $font-size-base * 2.5;
+
+  &.btn-sm {
+    @extend .btn-sm;
+    width: $font-size-sm * 2.3;
+    height: $font-size-sm * 2.3;
+  }
+
+  &.btn-lg {
+    @extend .btn-lg;
+    width: $font-size-lg * 2.5;
+    height: $font-size-lg * 2.5;
+  }
+}
