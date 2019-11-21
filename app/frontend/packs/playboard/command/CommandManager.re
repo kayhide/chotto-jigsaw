@@ -1,7 +1,6 @@
 type handler('a) = EventHandler.handler('a);
 type handlers('a) = EventHandler.handlers('a);
 
-let history: array(CommandGroup.t) = [||];
 let current: ref(CommandGroup.t) = ref(CommandGroup.create());
 let postHandler: ref(handlers(Command.t)) = ref(EventHandler.create());
 let commitHandler: ref(handlers(CommandGroup.t)) =
@@ -15,7 +14,6 @@ let onCommit = (handler: handler(CommandGroup.t)): unit =>
 
 let commit = (): unit => {
   let cmds = current^;
-  let _ = history |> Js.Array.push(cmds);
   current := CommandGroup.create();
   commitHandler^ |> EventHandler.fire(cmds);
 };
@@ -30,6 +28,5 @@ let post = (puzzle: Puzzle.t, cmd: Command.t): unit =>
 let receive = (puzzle: Puzzle.t, cmds: CommandGroup.t): unit => {
   cmds.extrinsic = true;
   cmds.commands |> Array.iter(Command.execute(puzzle));
-  let _ = history |> Js.Array.push(cmds);
   commitHandler^ |> EventHandler.fire(cmds);
 };
