@@ -1,6 +1,6 @@
 - longer = [@puzzle.width, @puzzle.height].max
 - view = { x: @puzzle.width * 0.5 - longer, y: @puzzle.height * 0.5 - longer, width: longer * 2, height: longer * 2 }
-#playboard.green data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=@standalone
+#playboard.bg-cinnamint data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=@standalone
   canvas#field.hidden
   canvas#active-canvas.hidden
 
@@ -14,6 +14,19 @@
 #back-button
   = link_to :root, class: %w(btn btn-fab btn-sm btn-dark) do
     i.fas.fa-chevron-left
+
+.dropdown.fab-action
+  button#menu-button.shadow-sm.btn.btn-fab.btn-dark data-toggle="dropdown"
+    i.fas.fa-bars
+  .dropdown-menu.dropdown-menu-right
+    .dropdown-menu-left
+      button.shadow-sm.btn.btn-fab.bg-dark-green data-action="playboard-background"
+      button.shadow-sm.btn.btn-fab.bg-cool-sky data-action="playboard-background"
+      button.shadow-sm.btn.btn-fab.bg-cinnamint data-action="playboard-background"
+      button.shadow-sm.btn.btn-fab.bg-margo data-action="playboard-background"
+    .dropdown-menu-down
+      button.shadow-sm.btn.btn-fab.btn-info data-action="fullscreen"
+        i.fas.fa-expand
 
 a#log-button.btn.btn-sm.btn-fab.text-muted href="#"
   i.fas.fa-caret-up

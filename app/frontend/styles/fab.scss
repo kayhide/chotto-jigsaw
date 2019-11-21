@@ -1,20 +1,50 @@
 @import "~bootstrap/scss/bootstrap";
 
+$btn-fab-size: $font-size-base * 2.5;
+$btn-fab-size-sm: $font-size-sm * 2.3;
+$btn-fab-size-lg: $font-size-lg * 2.5;
+
 .btn-fab {
   @extend .btn;
   @extend .rounded-circle;
-  width: $font-size-base * 2.5;
-  height: $font-size-base * 2.5;
+  width: $btn-fab-size;
+  height: $btn-fab-size;
 
   &.btn-sm {
     @extend .btn-sm;
-    width: $font-size-sm * 2.3;
-    height: $font-size-sm * 2.3;
+    width: $btn-fab-size-sm;
+    height: $btn-fab-size-sm;
   }
 
   &.btn-lg {
     @extend .btn-lg;
-    width: $font-size-lg * 2.5;
-    height: $font-size-lg * 2.5;
+    width: $btn-fab-size-lg;
+    height: $btn-fab-size-lg;
+  }
+}
+
+.fab-action {
+  .dropdown-menu {
+    background: none;
+    border: none;
+    min-width: 0;
+    padding: 0;
+    margin-top: -$btn-fab-size;
+
+    .dropdown-menu-left {
+      text-align: right;
+      padding-right: $btn-fab-size;
+      button {
+        display: inline;
+        @extend .mr-2;
+      }
+    }
+    .dropdown-menu-down {
+      button {
+        display: block;
+        margin-left: auto;
+        @extend .mt-2;
+      }
+    }
   }
 }

@@ -82,12 +82,29 @@ let setupUi = (puzzle: puzzle): unit => {
       });
 
   if (Screen.isFullscreenAvailable()) {
-    jquery("#fullscreen")
-    ->removeClass("hidden")
-    ->on("click", () =>
+    jquery("[data-action=fullscreen]")
+    ->on("click", _ =>
         Screen.toggleFullScreen(jquery("#playboard")->get()[0])
       );
+  } else {
+    jquery("[data-action=fullscreen]")->addClass("disabled");
   };
+
+  jquery("[data-action=playboard-background]")
+  ->on("click", e => {
+      let classes: array(string) = e##target##classList |> Js.Array.from;
+      classes
+      |> Js.Array.find(Js.String.startsWith("bg-"))
+      |> Maybe.traverse_(bg => {
+           let playground = jquery("#playboard");
+           let bgs =
+             playground->get()[0]##classList
+             |> Js.Array.from
+             |> Js.Array.filter(Js.String.startsWith("bg-"));
+           bgs |> Js.Array.forEach(x => playground->removeClass(x));
+           playground->addClass(bg);
+         });
+    });
 
   CommandManager.onCommit(cmds =>
     if (cmds.commands |> Js.Array.some(Command.isMerge)) {

@@ -1,4 +1,5 @@
 @import "./common";
+@import "./playboard-backgrounds";
 
 body {
   color: $gray-600;
@@ -10,15 +11,10 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-
-  &.blue {
-    background: #1e5799;
-    background: linear-gradient(to bottom, #1e5799 0%, #7db9e8 100%);
-  }
-
-  &.green {
-    background: #002400;
-    background: linear-gradient(to bottom, #002400 0%, #b4ddb4 100%);
+  @each $bg in $playboard-backgrounds {
+    &.#{$bg} {
+      @extend .bg-#{$bg};
+    }
   }
 }
 
@@ -43,12 +39,12 @@ body {
   top: 1rem;
 }
 
-.btn-circle-sm {
-  @extend .btn-sm;
-  @extend .rounded-circle;
-  width: $font-size-sm * 2.3;
-  height: $font-size-sm * 2.3;
+#menu-button {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
 }
+
 
 #buttons {
   position: absolute;
@@ -59,7 +55,7 @@ body {
 #game-progress {
   position: absolute;
   left: 1rem;
-  right: 5rem;
+  right: 1rem;
   bottom: 1rem;
   width: auto;
   height: 8px;

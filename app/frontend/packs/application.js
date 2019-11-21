@@ -13,7 +13,6 @@
 require("@rails/ujs").start();
 require("@rails/activestorage").start();
 
-import $ from "jquery";
 import "bootstrap";
 import bsCustomFileInput from "bs-custom-file-input";
 
