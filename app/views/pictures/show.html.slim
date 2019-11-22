@@ -25,6 +25,6 @@ h2 Picture
         th.text-right Games Count
         th
 
-    tbody
+    tbody.loading-watcher
       - @puzzles.each do |puzzle|
         = render "puzzles/row", puzzle: puzzle

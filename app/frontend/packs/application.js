@@ -13,11 +13,18 @@
 require("@rails/ujs").start();
 require("@rails/activestorage").start();
 
+import $ from "jquery";
 import "bootstrap";
 import bsCustomFileInput from "bs-custom-file-input";
 
+import LoadingWatcher from "./loading-watcher";
+
 import "../styles/application";
 
-$(document).ready(function () {
+$(document).ready(() => {
   bsCustomFileInput.init()
 })
+
+$(document).ready(() => {
+  LoadingWatcher.init();
+});

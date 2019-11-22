@@ -9,7 +9,7 @@
       = link_to [puzzle, :games], method: :post, class: %w(text-secondary ml-3) do
         i.fas.fa-play.fa-fw
 - else
-  tr id=dom_id(puzzle)
+  tr id=dom_id(puzzle) data-loading=url_for([puzzle, :row])
     td = puzzle.difficulty
     td colspan="4"
       .progress class=puzzle.difficulty

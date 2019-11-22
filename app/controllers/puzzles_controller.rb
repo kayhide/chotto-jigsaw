@@ -1,6 +1,6 @@
 class PuzzlesController < ApplicationController
   before_action :authenticate!
-  before_action :set_puzzle, only: [:show, :edit, :update, :destroy]
+  before_action :set_puzzle, only: [:show, :edit, :update, :destroy, :row]
   before_action :set_picture, only: [:create]
 
   def index
@@ -41,10 +41,14 @@ class PuzzlesController < ApplicationController
     redirect_to [:puzzles], notice: 'Puzzle was successfully destroyed.'
   end
 
+  def row
+    render partial: "puzzles/row", locals: { puzzle: @puzzle }
+  end
+
   private
 
   def set_puzzle
-    @puzzle = Puzzle.find(params[:id])
+    @puzzle = Puzzle.find(params[:id] || params[:puzzle_id])
   end
 
   def set_picture

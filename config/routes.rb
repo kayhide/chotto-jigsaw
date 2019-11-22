@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     resources :puzzles, only: [:create]
   end
   resources :puzzles, only: [:index, :show, :new, :create, :destroy], shallow: true do
+    get :row
     namespace :games do
       resource :standalone, only: [:show], controller: :standalone
     end
