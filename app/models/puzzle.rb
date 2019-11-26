@@ -26,6 +26,19 @@ class Puzzle < ApplicationRecord
         .select(:record_id)
     )
   }
+  scope :order_by_difficulty, -> () {
+    order(
+      Arel.sql(
+        [
+          'CASE',
+          * DIFFICULTIES.map.with_index { |d, i|
+            "WHEN difficulty='#{d}' THEN #{i}"
+          },
+          'END'
+        ].join(' ')
+      )
+    )
+  }
 
   def ready?
     picture.attached? && picture.analyzed? && content.attached?

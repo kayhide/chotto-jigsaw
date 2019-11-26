@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :users
   resources :pictures, only: [:index, :show, :create] do
     resources :puzzles, only: [:create]
+    resources :games, only: [:index, :show]
   end
   resources :puzzles, only: [:index, :show, :new, :create, :destroy], shallow: true do
     get :row

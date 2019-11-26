@@ -1,14 +1,29 @@
 h2 Games
 
 .row
-  .col.s12.m4
-    .card.puzzle.hoverable id=dom_id(@puzzle)
+  .col-sm-12.col-md-6.mb-2
+    .card.puzzle id=dom_id(@picture)
       .card-image
-        = link_to @puzzle, class: %w(waves-effect waves-light) do
-          = image_tag @puzzle.picture.variant(resize_to_fill: [600, 600])
+        = image_tag @picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid)
 
-  .col.s12.m8
-    ul.collection
-      - @games.each do |game|
-        = link_to game, class: %w(collection-item waves-effect waves-light) do
-          =l game.created_at
+  .col
+    - if @games.present?
+      .list-group.mb-2
+        - @games.each do |game|
+          = link_to game, class: %w(list-group-item list-group-item-action) do
+            .d-flex.align-items-center
+              .flex-shrink-1
+                i.fas.fa-play.fa-fw
+              .progress.w-100.ml-3 class=game.puzzle.difficulty
+                .progress-bar style="width:#{game.progress * 100}%"
+                  .px-3 = game.puzzle.difficulty.capitalize
+
+    .list-group
+      - @puzzles.each do |puzzle|
+        = link_to [puzzle, :games], method: :post, class: %w(list-group-item list-group-item-action) do
+          .d-flex.align-items-center
+            .flex-shrink-1
+              i.fas.fa-play.fa-fw
+            .progress.w-100.ml-3 class=puzzle.difficulty
+              .progress-bar.progress-bar-striped.w-100
+                .px-3 = puzzle.difficulty.humanize

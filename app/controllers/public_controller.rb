@@ -1,11 +1,15 @@
 class PublicController < ApplicationController
   def index
-    ids =
+    @games =
       Game
-        .select(:id, :puzzle_id)
-        .group(:puzzle_id)
-        .maximum(:id)
-        .values
-    @games = Game.where(id: ids).order(id: :desc)
+        .active
+        .order(updated_at: :desc)
+        .limit(18)
+    @pictures =
+      Picture
+        .order(created_at: :desc)
+        .where(
+          id: PictureAttachment.distinct.select(:blob_id)
+        )
   end
 end

@@ -6,10 +6,23 @@ RSpec.describe GamesController, type: :controller do
   let(:puzzle) { create :puzzle }
 
   describe "GET #index" do
-    it "returns a success response" do
-      create_list :game, 2, puzzle: puzzle
-      get :index, params: { puzzle_id: puzzle.id }
-      expect(response).to be_successful
+    context "with puzzle" do
+      it "returns a success response" do
+        create_list :game, 2, puzzle: puzzle
+        get :index, params: { puzzle_id: puzzle.id }
+        expect(response).to be_successful
+      end
+    end
+
+    context "with picture" do
+      let(:puzzle) { create :puzzle, :with_picture }
+      let(:picture) { puzzle.picture_blob.becomes(Picture) }
+
+      it "returns a success response" do
+        create_list :game, 2, puzzle: puzzle
+        get :index, params: { picture_id: picture.id }
+        expect(response).to be_successful
+      end
     end
   end
 

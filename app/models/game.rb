@@ -6,6 +6,12 @@ class Game < ApplicationRecord
   has_many :translate_commands
   has_many :rotate_commands
 
+  scope :not_started, -> () { where(progress: 0.0) }
+  scope :started, -> () { where.not(progress: 0.0) }
+  scope :not_finished, -> () { where.not(progress: 1.0) }
+  scope :finished, -> () { where(progress: 1.0) }
+  scope :active, -> () { started.not_finished }
+
   def ready?
     shuffled_at?
   end
