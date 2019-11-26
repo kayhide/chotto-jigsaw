@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :user do
-    username { "MyString" }
-    email { "MyString" }
+    sequence(:username) { |i| "User #{i}" }
+    sequence(:email) { |i| "user-#{i}@chotto-jigsaw.test" }
   end
 end
