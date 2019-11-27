@@ -8,7 +8,7 @@ dev:
 .PHONY: dev
 
 guard:
-	@$$($(MAKE) --no-print-directory envs) && bundle exec guard
+	@$$($(MAKE) --no-print-directory envs) && bundle exec guard --plugin RSpec
 .PHONY: guard
 
 infra-up:
