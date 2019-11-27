@@ -11,7 +11,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
 $difficulty-colors: (
   "trivial": $cyan,
   "easy": $green,
-  "normal": darken($yellow, 10%),
+  "normal": darken($yellow, 13%),
   "hard": darken($red, 10%),
   "extreme": darken($purple, 10%),
   "lunatic": $gray-800
@@ -30,8 +30,22 @@ $difficulty-colors: (
   transform: rotate(180deg);
 }
 
-.progress {
-  @each $key, $color in $difficulty-colors {
+@each $key, $color in $difficulty-colors {
+  .text-#{$key} {
+    color: $color;
+  }
+
+  .bg-#{$key} {
+    color: lighten($color, 60%);
+    background-color: lighten($color, 10%);
+
+    &:hover {
+      color: $white;
+      background-color: lighten($color, 20%);
+    }
+  }
+
+  .progress {
     &.#{$key} {
       background-color: lighten($color, 35%);
       .progress-bar {
@@ -39,10 +53,13 @@ $difficulty-colors: (
       }
     }
   }
+}
 
+.progress {
   &.offline {
     .progress-bar {
       @extend .progress-bar-striped;
     }
   }
 }
+

@@ -1,30 +1,24 @@
-h2 Games
+.row
+  .col-sm-12.col-md-6.p-2
+    div id=dom_id(@picture)
+      = image_tag @picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid rounded)
 
 .row
-  .col-sm-12.col-md-6.mb-2
-    .card.puzzle id=dom_id(@picture)
-      .card-image
-        = image_tag @picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid)
+  - current_user.available_difficulties.each do |difficulty|
+    .col-6.col-md.p-2
+      = link_to "#", class: %W(btn btn-block bg-#{difficulty}) do
+        .text-center
+          i.fas.fa-magic
+        .text-center
+          = difficulty.humanize
 
-  .col
-    .list-group
-      - current_user.available_difficulties.each do |difficulty|
-        = link_to [@picture, :games], method: :post, class: %w(list-group-item list-group-item-action) do
-          .d-flex.align-items-center
-            .flex-shrink-1
-              i.fas.fa-play.fa-fw
-            .progress.w-100.ml-3 class=difficulty
-              .progress-bar.progress-bar-striped.w-100
-                .px-3 = difficulty.humanize
-
-    - if @games.present?
-      .list-group.mb-2
-        - @games.each do |game|
-          = link_to game, class: %w(list-group-item list-group-item-action) do
-            .d-flex.align-items-center
-              .flex-shrink-1
-                i.fas.fa-play.fa-fw
-              .progress.w-100.ml-3 class=game.puzzle.difficulty
-                .progress-bar style="width:#{game.progress * 100}%"
-                  .px-3 = game.puzzle.difficulty.capitalize
-
+- if @games.present?
+  .list-group.mt-3.mb-2
+    - @games.each do |game|
+      = link_to game, class: %w(list-group-item list-group-item-action) do
+        .d-flex.align-items-center
+          .flex-shrink-1
+            i.fas.fa-play.fa-fw class="text-#{game.puzzle.difficulty}"
+          .progress.w-100.ml-3 class=game.puzzle.difficulty
+            .progress-bar style="width:#{game.progress * 100}%"
+              .px-3 = game.puzzle.difficulty.capitalize
