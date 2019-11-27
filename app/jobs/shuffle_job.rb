@@ -1,4 +1,7 @@
 class ShuffleJob < ApplicationJob
+  class NotReadyError < StandardError; end
+
+  retry_on NotReadyError
   queue_as :default
 
   def perform game
@@ -32,5 +35,9 @@ class ShuffleJob < ApplicationJob
     end
 
     game.touch :shuffled_at
+  end
+
+  def verify_puzzle! game
+    raise NotAnalyzedError unless game.puzzle.ready?
   end
 end

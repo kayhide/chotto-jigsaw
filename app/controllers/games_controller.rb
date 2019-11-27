@@ -20,13 +20,26 @@ class GamesController < ApplicationController
   end
 
   def create
-    @game = Game.new(puzzle: @puzzle)
-    if @game.save
-      ShuffleJob.perform_later(@game)
-      redirect_to @game, notice: 'Game was successfully created.'
-    else
-      render :new
+    unless @puzzle
+      difficulty = params.require(:puzzle).require(:difficulty)
+      @puzzle =
+        @picture.puzzles
+          .order(id: :desc)
+          .find_by(user: current_user, difficulty: difficulty)
     end
+    unless @puzzle
+      @puzzle =
+        current_user.puzzles
+          .create!(picture: @picture, difficulty: difficulty)
+      SetupJob.perform_later(@puzzle)
+    end
+
+    @game = Game.create!(puzzle: @puzzle)
+    ShuffleJob.perform_later(@game)
+    redirect_to @game, notice: 'Game was successfully created.'
+
+  rescue
+    redirect_to [@picture, :games], alert: 'Failed to create a Game'
   end
 
   def destroy
