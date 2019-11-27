@@ -1,9 +1,9 @@
 open JQuery;
 
-let dragger: ref(Game.dragger) = ref(Game.emptyDragger);
-let mover: ref(option(Game.mover)) = ref(None);
+let dragger: ref(GameInteractor.dragger) = ref(GameInteractor.emptyDragger);
+let mover: ref(option(GameInteractor.mover)) = ref(None);
 
-let onWheel = (game: Game.t, e): unit => {
+let onWheel = (gi: GameInteractor.t, e): unit => {
   e##preventDefault();
   let e_ = e##originalEvent;
   let pt = Point.create(e_##clientX, e_##clientY);
@@ -15,16 +15,16 @@ let onWheel = (game: Game.t, e): unit => {
     dragger^.spin(delta |> Js.Int.toFloat);
   } else {
     let delta = e_##deltaY < 0 ? 1.02 : 1.0 /. 1.02;
-    (game |> Game.getScaler)(pt, delta);
+    (gi |> GameInteractor.getScaler)(pt, delta);
   };
 };
 
-let attach = (game: Game.t): unit => {
+let attach = (gi: GameInteractor.t): unit => {
   Logger.trace("attached: MouseInteractor");
-  dragger := game |> Game.defaultDragger;
+  dragger := gi |> GameInteractor.defaultDragger;
 
-  let canvas = game.puzzle.stage |> Stage.canvas;
-  jquery(canvas)->on("wheel", onWheel(game));
+  let canvas = gi.puzzle.stage |> Stage.canvas;
+  jquery(canvas)->on("wheel", onWheel(gi));
 
   jquery(canvas)
   ->on("mousedown", e => {
@@ -33,7 +33,7 @@ let attach = (game: Game.t): unit => {
       let pt = Point.create(e##offsetX, e##offsetY);
       dragger := dragger^.continue(pt);
       if (!dragger^.active) {
-        mover := game |> Game.getMover(pt) |> Maybe.pure;
+        mover := gi |> GameInteractor.getMover(pt) |> Maybe.pure;
       };
     });
 

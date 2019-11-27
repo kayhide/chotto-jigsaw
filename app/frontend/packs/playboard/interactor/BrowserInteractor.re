@@ -1,12 +1,12 @@
 open JQuery;
 open Webapi.Dom;
 
-let onWindowResize = (game: Game.t): unit => {
+let onWindowResize = (gi: GameInteractor.t): unit => {
   let width = window |> Window.innerWidth;
   let height = window |> Window.innerHeight;
   Logger.trace({j|window resized: width: $width, height: $height|j});
 
-  let canvas = game.puzzle.stage |> Stage.canvas;
+  let canvas = gi.puzzle.stage |> Stage.canvas;
   canvas->Webapi.Canvas.CanvasElement.setWidth(width);
   canvas->Webapi.Canvas.CanvasElement.setHeight(height);
   let _ =
@@ -15,10 +15,10 @@ let onWindowResize = (game: Game.t): unit => {
     ->css("top", 0)
     ->setWidth(width |> Js.Int.toFloat)
     ->setHeight(height |> Js.Int.toFloat);
-  game.puzzle.stage |> Stage.invalidate;
+  gi.puzzle.stage |> Stage.invalidate;
 };
 
-let attach = (game: Game.t): unit => {
-  let _ = jquery(window)->on("resize", _ => onWindowResize(game));
-  onWindowResize(game);
+let attach = (gi: GameInteractor.t): unit => {
+  let _ = jquery(window)->on("resize", _ => onWindowResize(gi));
+  onWindowResize(gi);
 };

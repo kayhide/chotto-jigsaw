@@ -1,6 +1,6 @@
-let dragger: ref(Game.dragger) = ref(Game.emptyDragger);
-let mover: ref(option(Game.mover)) = ref(None);
-let scaler: ref(option(Game.scaler)) = ref(None);
+let dragger: ref(GameInteractor.dragger) = ref(GameInteractor.emptyDragger);
+let mover: ref(option(GameInteractor.mover)) = ref(None);
+let scaler: ref(option(GameInteractor.scaler)) = ref(None);
 
 let setupHammer = (canvas: Webapi.Dom.Element.t): Hammer.t => {
   open Hammer;
@@ -43,11 +43,11 @@ let updateListeners = (hammer: Hammer.t): unit =>
     }
   );
 
-let attach = (game: Game.t): unit => {
+let attach = (gi: GameInteractor.t): unit => {
   Logger.trace("attached: TouchInteractor");
-  dragger := game |> Game.defaultDragger;
+  dragger := gi |> GameInteractor.defaultDragger;
   open Hammer;
-  let hammer = setupHammer(game.puzzle.stage |> Stage.canvas);
+  let hammer = setupHammer(gi.puzzle.stage |> Stage.canvas);
 
   hammer
   ->on("tap", e => {
@@ -62,14 +62,14 @@ let attach = (game: Game.t): unit => {
       Logger.trace(e##"type");
       dragger := dragger^.finish();
       hammer |> updateListeners;
-      game.puzzle |> View.fit;
+      gi.puzzle |> View.fit;
     });
 
   hammer
   ->on("pinchstart", e => {
       Logger.trace(e##"type");
       dragger := dragger^.finish();
-      scaler := game |> Game.getScaler |> Maybe.pure;
+      scaler := gi |> GameInteractor.getScaler |> Maybe.pure;
       hammer |> updateListeners;
     });
 
@@ -81,7 +81,7 @@ let attach = (game: Game.t): unit => {
   hammer
   ->on("panstart", e => {
       Logger.trace(e##"type");
-      mover := game |> Game.getMover(e##center) |> Maybe.pure;
+      mover := gi |> GameInteractor.getMover(e##center) |> Maybe.pure;
       hammer |> updateListeners;
     });
   hammer->on("panmove", e => mover^ |> Maybe.traverse_(f => f(e##center)));

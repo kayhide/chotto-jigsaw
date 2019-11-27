@@ -166,7 +166,7 @@ let play = (): unit => {
         setupUi(puzzle);
         setupSound();
 
-        let game = Game.create(puzzle);
+        let game = GameInteractor.create(puzzle);
 
         if (playboard->data("initial-view") !== Js.Nullable.undefined) {
           let size = playboard->data("initial-view");
@@ -176,7 +176,7 @@ let play = (): unit => {
           );
         };
         if (playboard->data("standalone") !== Js.Nullable.undefined) {
-          game |> Game.shuffle;
+          game |> GameInteractor.shuffle;
           /* CommandManager.commit(); */
           puzzle |> View.fit;
         } else {
