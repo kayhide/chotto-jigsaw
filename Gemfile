@@ -21,9 +21,11 @@ gem 'webpacker', '~> 4.0'
 group :development, :test do
   gem 'factory_bot_rails'
   gem 'guard'
+  gem 'guard-livereload', require: false
   gem 'guard-rspec'
   gem 'pry-byebug'
   gem 'pry-stack_explorer'
+  gem 'rack-livereload'
   gem 'rspec-rails', '~> 4.0.0.beta2'
   gem 'spring-commands-rspec'
 end
