@@ -7,10 +7,14 @@ module Authenticator
     end
   end
 
+  def authenticated?
+    !current_user.guest?
+  end
+
   def current_user
     User.find(current_user_id)
   rescue ActiveRecord::RecordNotFound
-    nil
+    Guest.new
   end
 
   def current_user_id

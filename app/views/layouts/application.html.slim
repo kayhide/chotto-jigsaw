@@ -16,10 +16,9 @@ html
       button.navbar-toggler.collapsed type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
         span.navbar-toggler-icon
       div.navbar-collapse.collapse id="navbarCollapse" style=""
-        - if current_user
-          == render 'layouts/menu'
-        - else
+        - if current_user.guest?
           == render 'layouts/public_menu'
+        - else
+          == render 'layouts/menu'
     .container.rounded
       == yield
-
