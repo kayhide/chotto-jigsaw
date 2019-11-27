@@ -7,7 +7,7 @@ class PicturesController < ApplicationController
   end
 
   def show
-    @puzzles = Puzzle.with_picture_of(@picture).order(id: :desc)
+    @puzzles = @picture.puzzles.order(id: :desc)
   end
 
   def create

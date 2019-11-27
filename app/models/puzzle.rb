@@ -18,14 +18,6 @@ class Puzzle < ApplicationRecord
     lunatic: nil
   }.with_indifferent_access
 
-  scope :with_picture_of, -> (blob) {
-    where(
-      id:
-        ActiveStorage::Attachment
-        .where(blob_id: blob.id, record_type: "Puzzle")
-        .select(:record_id)
-    )
-  }
   scope :order_by_difficulty, -> () {
     order(
       Arel.sql(
