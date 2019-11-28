@@ -18,13 +18,12 @@ import "bootstrap";
 import bsCustomFileInput from "bs-custom-file-input";
 
 import LoadingWatcher from "./loading-watcher";
+import BackgroundPicture from "./background-picture";
 
 import "../styles/application";
 
 $(document).ready(() => {
   bsCustomFileInput.init()
-})
-
-$(document).ready(() => {
   LoadingWatcher.init();
-});
+  BackgroundPicture.init();
+})

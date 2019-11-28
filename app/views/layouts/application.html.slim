@@ -10,7 +10,7 @@ html
     = stylesheet_pack_tag 'application', media: 'all'
     = javascript_pack_tag 'application'
 
-  body
+  body data-picture=(@picture && url_for(@picture.variant(resize_to_fill: [800, 600])))
     nav.navbar.navbar-expand-md.fixed-top
       a.navbar-brand href="/" Chotto Jigsaw
       button.navbar-toggler.collapsed type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
