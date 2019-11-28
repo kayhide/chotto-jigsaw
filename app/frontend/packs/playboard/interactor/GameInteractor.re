@@ -338,28 +338,3 @@ and capture = (piece: piece, pt: point, game: t): dragger => {
   };
   dragger;
 };
-
-let shuffle = ({puzzle}: t): unit =>
-  Webapi.Dom.(
-    DisplayObject.(
-      puzzle.image
-      |> Maybe.traverse_(image' => {
-           let width = image'->HtmlImageElement.width;
-           let height = image'->HtmlImageElement.height;
-           let s = Js.Int.toFloat(Js.Math.max_int(width, height) * 2);
-           puzzle.pieces
-           |> Js.Array.filter(Piece.isAlive)
-           |> Array.iter(p => {
-                let center = p |> Piece.center;
-                let center' = center |> toGlobalFrom(p |> Piece.unwrapShape);
-                let degree = Js.Math.random() *. 360.0 -. 180.0;
-                Command.rotate(p.id, center', degree)
-                |> CommandManager.post(puzzle);
-                let vec =
-                  Point.create(Js.Math.random() *. s, Js.Math.random() *. s);
-                Command.translate(p.id, vec |> Point.subtract(center'))
-                |> CommandManager.post(puzzle);
-              });
-         })
-    )
-  );

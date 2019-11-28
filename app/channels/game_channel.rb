@@ -51,11 +51,14 @@ class GameChannel < ApplicationCable::Channel
       commands.in_batches(of: COMMIT_BATCH_SIZE) do |cmds|
         transmit(
           action: :commit,
-          success: true,
           token: nil,
           commands: cmds.map(&:command_attributes)
         )
       end
+      transmit(
+        action: :update,
+        success: true,
+      )
     else
       transmit(
         action: :update,

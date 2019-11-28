@@ -38,42 +38,43 @@ include ActionCable.Make(X);
 
 let subscription: ref(option(subscription)) = ref(None);
 
-let _received = (game: Game.t, data: X.data): unit => {
+let retryOnFailAndThen = (action: string, data: X.data, f: unit => unit): unit => {
   let this = subscription^ |> Maybe.fromJust;
+  if (data##action == action) {
+    if (data##success) {
+      f();
+    } else {
+      Logger.trace("failed: " ++ data##action);
+      let _ =
+        Js.Global.setTimeout(
+          () => this->_perform("request_" ++ action, Js.Obj.empty()),
+          3000,
+        );
+      ();
+    };
+  };
+};
+
+let _received = (game: Game.t, data: X.data): unit => {
   Logger.trace("received: " ++ data##action);
+
+  let this = subscription^ |> Maybe.fromJust;
+  retryOnFailAndThen(
+    "content",
+    data,
+    () => {
+      game |> Game.loadContent(data##content);
+      this->_perform("request_update", Js.Obj.empty());
+    },
+  );
+  retryOnFailAndThen("update", data, () => game |> Game.setUpdated);
+
   switch (data##action) {
   | "init" =>
     this##token #= data##token;
     if (!(game |> Game.isReady)) {
       this->_perform("request_content", Js.Obj.empty());
-    } else {
-      this->_perform("request_update", Js.Obj.empty());
     };
-  | "content" =>
-    if (!(game |> Game.isReady)) {
-      if (data##success) {
-        game |> Game.loadContent(data##content);
-        this->_perform("request_update", Js.Obj.empty());
-      } else {
-        Logger.trace("failed: " ++ data##action);
-        let _ =
-          Js.Global.setTimeout(
-            () => this->_perform("request_content", Js.Obj.empty()),
-            3000,
-          );
-        ();
-      };
-    };
-  | "update" =>
-    if (!data##success) {
-      Logger.trace("failed: " ++ data##action);
-      let _ =
-        Js.Global.setTimeout(
-          () => this->_perform("request_update", Js.Obj.empty()),
-          3000,
-        );
-      ();
-    }
   | _ => ()
   };
   if (data##token !== this##token) {

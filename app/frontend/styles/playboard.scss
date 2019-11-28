@@ -62,6 +62,12 @@ body {
   opacity: 0.7;
 
   @extend .no-interaction;
+
+  .progress-bar.loading {
+    width: 100%;
+    @extend .progress-bar-striped;
+    @extend .progress-bar-animated;
+  }
 }
 
 #info {

@@ -169,19 +169,12 @@ let play = (): unit => {
        setupUi(game.puzzle);
        setupSound();
 
-       let gi = GameInteractor.create(game.puzzle);
-
        if (playboard->data("initial-view") !== Js.Nullable.undefined) {
          let size = playboard->data("initial-view");
          Rectangle.create(size##x, size##y, size##width, size##height)
          |> View.contain(game.puzzle);
        };
-       if (game.isStandalone) {
-         gi |> GameInteractor.shuffle;
-         /* CommandManager.commit(); */
-         game.puzzle |> View.fit;
-       };
-
+       let gi = GameInteractor.create(game.puzzle);
        gi |> BrowserInteractor.attach;
        if (Screen.isTouchScreen()) {
          gi |> TouchInteractor.attach;
@@ -189,7 +182,19 @@ let play = (): unit => {
          gi |> MouseInteractor.attach;
        };
 
+       if (game.isStandalone) {
+         game |> Game.shuffle;
+         game |> Game.setUpdated;
+       };
+
        jquery("#picture")->fadeOut("slow");
+     });
+
+  game
+  |> Game.onUpdated(() => {
+       Logger.trace("game updated");
+       let _ = jquery("#game-progress .loading")->fadeOut("slow");
+       game.puzzle |> View.fit;
      });
 
   if (game.isStandalone) {
