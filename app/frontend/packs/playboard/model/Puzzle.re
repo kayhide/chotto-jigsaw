@@ -8,7 +8,6 @@ type t = {
   stage: shape,
   container: shape,
   shape,
-  mutable image: option(Webapi.Dom.HtmlImageElement.t),
   mutable pieces: array(piece),
   mutable linearMeasure: float,
   mutable rotationTolerance: float,
@@ -26,7 +25,6 @@ let create = canvas: t => {
     stage,
     container,
     shape,
-    image: None,
     pieces: [||],
     linearMeasure: 0.0,
     rotationTolerance: 24.0,
@@ -56,10 +54,8 @@ let parse = (puzzle: t, data: string): unit => {
 
 let piecesCount = (puzzle: t): int => puzzle.pieces |> Array.length;
 
-let initizlize = (image, puzzle: t): unit => puzzle.image = Some(image);
-
 let isReady = (puzzle: t): bool =>
-  0 < (puzzle |> piecesCount) && (puzzle.image |> Maybe.isSome)
+  0 < (puzzle |> piecesCount)
 
 let progress = puzzle: float => {
   let i =

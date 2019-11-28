@@ -23,7 +23,8 @@ let create = (id: int, canvas): t => {
   };
 };
 
-let isReady = (game: t): bool => game.puzzle |> Puzzle.isReady;
+let isReady = (game: t): bool =>
+  game.puzzle |> Puzzle.isReady && game.image |> Maybe.isSome;
 
 let fireUpdated = (game: t): unit =>
   if (game |> isReady && game.isUpdated) {
@@ -42,7 +43,6 @@ let loadContent = (data: string, game: t): unit => {
 };
 
 let loadImage = (image: Webapi.Dom.HtmlImageElement.t, game: t): unit => {
-  game.puzzle |> Puzzle.initizlize(image);
   game.image = Some(image);
   game |> fireReady;
 };
@@ -51,7 +51,6 @@ let setUpdated = (game: t): unit => {
   game.isUpdated = true;
   game |> fireUpdated;
 };
-
 
 let onReady = (handler: EventHandler.handler(unit), game: t): unit =>
   game.readyHandlers = game.readyHandlers |> EventHandler.append(handler);
@@ -84,3 +83,10 @@ let shuffle = (game: t): unit =>
          })
     )
   );
+let whenReady = (f: unit => unit, game: t): unit =>
+  if (game |> isReady) {
+    f();
+  } else {
+    game |> onReady(f);
+  };
+

@@ -2,9 +2,10 @@ type point = Point.t;
 type graphics = Graphics.t;
 type puzzle = Puzzle.t;
 type piece = Piece.t;
+type image = Webapi.Dom.HtmlImageElement.t;
 
 type t = {
-  puzzle,
+  image: image,
   drawsImage: bool,
   drawsStroke: bool,
   drawsControlLine: bool,
@@ -12,16 +13,14 @@ type t = {
   drawsCenter: bool,
 };
 
-let create = (puzzle: puzzle): t => {
-  puzzle,
+let create = (image: image): t => {
+  image,
   drawsImage: true,
   drawsStroke: false,
   drawsControlLine: false,
   drawsBoundary: false,
   drawsCenter: false,
 };
-
-let image = (drawer: t): 'a => drawer.puzzle.image;
 
 let drawHitArea = (piece: piece, g: graphics): unit => {
   open Graphics;
@@ -79,7 +78,7 @@ let draw = (piece: piece, g: graphics, drawer: t): unit => {
   open Graphics;
   g->clear();
   if (drawer.drawsImage) {
-    let _ = g->beginBitmapFill(drawer |> image);
+    let _ = g->beginBitmapFill(drawer.image);
     ();
   } else {
     let _ = g->beginFill("#9fa");
@@ -111,7 +110,7 @@ let draw = (piece: piece, g: graphics, drawer: t): unit => {
       g
       ->setStrokeStyle(2.0)
       ->beginFill("#390")
-      ->drawCircle(pt##x, pt##y, drawer.puzzle.linearMeasure /. 32.0);
+      ->drawCircle(pt##x, pt##y, 8.0);
     ();
   };
 };

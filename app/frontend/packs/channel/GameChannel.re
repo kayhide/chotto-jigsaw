@@ -85,7 +85,8 @@ let _received = (game: Game.t, data: X.data): unit => {
       |> fromAny
       |> Array.map(Bridge.decode)
       |> Array.iter(x => cmds |> CommandGroup.squash(x));
-      cmds |> CommandManager.receive(game.puzzle);
+      game
+      |> Game.whenReady(() => cmds |> CommandManager.receive(game.puzzle));
     | _ => ()
     };
   };

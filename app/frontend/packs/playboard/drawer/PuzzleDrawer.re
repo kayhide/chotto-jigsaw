@@ -1,8 +1,15 @@
 type puzzle = Puzzle.t;
+type image = Webapi.Dom.HtmlImageElement.t;
 
-type t = {mutable drawsGuide: bool};
+type t = {
+  image,
+  mutable drawsGuide: bool,
+};
 
-let create = (): t => {drawsGuide: false};
+let create = (image: image): t => {
+  image,
+  drawsGuide: false,
+};
 
 let drawGuide = g: unit => {
   open Graphics;
@@ -39,7 +46,7 @@ let draw = (puzzle: puzzle, g, drawer: t): unit => {
     drawGuide(g);
   };
 
-  let drawer' = PieceDrawer.create(puzzle);
+  let drawer' = PieceDrawer.create(drawer.image);
 
   puzzle.pieces
   |> Array.iter(p => {

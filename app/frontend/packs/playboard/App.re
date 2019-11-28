@@ -4,17 +4,18 @@ open Document;
 open JQuery;
 
 type puzzle = Puzzle.t;
+type image = Webapi.Dom.HtmlImageElement.t;
 
 module Guider = {
   type t = {
     puzzle,
-    drawer: PuzzleDrawer.t,
+    image,
     mutable _active: bool,
   };
 
-  let create = (puzzle: puzzle): t => {
+  let create = (puzzle: puzzle, image: image): t => {
     puzzle,
-    drawer: PuzzleDrawer.create(),
+    image,
     _active: false,
   };
 
@@ -27,9 +28,9 @@ module Guider = {
         jquery("#active-canvas")->addClass("z-depth-3") :
         jquery("#active-canvas")->removeClass("z-depth-3");
 
-    guider.drawer.drawsGuide = b;
-    guider.drawer
-    |> PuzzleDrawer.draw(guider.puzzle, guider.puzzle.shape##graphics);
+    let drawer = PuzzleDrawer.create(guider.image);
+    drawer.drawsGuide = b;
+    drawer |> PuzzleDrawer.draw(guider.puzzle, guider.puzzle.shape##graphics);
     guider.puzzle.stage |> Stage.invalidate;
   };
 
@@ -50,7 +51,7 @@ let setupLogger = (): unit => {
   |> Maybe.traverse_(log' => Logger.append(append'(log')));
 };
 
-let setupUi = (puzzle: puzzle): unit => {
+let setupUi = (puzzle: Puzzle.t, image: image): unit => {
   Ticker.addEventListener("tick", () =>
     jquery("#info .fps")
     ->setText(
@@ -61,7 +62,7 @@ let setupUi = (puzzle: puzzle): unit => {
 
   let _ = jquery("#field")->fadeIn("slow");
 
-  let guider = Guider.create(puzzle);
+  let guider = Guider.create(puzzle, image);
   let _ =
     jquery(window)
     ->on("keydown", e => {
@@ -157,16 +158,19 @@ let play = (): unit => {
     |> Maybe.fromJust
     |> Game.create(gameId);
   Js.log("game id: " ++ string_of_int(gameId));
-  Js.log("standalone: " ++ string_of_bool(game.isStandalone));
+  if (game.isStandalone) {
+    Js.log("standalone: " ++ string_of_bool(game.isStandalone));
+  };
 
   game
   |> Game.onReady(() => {
        Logger.trace("game ready");
 
-       PuzzleDrawer.create()
+       let image = game.image |> Maybe.fromJust;
+       PuzzleDrawer.create(image)
        |> PuzzleDrawer.draw(game.puzzle, game.puzzle.shape##graphics);
 
-       setupUi(game.puzzle);
+       setupUi(game.puzzle, image);
        setupSound();
 
        if (playboard->data("initial-view") !== Js.Nullable.undefined) {
@@ -184,7 +188,8 @@ let play = (): unit => {
 
        if (game.isStandalone) {
          game |> Game.shuffle;
-         game |> Game.setUpdated;
+         let _ = Js.Global.setTimeout(() => game |> Game.setUpdated, 0);
+         ();
        };
 
        jquery("#picture")->fadeOut("slow");
@@ -198,8 +203,10 @@ let play = (): unit => {
      });
 
   if (game.isStandalone) {
-    game.puzzle
-    ->Puzzle.parse(jquery(playboard->data("puzzle-content"))->getText());
+    game
+    |> Game.loadContent(
+         jquery(playboard->data("puzzle-content"))->getText(),
+       );
   } else {
     game |> connectGameChannel;
   };
