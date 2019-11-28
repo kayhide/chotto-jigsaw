@@ -1,4 +1,4 @@
-class PictureAttachment < ActiveStorage::Attachment
+class PuzzlePictureAttachment < ActiveStorage::Attachment
   default_scope { where(record_type: "Puzzle", name: "picture") }
 
   belongs_to :puzzle, foreign_key: :record_id

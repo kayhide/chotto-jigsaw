@@ -2,14 +2,14 @@ class PublicController < ApplicationController
   def index
     @games =
       Game
-        .active
+        .not_finished
         .order(updated_at: :desc)
         .limit(18)
     @pictures =
       Picture
         .order(created_at: :desc)
         .where(
-          id: PictureAttachment.distinct.select(:blob_id)
+          id: UserPicturesAttachment.select(:blob_id)
         )
   end
 end

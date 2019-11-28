@@ -1,23 +1,29 @@
-h2 Active Games
-.row
-  - @games.each do |game|
-    - puzzle = game.puzzle
-    .col-6.col-md-4.col-lg-2.p-1
-      .card.puzzle id=dom_id(game)
-        = link_to game do
-          = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
-        .progress class=puzzle.difficulty
-          .progress-bar style="width:#{game.progress * 100}%"
-        .card-body
-          = puzzle.pieces_count
-          span< pcs
-          .float-right
-            = puzzle.difficulty
+ul.nav.nav-pills.nav-fill role="tablist"
+  li.nav-item
+    a#pills-games-tab.nav-link.active data-toggle="pill" href="#games" role="tab" aria-controls="pills-games" aria-selected="true"
+      i.fas.fa-play>
+      | Games
+  li.nav-item
+    a#pills-pictures-tab.nav-link data-toggle="pill" href="#pictures" role="tab" aria-controls="pills-pictures" aria-selected="false"
+      i.fas.fa-image>
+      | Pictures
 
-h2.mt-3 Pictures
-.row
-  - @pictures.each do |picture|
-    .col-6.col-md-4.col-lg-2.p-1
-      .card.picture id=dom_id(picture)
-        = link_to [picture, :games] do
-          = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid)
+#pills-tabContent.tab-content.mt-3
+  #games.tab-pane.fade.show.active role="tabpanel" aria-labelledby="pills-games-tab"
+    .row
+      - @games.each do |game|
+        - puzzle = game.puzzle
+        .col-6.col-md-4.col-lg-2.p-2
+          .card.puzzle.rounded id=dom_id(game)
+            = render "games/join", game: game do
+              = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
+            .progress class=puzzle.difficulty
+              .progress-bar style="width:#{game.progress * 100}%"
+
+  #pictures.tab-pane.fade role="tabpanel" aria-labelledby="pills-pictures-tab"
+    .row
+      - @pictures.each do |picture|
+        .col-6.col-md-4.col-lg-2.p-2
+          .card.picture id=dom_id(picture)
+            = link_to [picture, :games] do
+              = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid border rounded)

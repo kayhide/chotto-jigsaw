@@ -36,7 +36,7 @@ class GamesController < ApplicationController
 
     @game = Game.create!(puzzle: @puzzle)
     ShuffleJob.perform_later(@game)
-    redirect_to @game, notice: 'Game was successfully created.'
+    redirect_to @game
 
   rescue
     redirect_to [@picture, :games], alert: 'Failed to create a Game'

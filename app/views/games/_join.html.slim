@@ -1,0 +1,12 @@
+- classes ||= []
+- login_to_join_this_game = capture do
+  => link_to "Login", [:login]
+  | to join this Game.
+
+- if current_user.playable_difficulties.include? game.puzzle.difficulty
+  = link_to game, class: classes do
+    == yield
+- else
+  span class=classes data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_join_this_game.to_str
+    == yield
+    i.fas.fa-lock.fa-2x.overlay

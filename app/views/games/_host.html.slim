@@ -1,0 +1,13 @@
+- login_to_host_a_new_game = capture do
+  => link_to "Login", [:login]
+  | to host a new Game.
+
+- if current_user.hostable_difficulties.include? difficulty
+  = form_for Puzzle.new(difficulty: difficulty), url: [picture, :games], html: { class: %w(form-inline) } do |f|
+    = f.hidden_field :difficulty
+    = f.button type: :submit, class: %W(btn btn-block bg-#{difficulty}) do
+      == yield
+- else
+  button.btn.btn-block.disabled class="bg-#{difficulty}" data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_host_a_new_game.to_str
+    == yield
+  i.fas.fa-lock.fa-2x.overlay
