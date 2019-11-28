@@ -8,14 +8,12 @@ type image = Webapi.Dom.HtmlImageElement.t;
 
 module Guider = {
   type t = {
-    puzzle,
-    image,
+    game: Game.t,
     mutable _active: bool,
   };
 
-  let create = (puzzle: puzzle, image: image): t => {
-    puzzle,
-    image,
+  let create = (game: Game.t): t => {
+    game,
     _active: false,
   };
 
@@ -28,10 +26,11 @@ module Guider = {
         jquery("#active-canvas")->addClass("z-depth-3") :
         jquery("#active-canvas")->removeClass("z-depth-3");
 
-    let drawer = PuzzleDrawer.create(guider.image);
+    let drawer = PuzzleDrawer.create(guider.game.image);
+    let puzzle = guider.game.puzzle;
     drawer.drawsGuide = b;
-    drawer |> PuzzleDrawer.draw(guider.puzzle, guider.puzzle.shape##graphics);
-    guider.puzzle.stage |> Stage.invalidate;
+    drawer |> PuzzleDrawer.draw(puzzle, puzzle.shape##graphics);
+    puzzle.stage |> Stage.invalidate;
   };
 
   let toggle = (guider: t): unit =>
@@ -51,7 +50,8 @@ let setupLogger = (): unit => {
   |> Maybe.traverse_(log' => Logger.append(append'(log')));
 };
 
-let setupUi = (puzzle: Puzzle.t, image: image): unit => {
+let setupUi = (game: Game.t): unit => {
+
   Ticker.addEventListener("tick", () =>
     jquery("#info .fps")
     ->setText(
@@ -62,7 +62,7 @@ let setupUi = (puzzle: Puzzle.t, image: image): unit => {
 
   let _ = jquery("#field")->fadeIn("slow");
 
-  let guider = Guider.create(puzzle, image);
+  let guider = Guider.create(game);
   let _ =
     jquery(window)
     ->on("keydown", e => {
@@ -112,7 +112,7 @@ let setupUi = (puzzle: Puzzle.t, image: image): unit => {
       jquery("#progressbar")
       ->setWidth(
           (
-            (puzzle |> Puzzle.progress)
+            (game |> Game.progress)
             *. 100.0
             |> Js.Math.floor_int
             |> Js.Int.toString
@@ -166,11 +166,10 @@ let play = (): unit => {
   |> Game.onReady(() => {
        Logger.trace("game ready");
 
-       let image = game.image |> Maybe.fromJust;
-       PuzzleDrawer.create(image)
+       PuzzleDrawer.create(game.image)
        |> PuzzleDrawer.draw(game.puzzle, game.puzzle.shape##graphics);
 
-       setupUi(game.puzzle, image);
+       setupUi(game);
        setupSound();
 
        if (playboard->data("initial-view") !== Js.Nullable.undefined) {
@@ -211,19 +210,7 @@ let play = (): unit => {
     game |> connectGameChannel;
   };
 
-  let image = HtmlImageElement.make();
-  image->HtmlImageElement.setCrossOrigin(Some("anonymous"));
-  let _ =
-    jquery(image)
-    ->on("load", _e => {
-        Logger.trace(
-          "image loaded: "
-          ++ (image |> HtmlImageElement.src |> Filename.basename),
-        );
-        game |> Game.loadImage(image);
-      });
-
-  playboard->data("picture") |> image->HtmlImageElement.setSrc;
+  game |> Game.loadImage(playboard->data("picture"));
 };
 
 jquery(document)->ready(play);
