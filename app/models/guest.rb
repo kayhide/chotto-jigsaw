@@ -15,11 +15,15 @@ class Guest < User
     true
   end
 
-  def available_difficulties
-    super.take(3)
+  def hostable_difficulties
+    super.take(0)
+  end
+
+  def playable_difficulties
+    super.take(2)
   end
 
   def accessible_difficulties
-    super.take(3)
+    super.take(4)
   end
 end

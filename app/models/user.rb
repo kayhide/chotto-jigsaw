@@ -8,11 +8,23 @@ class User < ApplicationRecord
     false
   end
 
-  def available_difficulties
+  def playable_difficulties
+    Puzzle::DIFFICULTIES.take(4)
+  end
+
+  def hostable_difficulties
     Puzzle::DIFFICULTIES.take(4)
   end
 
   def accessible_difficulties
-    Puzzle::DIFFICULTIES.take(5)
+    Puzzle::DIFFICULTIES.take(4)
+  end
+
+  def is_playable? difficulty
+    playable_difficulties.include? difficulty
+  end
+
+  def is_hostable? difficulty
+    hostable_difficulties.include? difficulty
   end
 end

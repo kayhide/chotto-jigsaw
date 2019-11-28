@@ -1,14 +1,26 @@
-.row.justify-content-center
-  .col-sm-12.col-md-6.p-2
-    div id=dom_id(@picture)
-      = image_tag @picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid rounded)
+- login_to_host_a_new_game = capture do
+  => link_to "Login", [:login]
+  | to host a new Game.
+- login_to_join_this_game = capture do
+  => link_to "Login", [:login]
+  | to join this Game.
+
+- hostables = current_user.hostable_difficulties
+- playables = current_user.playable_difficulties
 
 .row
-  - current_user.available_difficulties.each do |difficulty|
-    .col-6.col-md.p-2
-      = form_for Puzzle.new(difficulty: difficulty), url: [@picture, :games], html: { class: %w(form-inline) } do |f|
-        = f.hidden_field :difficulty
-        = f.button type: :submit, class: %W(btn btn-block bg-#{difficulty}) do
+  - current_user.accessible_difficulties.each do |difficulty|
+    .col-6.col-md.p-3
+      - if hostables.include? difficulty
+        = form_for Puzzle.new(difficulty: difficulty), url: [@picture, :games], html: { class: %w(form-inline) } do |f|
+          = f.hidden_field :difficulty
+          = f.button type: :submit, class: %W(btn btn-block bg-#{difficulty}) do
+            .text-center
+              i.fas.fa-magic
+            .text-center
+              = difficulty.humanize
+      - else
+        button.btn.btn-block.disabled class="bg-#{difficulty}" data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_host_a_new_game.to_str
           .text-center
             i.fas.fa-magic
           .text-center
@@ -17,10 +29,16 @@
 - if @games.present?
   .list-group.mt-3.mb-2
     - @games.each do |game|
-      = link_to game, class: %w(list-group-item list-group-item-action) do
-        .d-flex.align-items-center
-          .flex-shrink-1
-            i.fas.fa-play.fa-fw class="text-#{game.puzzle.difficulty}"
-          .progress.w-100.ml-3 class=game.puzzle.difficulty
-            .progress-bar style="width:#{game.progress * 100}%"
-              .px-3 = game.puzzle.difficulty.capitalize
+      - content = capture do
+          .d-flex.align-items-center
+            .flex-shrink-1
+              i.fas.fa-play.fa-fw class="text-#{game.puzzle.difficulty}"
+            .progress.w-100.ml-3 class=game.puzzle.difficulty
+              .progress-bar style="width:#{game.progress * 100}%"
+                .px-3 = game.puzzle.difficulty.capitalize
+      - if playables.include? game.puzzle.difficulty
+        = link_to game, class: %w(list-group-item list-group-item-action) do
+          = content
+      - else
+        .list-group-item.list-group-item-action data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_join_this_game.to_str
+          = content

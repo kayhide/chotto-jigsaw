@@ -23,7 +23,9 @@ import BackgroundPicture from "./background-picture";
 import "../styles/application";
 
 $(document).ready(() => {
-  bsCustomFileInput.init()
+  $('[data-toggle="popover"]').popover();
+  $('[data-toggle="tooltip"]').tooltip();
+  bsCustomFileInput.init();
   LoadingWatcher.init();
   BackgroundPicture.init();
 })

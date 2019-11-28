@@ -1,4 +1,5 @@
 class GamesController < ApplicationController
+  before_action :authenticate!
   before_action :set_game, only: [:show, :destroy]
   before_action :set_puzzle
   before_action :set_picture
