@@ -58,6 +58,9 @@ let piecesCount = (puzzle: t): int => puzzle.pieces |> Array.length;
 
 let initizlize = (image, puzzle: t): unit => puzzle.image = Some(image);
 
+let isReady = (puzzle: t): bool =>
+  0 < (puzzle |> piecesCount) && (puzzle.image |> Maybe.isSome)
+
 let progress = puzzle: float => {
   let i =
     puzzle.pieces

@@ -23,16 +23,43 @@ class GameChannel < ApplicationCable::Channel
     )
   end
 
-  def request_update data
-    commands = game.commands.order(:id)
-    if since = data["since"]
-      commands = commands.where(created_at: since .. DateTime.current)
-    end
-    commands.in_batches(of: COMMIT_BATCH_SIZE) do |cmds|
+  def request_content data
+    game.reload
+    if game.puzzle.ready?
+      game.puzzle.load_content!
+      content = game.puzzle.slice(:pieces, :linear_measure).to_json
       transmit(
-        action: :commit,
-        token: nil,
-        commands: cmds.map(&:command_attributes)
+        action: :content,
+        success: true,
+        content: content
+      )
+    else
+      transmit(
+        action: :content,
+        success: false,
+      )
+    end
+  end
+
+  def request_update data
+    game.reload
+    if game.shuffled_at?
+      commands = game.commands.order(:id)
+      if since = data["since"]
+        commands = commands.where(created_at: since .. DateTime.current)
+      end
+      commands.in_batches(of: COMMIT_BATCH_SIZE) do |cmds|
+        transmit(
+          action: :commit,
+          success: true,
+          token: nil,
+          commands: cmds.map(&:command_attributes)
+        )
+      end
+    else
+      transmit(
+        action: :update,
+        success: false,
       )
     end
   end

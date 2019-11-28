@@ -1,15 +1,19 @@
 - longer = [@puzzle.width, @puzzle.height].max
 - view = { x: @puzzle.width * 0.5 - longer, y: @puzzle.height * 0.5 - longer, width: longer * 2, height: longer * 2 }
-#playboard.bg-cinnamint data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-puzzle="#puzzle" data-initial-view=view.to_json data-standalone=@standalone
+#playboard.bg-cinnamint data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-initial-view=view.to_json data-standalone=@standalone data-puzzle-content="#puzzle-content"
   canvas#field.hidden
   canvas#active-canvas.hidden
 
-  #game-progress.progress class=([@puzzle.difficulty] + (@standalone ? %w(offline) : []))
+  #game-progress.progress class=([@puzzle.difficulty] + (@standalone ? %w(standalone) : []))
     #progressbar.progress-bar style="width:0%"
 
   #info.white-text
     p.fps
     p = @puzzle.pieces_count
+
+#picture.row.justify-content-center.align-items-center.position-absolute.vw-100.vh-100.m-0
+  .col-6
+    = image_tag @puzzle.picture.variant(resize_to_fill: [800, 600]), class: %w(img-fluid)
 
 #back-button
   = link_to :root, class: %w(btn btn-fab btn-sm btn-dark) do
@@ -41,5 +45,6 @@ a#log-button.btn.btn-sm.btn-fab.text-muted href="#"
   audio.merge src="/sounds/merge.mp3"
   audio.merge src="/sounds/merge.wav"
 
-script#puzzle type="application/json"
-  == @puzzle.slice(:pieces, :linear_measure).to_json
+- if @standalone
+  script#puzzle-content type="application/json"
+    == @puzzle.slice(:pieces, :linear_measure).to_json

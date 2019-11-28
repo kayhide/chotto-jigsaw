@@ -4,8 +4,8 @@
       .card.puzzle id=dom_id(puzzle)
         = link_to [puzzle, :games, :standalone] do
           = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
-        .progress.offline class=puzzle.difficulty
-          .progress-bar
+        .progress.standalone class=puzzle.difficulty
+          .progress-bar.w-100
         .card-body
           = puzzle.pieces_count
           span< pcs

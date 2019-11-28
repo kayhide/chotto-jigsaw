@@ -134,12 +134,12 @@ let setupSound = (): unit => {
   );
 };
 
-let connectGameChannel = (puzzle: puzzle, game_id: int): unit => {
-  GameChannel.subscribe(puzzle, game_id);
+let connectGameChannel = (game: Game.t): unit => {
+  GameChannel.subscribe(game);
   CommandManager.onCommit(GameChannel.commit);
   CommandManager.onCommit(cmds =>
     if (!cmds.extrinsic && cmds.commands |> Js.Array.some(Command.isMerge)) {
-      GameChannel.report_progress(puzzle |> Puzzle.progress);
+      GameChannel.report_progress(game.puzzle |> Puzzle.progress);
     }
   );
 };
@@ -149,46 +149,66 @@ let play = (): unit => {
 
   let playboard = jquery("#playboard");
 
-  let puzzle =
-    Puzzle.create(document |> getElementById("field") |> Maybe.fromJust);
-  puzzle->Puzzle.parse(jquery(playboard->data("puzzle"))->getText());
+  let gameId =
+    playboard->data("game-id") |> Js.Nullable.toOption |> Maybe.fromMaybe(0);
+  let game =
+    document
+    |> getElementById("field")
+    |> Maybe.fromJust
+    |> Game.create(gameId);
+  Js.log("game id: " ++ string_of_int(gameId));
+  Js.log("standalone: " ++ string_of_bool(game.isStandalone));
+
+  game
+  |> Game.onReady(() => {
+       Logger.trace("game ready");
+
+       PuzzleDrawer.create()
+       |> PuzzleDrawer.draw(game.puzzle, game.puzzle.shape##graphics);
+
+       setupUi(game.puzzle);
+       setupSound();
+
+       let gi = GameInteractor.create(game.puzzle);
+
+       if (playboard->data("initial-view") !== Js.Nullable.undefined) {
+         let size = playboard->data("initial-view");
+         Rectangle.create(size##x, size##y, size##width, size##height)
+         |> View.contain(game.puzzle);
+       };
+       if (game.isStandalone) {
+         gi |> GameInteractor.shuffle;
+         /* CommandManager.commit(); */
+         game.puzzle |> View.fit;
+       };
+
+       gi |> BrowserInteractor.attach;
+       if (Screen.isTouchScreen()) {
+         gi |> TouchInteractor.attach;
+       } else {
+         gi |> MouseInteractor.attach;
+       };
+
+       jquery("#picture")->fadeOut("slow");
+     });
+
+  if (game.isStandalone) {
+    game.puzzle
+    ->Puzzle.parse(jquery(playboard->data("puzzle-content"))->getText());
+  } else {
+    game |> connectGameChannel;
+  };
 
   let image = HtmlImageElement.make();
   image->HtmlImageElement.setCrossOrigin(Some("anonymous"));
   let _ =
     jquery(image)
     ->on("load", _e => {
-        Logger.trace("image loaded: " ++ (image |> HtmlImageElement.src));
-        puzzle |> Puzzle.initizlize(image);
-        PuzzleDrawer.create()
-        |> PuzzleDrawer.draw(puzzle, puzzle.shape##graphics);
-
-        setupUi(puzzle);
-        setupSound();
-
-        let game = GameInteractor.create(puzzle);
-
-        if (playboard->data("initial-view") !== Js.Nullable.undefined) {
-          let size = playboard->data("initial-view");
-          View.contain(
-            puzzle,
-            Rectangle.create(size##x, size##y, size##width, size##height),
-          );
-        };
-        if (playboard->data("standalone") !== Js.Nullable.undefined) {
-          game |> GameInteractor.shuffle;
-          /* CommandManager.commit(); */
-          puzzle |> View.fit;
-        } else {
-          connectGameChannel(puzzle, playboard->data("game-id"));
-        };
-
-        game |> BrowserInteractor.attach;
-        if (Screen.isTouchScreen()) {
-          game |> TouchInteractor.attach;
-        } else {
-          game |> MouseInteractor.attach;
-        };
+        Logger.trace(
+          "image loaded: "
+          ++ (image |> HtmlImageElement.src |> Filename.basename),
+        );
+        game |> Game.loadImage(image);
       });
 
   playboard->data("picture") |> image->HtmlImageElement.setSrc;

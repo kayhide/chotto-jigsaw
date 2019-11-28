@@ -56,7 +56,7 @@ $difficulty-colors: (
 }
 
 .progress {
-  &.offline {
+  &.standalone {
     .progress-bar {
       @extend .progress-bar-striped;
     }

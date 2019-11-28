@@ -15,7 +15,6 @@ class GamesController < ApplicationController
   end
 
   def show
-    @puzzle.load_content!
     cookies.encrypted[:user_id] = current_user_id
   end
 

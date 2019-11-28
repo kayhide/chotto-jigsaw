@@ -5,6 +5,8 @@ class ShuffleJob < ApplicationJob
   queue_as :default
 
   def perform game
+    verify_puzzle! game
+
     puzzle = game.puzzle
     user = puzzle.user
 
@@ -38,6 +40,6 @@ class ShuffleJob < ApplicationJob
   end
 
   def verify_puzzle! game
-    raise NotAnalyzedError unless game.puzzle.ready?
+    raise NotReadyError unless game.puzzle.ready?
   end
 end

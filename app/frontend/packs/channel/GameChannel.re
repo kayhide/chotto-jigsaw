@@ -12,8 +12,10 @@ module X = {
   type data = {
     .
     "action": string,
+    "success": bool,
     "token": token,
     "commands": any,
+    "content": string,
   };
   type funcs = {
     .
@@ -36,14 +38,42 @@ include ActionCable.Make(X);
 
 let subscription: ref(option(subscription)) = ref(None);
 
-let _received = (puzzle: Puzzle.t, data: X.data): unit => {
+let _received = (game: Game.t, data: X.data): unit => {
   let this = subscription^ |> Maybe.fromJust;
   Logger.trace("received: " ++ data##action);
   switch (data##action) {
   | "init" =>
     this##token #= data##token;
-    this->_perform("request_update", Js.Obj.empty());
-    ();
+    if (!(game |> Game.isReady)) {
+      this->_perform("request_content", Js.Obj.empty());
+    } else {
+      this->_perform("request_update", Js.Obj.empty());
+    };
+  | "content" =>
+    if (!(game |> Game.isReady)) {
+      if (data##success) {
+        game |> Game.loadContent(data##content);
+        this->_perform("request_update", Js.Obj.empty());
+      } else {
+        Logger.trace("failed: " ++ data##action);
+        let _ =
+          Js.Global.setTimeout(
+            () => this->_perform("request_content", Js.Obj.empty()),
+            3000,
+          );
+        ();
+      };
+    };
+  | "update" =>
+    if (!data##success) {
+      Logger.trace("failed: " ++ data##action);
+      let _ =
+        Js.Global.setTimeout(
+          () => this->_perform("request_update", Js.Obj.empty()),
+          3000,
+        );
+      ();
+    }
   | _ => ()
   };
   if (data##token !== this##token) {
@@ -54,7 +84,7 @@ let _received = (puzzle: Puzzle.t, data: X.data): unit => {
       |> fromAny
       |> Array.map(Bridge.decode)
       |> Array.iter(x => cmds |> CommandGroup.squash(x));
-      cmds |> CommandManager.receive(puzzle);
+      cmds |> CommandManager.receive(game.puzzle);
     | _ => ()
     };
   };
@@ -76,10 +106,10 @@ let report_progress = (x: float): unit => {
   this->_perform("report_progress", {"progress": x});
 };
 
-let subscribe = (puzzle: Puzzle.t, game_id: int): unit => {
-  let identifier = {"channel": "GameChannel", "game_id": game_id};
+let subscribe = (game: Game.t): unit => {
+  let identifier = {"channel": "GameChannel", "game_id": game.id};
   let funcs = {
-    "received": _received(puzzle),
+    "received": _received(game),
     "commit": commit,
     "report_progress": report_progress,
   };
