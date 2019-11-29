@@ -18,9 +18,7 @@ let execute = (puzzle: puzzle, cmd: t): unit => {
     |> IntSet.union(piece.neighborIds);
 
   mergee |> Piece.setMerger(piece);
-
   mergee.loops |> List.iter(lp => piece |> Piece.addLoop(lp));
-  piece |> Piece.enbox(mergee);
 };
 
 let isValid = (puzzle: puzzle, cmd: t): bool => {

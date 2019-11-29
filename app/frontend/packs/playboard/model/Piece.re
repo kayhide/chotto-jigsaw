@@ -1,17 +1,11 @@
 type point = Point.t;
 type rectangle = Rectangle.t;
 
-type actor =
-  | Unboxed(DisplayObject.t)
-  | Boxed(DisplayObject.t);
-
 type loop = list(option(point));
 
 type t = {
   id: int,
   mutable loops: list(loop),
-  shape: DisplayObject.t,
-  mutable actor,
   mutable neighborIds: IntSet.t,
   mutable _position: point,
   mutable _rotation: float,
@@ -29,12 +23,8 @@ let parse = src: t => {
          |> Js.Nullable.toOption
          |> Maybe.map(p' => Point.create(p'[0], p'[1]))
        );
-  let shape = Shape.create();
-  let actor = Unboxed(shape);
   let piece = {
     id: src##number,
-    shape,
-    actor,
     loops: [loop],
     neighborIds: src##neighbors |> Array.to_list |> IntSet.of_list,
     _position: Point.create(0.0, 0.0),
@@ -120,56 +110,3 @@ let boundary = piece: rectangle =>
   };
 
 let center = piece: point => piece |> boundary |> Rectangle.center;
-
-let cache = (~scale=1.0, piece): unit => {
-  let rect = piece |> localBoundary |> Rectangle.inflate(4.0);
-  switch (piece.actor) {
-  | Unboxed(s) =>
-    s
-    |> DisplayObject.cache(rect##x, rect##y, rect##width, rect##height, scale)
-  | Boxed(s) =>
-    s
-  |> DisplayObject.cache(rect##x, rect##y, rect##width, rect##height, scale)
-  };
-};
-
-let unwrapActor = (piece: t): DisplayObject.t =>
-  switch (piece.actor) {
-  | Unboxed(s) => s
-  | Boxed(c) => c
-  };
-
-let withActor = (f: DisplayObject.t => 'a, piece: t): 'a =>
-  piece |> unwrapActor |> f;
-
-let enbox = (p: t, piece: t): unit => {
-  open DisplayObject;
-  let container =
-    switch (piece.actor) {
-    | Unboxed(s) =>
-      /* piece.shape##uncache(); */
-      let container = Container.create();
-      s |> copyTransform(container);
-      s |> clearTransform;
-      s |> parent |> Maybe.traverse_(c => c->Container.addChild(container));
-      container->Container.addChild(s);
-      /* container##piece #= piece; */
-      piece.actor = Boxed(container);
-      container;
-    | Boxed(c) => c
-    };
-  /* p.shape.uncache(); */
-  switch (p.actor) {
-  | Unboxed(s) =>
-    s |> clearTransform;
-    container->Container.addChild(s);
-  | Boxed(c) =>
-    c |> Container.transportTo(container);
-    c |> Container.remove;
-  };
-  /* piece.cache(); */
-  piece._localBoundary =
-    piece._localBoundary
-    |> Maybe.map(Rectangle.addRectangle(p |> localBoundary));
-  piece._boundary = None;
-};

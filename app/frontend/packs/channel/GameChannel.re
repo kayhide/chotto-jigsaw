@@ -85,7 +85,7 @@ let _received =
             |> Array.iter(x => cmds |> CommandGroup.squash(x));
             game
             |> Game.whenReady(() =>
-                 cmds |> CommandManager.receive(game.puzzle)
+                 cmds |> CommandManager.receive(game.puzzleActor.body)
                );
           | _ => ()
           };

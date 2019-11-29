@@ -47,7 +47,7 @@ let attach = (gi: GameInteractor.t): unit => {
   Logger.trace("attached: TouchInteractor");
   dragger := gi |> GameInteractor.defaultDragger;
   open Hammer;
-  let hammer = setupHammer(gi.puzzle.stage |> Stage.canvas);
+  let hammer = setupHammer(gi.baseStage |> Stage.canvas);
 
   hammer
   ->on("tap", e => {
@@ -62,7 +62,7 @@ let attach = (gi: GameInteractor.t): unit => {
       Logger.trace(e##"type");
       dragger := dragger^.finish();
       hammer |> updateListeners;
-      gi.puzzle |> View.fit;
+      gi.game |> View.fit;
     });
 
   hammer

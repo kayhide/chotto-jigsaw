@@ -3,8 +3,8 @@ type image = Webapi.Dom.HtmlImageElement.t;
 type t = {
   id: int,
   isStandalone: bool,
-  puzzle: Puzzle.t,
-  pieces: array(Piece.t),
+  mutable puzzleActor: PuzzleActor.t,
+  mutable pieceActors: array(PieceActor.t),
   image,
   mutable isImageLoaded: bool,
   mutable isUpdated: bool,
@@ -16,6 +16,7 @@ let create = (id: int, canvas): t => {
   open Webapi.Dom;
 
   let puzzle = Puzzle.create(canvas);
+  let puzzleActor = PuzzleActor.create(puzzle);
   let image = HtmlImageElement.make();
   image->HtmlImageElement.setCrossOrigin(Some("anonymous"));
   {
@@ -23,18 +24,18 @@ let create = (id: int, canvas): t => {
     isStandalone: 0 == id,
     isImageLoaded: false,
     isUpdated: false,
-    puzzle,
-    pieces: [||],
+    puzzleActor,
+    pieceActors: [||],
     image,
     readyHandlers: EventHandler.create(),
     updatedHandlers: EventHandler.create(),
   };
 };
 
-let progress = (game: t): float => game.puzzle |> Puzzle.progress;
+let progress = (game: t): float => game.puzzleActor.body |> Puzzle.progress;
 
 let isReady = (game: t): bool =>
-  game.puzzle |> Puzzle.isReady && game.isImageLoaded;
+  game.puzzleActor.body |> Puzzle.isReady && game.isImageLoaded;
 
 let fireUpdated = (game: t): unit =>
   if (game |> isReady && game.isUpdated) {
@@ -48,7 +49,11 @@ let fireReady = (game: t): unit =>
   };
 
 let loadContent = (data: string, game: t): unit => {
-  game.puzzle->Puzzle.parse(data);
+  game.puzzleActor.body->Puzzle.parse(data);
+  game.pieceActors = game.puzzleActor.body.pieces |> Array.map(PieceActor.create);
+  game.pieceActors
+  |> Array.map((a: PieceActor.t) => a.shape)
+  |> Array.iter(game.puzzleActor.container->Container.addChild);
   game |> fireReady;
 };
 
@@ -85,7 +90,8 @@ let whenReady = (f: unit => unit, game: t): unit =>
     game |> onReady(f);
   };
 
-let shuffle = (game: t): unit => {
+let shuffle = (game: t): unit =>
+  {
   open Webapi.Dom;
   open DisplayObject;
 
@@ -93,17 +99,23 @@ let shuffle = (game: t): unit => {
   let width = image'->HtmlImageElement.width;
   let height = image'->HtmlImageElement.height;
   let s = Js.Int.toFloat(Js.Math.max_int(width, height) * 2);
-  game.puzzle.pieces
-  |> Js.Array.filter(Piece.isAlive)
-  |> Array.iter(p => {
-       let center = p |> Piece.center;
-       let center' = p |> Piece.withActor(a => center |> toGlobalFrom(a));
-       let degree = Js.Math.random() *. 360.0 -. 180.0;
-       Command.rotate(p.id, center', degree)
-       |> CommandManager.post(game.puzzle);
-       let vec = Point.create(Js.Math.random() *. s, Js.Math.random() *. s);
-       Command.translate(p.id, vec |> Point.subtract(center'))
-       |> CommandManager.post(game.puzzle);
-     });
+  game.pieceActors
+  |> Js.Array.filter((p: PieceActor.t) => p.body |> Piece.isAlive)
+  |> Array.iter((p: PieceActor.t) => {
+      let center = p.body |> Piece.center;
+      let center' = p |> PieceActor.withSkin(a => center |> toGlobalFrom(a));
+      let degree = Js.Math.random() *. 360.0 -. 180.0;
+      Command.rotate(p.body.id, center', degree)
+      |> CommandManager.post(game.puzzleActor.body);
+      let vec = Point.create(Js.Math.random() *. s, Js.Math.random() *. s);
+      Command.translate(p.body.id, vec |> Point.subtract(center'))
+      |> CommandManager.post(game.puzzleActor.body);
+    });
   CommandManager.commit();
-};
+}
+
+let findPieceActor = (id: int, game: t): PieceActor.t =>
+  game.pieceActors[id];
+
+let findPieceEntityActor = (id: int, game: t): PieceActor.t =>
+  game.pieceActors[(game.puzzleActor.body |> Puzzle.findPiece(id) |> Piece.entity).id];

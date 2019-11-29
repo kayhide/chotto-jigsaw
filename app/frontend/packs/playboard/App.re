@@ -1,9 +1,6 @@
 open Webapi.Dom;
 open JQuery;
 
-type puzzle = Puzzle.t;
-type image = HtmlImageElement.t;
-
 external fromTokenList: DomTokenList.t => Js.Array.array_like(DomTokenList.t) =
   "%identity";
 
@@ -14,32 +11,6 @@ type app = {
   field: Webapi.Dom.Element.t,
   sounds: Webapi.Dom.Element.t,
   log: option(Webapi.Dom.Element.t),
-};
-
-module Guider = {
-  type t = {
-    game: Game.t,
-    mutable isActive: bool,
-  };
-
-  let create = (game: Game.t): t => {game, isActive: false};
-
-  let setActive = (b: bool, guider: t): unit => {
-    guider.isActive = b;
-    let _ =
-      b ?
-        jquery("#active-canvas")->addClass("z-depth-3") :
-        jquery("#active-canvas")->removeClass("z-depth-3");
-
-    let drawer = PuzzleDrawer.create(guider.game.image);
-    let puzzle = guider.game.puzzle;
-    drawer.drawsGuide = b;
-    drawer |> PuzzleDrawer.draw(puzzle, puzzle.shape##graphics);
-    puzzle.stage |> Stage.invalidate;
-  };
-
-  let toggle = (guider: t): unit =>
-    guider |> setActive(!guider.isActive);
 };
 
 let setupLogger = (): unit => {
@@ -69,18 +40,6 @@ let setupUi = (game: Game.t, app: app): unit => {
   );
 
   let _ = jquery("#field")->fadeIn("slow");
-
-  let guider = Guider.create(game);
-  let _ =
-    jquery(window)
-    ->on("keydown", e => {
-        if (e##key === "F1") {
-          jquery("#log-button")->trigger("click");
-        };
-        if (e##key === "F2") {
-          guider |> Guider.toggle;
-        };
-      });
 
   let _ =
     jquery("#log-button")
@@ -150,14 +109,12 @@ let connectGameChannel = (game: Game.t): unit => {
   CommandManager.onCommit(sub->GameChannel.commit);
   CommandManager.onCommit(cmds =>
     if (!cmds.extrinsic && cmds.commands |> Js.Array.some(Command.isMerge)) {
-      sub->GameChannel.report_progress(game.puzzle |> Puzzle.progress);
+      sub->GameChannel.report_progress(game |> Game.progress);
     }
   );
 };
 
 let play = (app: app): unit => {
-  open Document;
-
   setupLogger();
 
   let gameId =
@@ -174,8 +131,21 @@ let play = (app: app): unit => {
   |> Game.onReady(() => {
        Logger.trace("game ready");
 
-       PuzzleDrawer.create(game.image)
-       |> PuzzleDrawer.draw(game.puzzle, game.puzzle.shape##graphics);
+       PuzzleDrawer.(
+         create(game.image)
+         |> draw(game.puzzleActor.body, game.puzzleActor.shape##graphics)
+       );
+
+       PieceDrawer.(
+         create(game.image)
+         |> (
+           d =>
+             game.pieceActors
+             |> Array.iter((p: PieceActor.t) =>
+                  draw(p.body, p.shape##graphics, d)
+                )
+         )
+       );
 
        app |> setupUi(game);
        app |> setupSound;
@@ -184,10 +154,12 @@ let play = (app: app): unit => {
            !== Js.Nullable.undefined) {
          let size = jquery(app.playboard)->data("initial-view");
          Rectangle.create(size##x, size##y, size##width, size##height)
-         |> View.contain(game.puzzle);
+         |> View.contain(game);
        };
-       let gi = GameInteractor.create(game.puzzle);
+
+       let gi = GameInteractor.create(game);
        gi |> BrowserInteractor.attach;
+       gi |> GuideInteractor.attach;
        if (Screen.isTouchScreen()) {
          gi |> TouchInteractor.attach;
        } else {
@@ -207,7 +179,7 @@ let play = (app: app): unit => {
   |> Game.onUpdated(() => {
        Logger.trace("game updated");
        let _ = jquery("#game-progress .loading")->fadeOut("slow");
-       game.puzzle |> View.fit;
+       game |> View.fit;
      });
 
   if (game.isStandalone) {

@@ -6,7 +6,7 @@ let onWindowResize = (gi: GameInteractor.t): unit => {
   let height = window |> Window.innerHeight;
   Logger.trace({j|window resized: width: $width, height: $height|j});
 
-  let canvas = gi.puzzle.stage |> Stage.canvas;
+  let canvas = gi.baseStage |> Stage.canvas;
   canvas->Webapi.Canvas.CanvasElement.setWidth(width);
   canvas->Webapi.Canvas.CanvasElement.setHeight(height);
   let _ =
@@ -15,7 +15,7 @@ let onWindowResize = (gi: GameInteractor.t): unit => {
     ->css("top", 0)
     ->setWidth(width |> Js.Int.toFloat)
     ->setHeight(height |> Js.Int.toFloat);
-  gi.puzzle.stage |> Stage.invalidate;
+  gi.baseStage |> Stage.invalidate;
 };
 
 let attach = (gi: GameInteractor.t): unit => {

@@ -2,12 +2,8 @@ type point = Point.t;
 type rectangle = Rectangle.t;
 type matrix2d = Matrix2D.t;
 type piece = Piece.t;
-type shape = DisplayObject.t;
 
 type t = {
-  stage: shape,
-  container: shape,
-  shape,
   mutable pieces: array(piece),
   mutable linearMeasure: float,
   mutable rotationTolerance: float,
@@ -15,21 +11,10 @@ type t = {
 };
 
 let create = canvas: t => {
-  let stage = Stage.create(canvas);
-  let container = Container.create();
-  let shape = Shape.create();
-  stage->Container.addChild(container);
-  container->Container.addChild(shape);
-
-  {
-    stage,
-    container,
-    shape,
-    pieces: [||],
-    linearMeasure: 0.0,
-    rotationTolerance: 24.0,
-    translationTolerance: 0.0,
-  };
+  pieces: [||],
+  linearMeasure: 0.0,
+  rotationTolerance: 24.0,
+  translationTolerance: 0.0,
 };
 
 [@bs.deriving abstract]
@@ -44,8 +29,6 @@ external parseData: string => puzzle_data('a) = "parse";
 let parse = (puzzle: t, data: string): unit => {
   let content: puzzle_data('a) = parseData(data);
   puzzle.pieces = content |> piecesGet |> Array.map(Piece.parse);
-  puzzle.pieces
-  |> Array.iter(Piece.withActor(puzzle.container->Container.addChild));
   puzzle.linearMeasure = content |> linear_measureGet;
   puzzle.translationTolerance = puzzle.linearMeasure /. 4.0;
 };
@@ -70,12 +53,6 @@ let boundary = (puzzle: t): rectangle =>
        (acc, rect) => acc |> Rectangle.addRectangle(rect),
        Rectangle.empty(),
      );
-let currentScale = (puzzle: t): float => puzzle.container##scaleX;
-
-[@bs.send] external update: (shape, unit) => unit = "update";
-[@bs.send] external invalidate: (shape, unit) => unit = "invalidate";
-
-let invalidate = puzzle: unit => puzzle.stage->invalidate();
 
 let findPiece = (id: int, puzzle: t): piece => puzzle.pieces[id];
 
@@ -84,3 +61,35 @@ let getAdjacentPieces = (piece: piece, puzzle: t): list(piece) =>
   |> IntSet.elements
   |> List.map(p => puzzle |> findPiece(p) |> Piece.entity)
   |> List.filter((p: piece) => p.id !== piece.id);
+
+let getDegreeTo = (target: piece, source: piece): float => {
+  let deg =
+    (
+      (target |> Piece.rotation)
+      -. (source |> Piece.rotation)
+      |> Js.Math.floor_int
+    )
+    mod 360;
+  Js.Int.toFloat(deg < (-180) ? deg + 360 : 180 <= deg ? deg - 360 : deg);
+};
+
+let isWithinTolerance =
+    (source: piece, target: piece, pt: point, puzzle: t): bool =>
+  if (Js.Math.abs_float(source |> getDegreeTo(target))
+      < puzzle.rotationTolerance) {
+    let pt0 = pt |> Point.apply((source |> Piece.matrix)->Matrix2D.invert);
+    let pt1 = pt |> Point.apply((target |> Piece.matrix)->Matrix2D.invert);
+    pt0 |> Point.distanceTo(pt1) < puzzle.translationTolerance;
+  } else {
+    false;
+  };
+
+let findMergeableOn = (p: piece, point: point, puzzle: t): option(piece) =>
+  switch (
+    puzzle
+    |> getAdjacentPieces(p)
+    |> List.find(p1 => puzzle |> isWithinTolerance(p, p1, point))
+  ) {
+  | p' => Some(p')
+  | exception Not_found => None
+  };

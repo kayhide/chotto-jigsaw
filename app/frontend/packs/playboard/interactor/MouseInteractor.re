@@ -23,7 +23,7 @@ let attach = (gi: GameInteractor.t): unit => {
   Logger.trace("attached: MouseInteractor");
   dragger := gi |> GameInteractor.defaultDragger;
 
-  let canvas = gi.puzzle.stage |> Stage.canvas;
+  let canvas = gi.baseStage |> Stage.canvas;
   jquery(canvas)->on("wheel", onWheel(gi));
 
   jquery(canvas)

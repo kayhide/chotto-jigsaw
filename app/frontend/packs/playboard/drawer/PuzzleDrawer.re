@@ -42,15 +42,4 @@ let draw = (puzzle: puzzle, g, drawer: t): unit => {
   if (drawer.drawsGuide) {
     drawGuide(g);
   };
-
-  let drawer' = PieceDrawer.create(drawer.image);
-
-  puzzle.pieces
-  |> Array.iter(p => {
-       drawer' |> PieceDrawer.draw(p, p.shape##graphics);
-       p |> Piece.cache(~scale=puzzle |> cacheScale);
-       let shape = Shape.create();
-       PieceDrawer.drawHitArea(p, shape##graphics);
-       p.shape##hitArea #= shape;
-     });
 };

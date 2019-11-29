@@ -1,11 +1,12 @@
 open JQuery;
 
 type point = Point.t;
-type piece = Piece.t;
-type puzzle = Puzzle.t;
+type piece = PieceActor.t;
+type puzzle = PuzzleActor.t;
 
 type t = {
-  puzzle,
+  game: Game.t,
+  baseStage: DisplayObject.t,
   activeStage: DisplayObject.t,
   shapeToPiece: Js.Dict.t(piece),
   mutable activePiece: option(piece),
@@ -36,104 +37,123 @@ let rec emptyDragger: dragger = {
 type scaler = (point, float) => unit;
 type mover = point => unit;
 
-let putToActiveLayer = (p: piece, game: t): unit => {
-  game.activePiece = Some(p);
+let putToActiveLayer = (p: piece, gi: t): unit => {
   open Webapi.Canvas;
   open DisplayObject;
-  let rect = p |> Piece.boundary;
+
+  gi.activePiece = Some(p);
+
+  let game = gi.game;
+  let rect = p.body |> Piece.boundary;
   let pt0 =
-    rect |> Rectangle.topLeft |> toWindowFromLocal(game.puzzle.container);
+    rect |> Rectangle.topLeft |> toWindowFromLocal(game.puzzleActor.container);
   let pt1 =
-    rect |> Rectangle.bottomRight |> toWindowFromLocal(game.puzzle.container);
+    rect
+    |> Rectangle.bottomRight
+    |> toWindowFromLocal(game.puzzleActor.container);
 
-  game.puzzle.container |> copyTransform(game.activeStage);
+  game.puzzleActor.container |> copyTransform(gi.activeStage);
 
-  let canvas = game.activeStage |> Stage.canvas;
+  let canvas = gi.activeStage |> Stage.canvas;
   canvas->CanvasElement.setWidth(pt1##x -. pt0##x |> int_of_float);
   canvas->CanvasElement.setHeight(pt1##y -. pt0##y |> int_of_float);
   let _ = jquery(canvas)->css("left", pt0##x)->css("top", pt0##y)->show();
 
   let pt' =
-    p
+    p.body
     |> Piece.position
-    |> toWindowFromLocal(game.puzzle.container)
-    |> fromWindowToLocal(game.activeStage);
+    |> toWindowFromLocal(game.puzzleActor.container)
+    |> fromWindowToLocal(gi.activeStage);
   p
-  |> Piece.withActor(a => {
+  |> PieceActor.withSkin(a => {
        a##x #= pt'##x;
        a##y #= pt'##y;
-       a##rotation #= (p |> Piece.rotation);
-       game.activeStage->Container.addChild(a);
-       game.activeStage->Stage.update;
+       a##rotation #= (p.body |> Piece.rotation);
+       gi.activeStage->Container.addChild(a);
+       gi.activeStage->Stage.update;
      });
 };
 
-let clearActiveLayer = (game: t): unit => {
-  game.activePiece
-  |> Maybe.traverse_(p =>
+let clearActiveLayer = (gi: t): unit => {
+  gi.activePiece
+  |> Maybe.traverse_((p: piece) =>
        p
-       |> Piece.withActor(a => {
-            a##x #= (p |> Piece.position)##x;
-            a##y #= (p |> Piece.position)##y;
-            a##rotation #= (p |> Piece.rotation);
-            game.puzzle.container->Container.addChild(a);
+       |> PieceActor.withSkin(a => {
+            a##x #= (p.body |> Piece.position)##x;
+            a##y #= (p.body |> Piece.position)##y;
+            a##rotation #= (p.body |> Piece.rotation);
+            gi.game.puzzleActor.container->Container.addChild(a);
           })
      );
-  game.activePiece = None;
-  jquery(game.activeStage->Stage.canvas)->hide();
+  gi.activePiece = None;
+  jquery(gi.activeStage->Stage.canvas)->hide();
 };
 
-let isCaptured = (piece_id: int, game: t): bool => {
-  let p = game.puzzle |> Puzzle.findPiece(piece_id);
-  p |> Piece.withActor(DisplayObject.parent) === Some(game.activeStage);
+let isCaptured = (piece_id: int, gi: t): bool => {
+  let p = gi.game.puzzleActor.body |> Puzzle.findPiece(piece_id);
+  gi.game
+  |> Game.findPieceActor(p.id)
+  |> PieceActor.withSkin(DisplayObject.parent) === Some(gi.activeStage);
 };
 
-let release = (piece_id: int, game: t): unit => {
+let release = (piece_id: int, gi: t): unit => {
   Logger.trace("released[" ++ string_of_int(piece_id) ++ "]");
   CommandManager.commit();
-  game |> clearActiveLayer;
-  game.puzzle.stage |> Stage.invalidate;
+  gi |> clearActiveLayer;
+  gi.baseStage |> Stage.invalidate;
 };
 
-let handleTranslate = (cmd: TranslateCommand.t, game: t): unit => {
-  let canvas_: Webapi.Dom.Element.t = game.activeStage |> Stage.canvas;
+let handleTranslate = (cmd: TranslateCommand.t, gi: t): unit => {
+  let canvas_: Webapi.Dom.Element.t = gi.activeStage |> Stage.canvas;
 
   let offset = jquery(canvas_)->getOffset();
   jquery(canvas_)
   ->setOffset({
-      "left": offset##left +. cmd.vector##x *. game.puzzle.container##scaleX,
-      "top": offset##top +. cmd.vector##y *. game.puzzle.container##scaleY,
+      "left":
+        offset##left +. cmd.vector##x *. gi.game.puzzleActor.container##scaleX,
+      "top":
+        offset##top +. cmd.vector##y *. gi.game.puzzleActor.container##scaleY,
     });
 };
 
-let create = (puzzle: puzzle): t => {
-  let canvas_: Webapi.Dom.Element.t = jquery("#active-canvas")->get()[0];
-  let activeStage = Stage.create(canvas_);
+let create = (game: Game.t): t => {
+  open Webapi.Dom.Document;
+
+  let document = Webapi.Dom.document;
+  let baseStage =
+    document |> getElementById("field") |> Maybe.fromJust |> Stage.create;
+  let activeStage =
+    document
+    |> getElementById("active-canvas")
+    |> Maybe.fromJust
+    |> Stage.create;
   let shapeToPiece = Js.Dict.empty();
-  puzzle.pieces
-  |> Array.iter(p =>
-       shapeToPiece
-       ->Js.Dict.set(p |> Piece.withActor(a => a##id) |> Js.Int.toString, p)
+
+  game.pieceActors
+  |> Array.iter((p: PieceActor.t) =>
+       shapeToPiece->Js.Dict.set(p.shape##id |> Js.Int.toString, p)
      );
-  let game = {puzzle, activeStage, shapeToPiece, activePiece: None};
+  baseStage->Container.addChild(game.puzzleActor.container);
+
+  let gi = {game, baseStage, activeStage, shapeToPiece, activePiece: None};
 
   CommandManager.onPost(cmd => {
     let piece_id = cmd |> Command.pieceId;
-    if (game |> isCaptured(piece_id)) {
+    if (gi |> isCaptured(piece_id)) {
       switch (cmd) {
       | Command.Rotate(_) =>
-        game |> putToActiveLayer(puzzle |> Puzzle.findPiece(piece_id))
-      | Command.Translate(cmd') => game |> handleTranslate(cmd')
+        gi |> putToActiveLayer(game |> Game.findPieceActor(piece_id))
+      | Command.Translate(cmd') => gi |> handleTranslate(cmd')
       | _ => ()
       };
     } else {
-      let piece = puzzle |> Puzzle.findPiece(piece_id);
+      let piece = game |> Game.findPieceActor(piece_id);
       piece
-      |> Piece.withActor(a => {
-           let pt = piece |> Piece.position;
-           a##x #= pt##x;
-           a##y #= pt##y;
-           a##rotation #= (piece |> Piece.rotation);
+      |> PieceActor.withSkin(s => {
+           let pt = piece.body |> Piece.position;
+           s##x #= pt##x;
+           s##y #= pt##y;
+           s##rotation #= (piece.body |> Piece.rotation);
          });
       ();
     };
@@ -144,198 +164,187 @@ let create = (puzzle: puzzle): t => {
     |> Array.iter(cmd =>
          switch (cmd) {
          | Command.Merge(cmd') =>
-           if (game |> isCaptured(cmd'.piece_id)) {
-             game |> release(cmd'.piece_id);
+           let merger = game |> Game.findPieceActor(cmd'.piece_id);
+           let mergee = game |> Game.findPieceActor(cmd'.mergee_id);
+           merger |> PieceActor.enbox(mergee);
+           if (gi |> isCaptured(cmd'.piece_id)) {
+             gi |> release(cmd'.piece_id);
            };
-           if (game |> isCaptured(cmd'.mergee_id)) {
-             game |> release(cmd'.mergee_id);
+           if (gi |> isCaptured(cmd'.mergee_id)) {
+             gi |> release(cmd'.mergee_id);
            };
          | Command.Translate(cmd') =>
-           let piece = puzzle |> Puzzle.findPiece(cmd'.piece_id);
-           if (piece |> Piece.isAlive) {
-             let s = piece |> Piece.unwrapActor;
-             s##x #= cmd'.position##x;
-             s##y #= cmd'.position##y;
-             s##rotation #= cmd'.rotation;
+           let piece = game |> Game.findPieceActor(cmd'.piece_id);
+           if (piece.body |> Piece.isAlive) {
+             piece
+             |> PieceActor.withSkin(s => {
+                  s##x #= cmd'.position##x;
+                  s##y #= cmd'.position##y;
+                  s##rotation #= cmd'.rotation;
+                });
            };
          | Command.Rotate(cmd') =>
-           let piece = puzzle |> Puzzle.findPiece(cmd'.piece_id);
-           if (piece |> Piece.isAlive) {
-             let s = piece |> Piece.unwrapActor;
-             s##x #= cmd'.position##x;
-             s##y #= cmd'.position##y;
-             s##rotation #= cmd'.rotation;
+           let piece = game |> Game.findPieceActor(cmd'.piece_id);
+           if (piece.body |> Piece.isAlive) {
+             piece
+             |> PieceActor.withSkin(s => {
+                  s##x #= cmd'.position##x;
+                  s##y #= cmd'.position##y;
+                  s##rotation #= cmd'.rotation;
+                });
            };
          }
        );
-    game.puzzle.stage |> Stage.invalidate;
+    gi.baseStage |> Stage.invalidate;
   });
 
   Ticker.setFramerate(60);
   Ticker.addEventListener("tick", () =>
-    if (puzzle.stage |> Stage.isInvalidated) {
-      puzzle.stage |> Stage.update;
-      puzzle.stage##invalidated #= false;
+    if (baseStage |> Stage.isInvalidated) {
+      baseStage |> Stage.update;
+      baseStage##invalidated #= false;
     }
   );
-  game;
+  gi;
 };
 
-let findPiece = (shape: DisplayObject.t, game: t): option(piece) =>
-  game.shapeToPiece->Js.Dict.get(shape##id |> Js.Int.toString);
+let findPiece = (shape: DisplayObject.t, gi: t): option(piece) =>
+  gi.shapeToPiece->Js.Dict.get(shape##id |> Js.Int.toString);
 
-let scale = (x: float, y: float, scale: float, game: t): unit => {
+let findPieceEntity = (shape: DisplayObject.t, gi: t): option(piece) =>
+  gi
+  |> findPiece(shape)
+  |> Maybe.map((a: PieceActor.t) =>
+       gi.game |> Game.findPieceEntityActor(a.body.id)
+     );
+
+let scale = (x: float, y: float, scale: float, gi: t): unit => {
   open DisplayObject;
-  let puzzle = game.puzzle;
+  let puzzle = gi.game.puzzleActor;
   let pt0 = puzzle.container |> windowToLocal(Point.create(x, y));
-  let delta = scale /. (puzzle |> Puzzle.currentScale);
+  let delta = scale /. (puzzle |> PuzzleActor.currentScale);
   let mtx =
     (puzzle.container |> DisplayObject.matrix)
     ->Matrix2D.translate(pt0##x, pt0##y)
     ->Matrix2D.scale(delta, delta)
     ->Matrix2D.translate(-. pt0##x, -. pt0##y);
   let _ = Js.Obj.assign(puzzle.container, mtx->Matrix2D.decompose());
-  puzzle.stage |> Stage.invalidate;
+  gi.baseStage |> Stage.invalidate;
 };
 
-let getScaler = (game: t): scaler => {
-  let sc0 = game.puzzle |> Puzzle.currentScale;
+let getScaler = (gi: t): scaler => {
+  let sc0 = gi.game.puzzleActor |> PuzzleActor.currentScale;
   (pt: point, delta: float) => (
-    game |> scale(pt##x, pt##y, delta *. sc0): unit
+    gi |> scale(pt##x, pt##y, delta *. sc0): unit
   );
 };
 
-let getMover = (pt: point, game: t): mover => {
+let getMover = (pt: point, gi: t): mover => {
   let pt0 =
     Point.create(
-      pt##x -. game.puzzle.container##x,
-      pt##y -. game.puzzle.container##y,
+      pt##x -. gi.game.puzzleActor.container##x,
+      pt##y -. gi.game.puzzleActor.container##y,
     );
   pt' => (
     {
-      game.puzzle.container##x #= (pt'##x -. pt0##x);
-      game.puzzle.container##y #= (pt'##y -. pt0##y);
-      game.puzzle.stage |> Stage.invalidate;
+      gi.game.puzzleActor.container##x #= (pt'##x -. pt0##x);
+      gi.game.puzzleActor.container##y #= (pt'##y -. pt0##y);
+      gi.baseStage |> Stage.invalidate;
     }: unit
   );
 };
 
-let getDegreeTo = (target: piece, source: piece): float => {
-  let deg =
-    (
-      (target |> Piece.rotation)
-      -. (source |> Piece.rotation)
-      |> Js.Math.floor_int
-    )
-    mod 360;
-  Js.Int.toFloat(deg < (-180) ? deg + 360 : 180 <= deg ? deg - 360 : deg);
-};
-
-let isWithinTolerance =
-    (source: piece, target: piece, pt: point, game: t): bool =>
-  if (Js.Math.abs_float(source |> getDegreeTo(target))
-      < game.puzzle.rotationTolerance) {
-    let pt0 = pt |> Point.apply((source |> Piece.matrix)->Matrix2D.invert);
-    let pt1 = pt |> Point.apply((target |> Piece.matrix)->Matrix2D.invert);
-    pt0 |> Point.distanceTo(pt1) < game.puzzle.translationTolerance;
-  } else {
-    false;
-  };
-
-let findMergeableOn = (p: piece, point: point, game: t): option(piece) =>
-  switch (
-    game.puzzle
-    |> Puzzle.getAdjacentPieces(p)
-    |> List.find(p1 => game |> isWithinTolerance(p, p1, point))
-  ) {
-  | p' => Some(p')
-  | exception Not_found => None
-  };
-
-let rec defaultDragger = (game: t): dragger => {
+let rec defaultDragger = (gi: t): dragger => {
   active: false,
   piece: None,
   move: _ => (),
   spin: _ => (),
   resetSpin: _ => (),
-  attempt: _ => game |> defaultDragger,
-  finish: _ => game |> defaultDragger,
-  continue: (pt: point) => game |> dragStart(pt),
+  attempt: _ => gi |> defaultDragger,
+  finish: _ => gi |> defaultDragger,
+  continue: (pt: point) => gi |> dragStart(pt),
 }
-and dragStart = (pt: point, game: t): dragger =>
-  DisplayObject.(
-    pt
-    |> game.puzzle.stage->getObjectUnderPoint
-    |> Maybe.bind(x => game |> findPiece(x))
-    |> Maybe.map(Piece.entity)
-    |> Maybe.maybe(game |> defaultDragger, (piece: piece) =>
-         game |> capture(piece, pt)
-       )
-  )
-and capture = (piece: piece, pt: point, game: t): dragger => {
+and dragStart = (pt: point, gi: t): dragger =>
+  pt
+  |> gi.baseStage->DisplayObject.getObjectUnderPoint
+  |> Maybe.bind(x => gi |> findPiece(x))
+  |> Maybe.map((a: piece) =>
+       gi.game |> Game.findPieceEntityActor(a.body.id)
+     )
+  |> Maybe.maybe(gi |> defaultDragger, (piece: piece) =>
+       gi |> capture(piece, pt)
+     )
+and capture = (piece: piece, pt: point, gi: t): dragger => {
   open DisplayObject;
 
-  Logger.trace("captured[" ++ Js.Int.toString(piece.id) ++ "]");
-  game |> putToActiveLayer(piece);
-  game.puzzle.stage |> Stage.invalidate;
+  Logger.trace("captured[" ++ Js.Int.toString(piece.body.id) ++ "]");
+  gi |> putToActiveLayer(piece);
+  gi.baseStage |> Stage.invalidate;
 
-  let pt0 = ref(game.puzzle.container |> windowToLocal(pt));
+  let pt0 = ref(gi.game.puzzleActor.container |> windowToLocal(pt));
   let deg0 = ref(0.0);
   let rec dragger: dragger = {
     active: true,
     piece: Some(piece),
     move: pt' => {
-      let pt1 = game.puzzle.container |> windowToLocal(pt');
+      let pt1 = gi.game.puzzleActor.container |> windowToLocal(pt');
       let vec = pt1 |> Point.subtract(pt0^);
-      Command.translate(piece.id, vec) |> CommandManager.post(game.puzzle);
+      Command.translate(piece.body.id, vec)
+      |> CommandManager.post(gi.game.puzzleActor.body);
       pt0 := pt1;
     },
     spin: (deg: float) => {
-      Command.rotate(piece.id, pt0^, deg -. deg0^)
-      |> CommandManager.post(game.puzzle);
+      Command.rotate(piece.body.id, pt0^, deg -. deg0^)
+      |> CommandManager.post(gi.game.puzzleActor.body);
       deg0 := deg;
     },
     resetSpin: deg => deg0 := deg,
     attempt: () =>
-      game
-      |> findMergeableOn(piece, pt0^)
+      gi.game.puzzleActor.body
+      |> Puzzle.findMergeableOn(piece.body, pt0^)
       |> Maybe.maybe(
            dragger,
-           (p': piece) => {
-             game |> release(piece.id);
-             Command.merge(p'.id, piece.id)
-             |> CommandManager.post(game.puzzle);
+           (p': Piece.t) => {
+             gi |> release(piece.body.id);
+             Command.merge(p'.id, piece.body.id)
+             |> CommandManager.post(gi.game.puzzleActor.body);
              CommandManager.commit();
-             game |> defaultDragger;
+             gi |> defaultDragger;
            },
          ),
     finish: () => {
-      game |> release(piece.id);
-      game
-      |> findMergeableOn(piece, pt0^)
-      |> Maybe.traverse_((p': piece) => {
-           Command.merge(p'.id, piece.id) |> CommandManager.post(game.puzzle);
+      gi |> release(piece.body.id);
+      gi.game.puzzleActor.body
+      |> Puzzle.findMergeableOn(piece.body, pt0^)
+      |> Maybe.traverse_((p': Piece.t) => {
+           Command.merge(p'.id, piece.body.id)
+           |> CommandManager.post(gi.game.puzzleActor.body);
            CommandManager.commit();
          });
-      game |> defaultDragger;
+      gi |> defaultDragger;
     },
     continue: pt' => {
       let piece' =
         pt'
-        |> fromWindowToLocal(game.activeStage)
-        |> game.activeStage->getObjectUnderPoint
-        |> Maybe.bind(x => game |> findPiece(x))
+        |> fromWindowToLocal(gi.activeStage)
+        |> gi.activeStage->getObjectUnderPoint
+        |> Maybe.bind(x => gi |> findPiece(x))
         |> Maybe.guard(piece' => piece' === piece);
 
       switch (piece') {
       | None =>
         let _ = dragger.finish();
-        game |> dragStart(pt');
+        gi |> dragStart(pt');
       | Some(_) =>
-        pt0 := game.puzzle.container |> windowToLocal(pt');
+        pt0 := gi.game.puzzleActor.container |> windowToLocal(pt');
         dragger;
       };
     },
   };
   dragger;
 };
+
+[@bs.send] external update: (DisplayObject.t, unit) => unit = "update";
+[@bs.send] external invalidate: (DisplayObject.t, unit) => unit = "invalidate";
+
+let invalidate = (gi: t): unit => gi.baseStage->invalidate();
