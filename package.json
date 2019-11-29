@@ -20,6 +20,7 @@
   },
   "version": "0.1.0",
   "devDependencies": {
+    "madge": "^3.6.0",
     "stylelint": "^11.1.1",
     "stylelint-config-css-modules": "^1.5.0",
     "stylelint-config-standard": "^19.0.0",
@@ -28,6 +29,7 @@
   },
   "scripts": {
     "postinstall": "$(yarn bin)/bsb -make-world",
-    "lint": "$(yarn bin)/stylelint 'app/frontend/**/*.scss'"
+    "lint": "$(yarn bin)/stylelint 'app/frontend/**/*.scss'",
+    "deps": "$(yarn bin)/madge app/frontend/packs/playboard/App.bs.js --basedir app/frontend/packs/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg"
   }
 }
