@@ -1,7 +1,7 @@
 type window('a) = {. "ontouchstart": 'a};
 [@bs.val] external window: window('a) = "window";
 
-type element = {. "requestFullscreen": unit => unit};
+type element = Webapi.Dom.Element.t;
 type document = {
   .
   "fullscreenEnabled": bool,
@@ -20,5 +20,5 @@ let toggleFullScreen = element: unit =>
     |> Js.Nullable.toOption
     |> Maybe.maybe((), f => f());
   } else {
-    element##requestFullscreen();
+    element |> Webapi.Dom.Element.requestFullscreen;
   };

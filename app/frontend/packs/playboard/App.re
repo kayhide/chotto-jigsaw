@@ -1,26 +1,31 @@
 open Webapi.Dom;
-open Document;
-
 open JQuery;
 
 type puzzle = Puzzle.t;
-type image = Webapi.Dom.HtmlImageElement.t;
+type image = HtmlImageElement.t;
+
+external fromTokenList: DomTokenList.t => Js.Array.array_like(DomTokenList.t) =
+  "%identity";
+
+[@bs.send] external play: (Element.t, unit) => unit = "play";
+
+type app = {
+  playboard: Webapi.Dom.Element.t,
+  field: Webapi.Dom.Element.t,
+  sounds: Webapi.Dom.Element.t,
+  log: option(Webapi.Dom.Element.t),
+};
 
 module Guider = {
   type t = {
     game: Game.t,
-    mutable _active: bool,
+    mutable isActive: bool,
   };
 
-  let create = (game: Game.t): t => {
-    game,
-    _active: false,
-  };
-
-  let isActive = (guider: t): bool => guider._active;
+  let create = (game: Game.t): t => {game, isActive: false};
 
   let setActive = (b: bool, guider: t): unit => {
-    guider._active = b;
+    guider.isActive = b;
     let _ =
       b ?
         jquery("#active-canvas")->addClass("z-depth-3") :
@@ -34,10 +39,12 @@ module Guider = {
   };
 
   let toggle = (guider: t): unit =>
-    guider |> setActive(!(guider |> isActive));
+    guider |> setActive(!guider.isActive);
 };
 
 let setupLogger = (): unit => {
+  open Document;
+
   Logger.append(Js.log);
 
   let append' = (log', message: string) => {
@@ -50,7 +57,8 @@ let setupLogger = (): unit => {
   |> Maybe.traverse_(log' => Logger.append(append'(log')));
 };
 
-let setupUi = (game: Game.t): unit => {
+let setupUi = (game: Game.t, app: app): unit => {
+  open Document;
 
   Ticker.addEventListener("tick", () =>
     jquery("#info .fps")
@@ -84,9 +92,7 @@ let setupUi = (game: Game.t): unit => {
 
   if (Screen.isFullscreenAvailable()) {
     jquery("[data-action=fullscreen]")
-    ->on("click", _ =>
-        Screen.toggleFullScreen(jquery("#playboard")->get()[0])
-      );
+    ->on("click", _ => Screen.toggleFullScreen(app.playboard));
   } else {
     jquery("[data-action=fullscreen]")->addClass("disabled");
   };
@@ -97,9 +103,13 @@ let setupUi = (game: Game.t): unit => {
       classes
       |> Js.Array.find(Js.String.startsWith("bg-"))
       |> Maybe.traverse_(bg => {
+           let elm =
+             document |> getElementById("playboard") |> Maybe.fromJust;
            let playground = jquery("#playboard");
            let bgs =
-             playground->get()[0]##classList
+             elm
+             |> Element.classList
+             |> fromTokenList
              |> Js.Array.from
              |> Js.Array.filter(Js.String.startsWith("bg-"));
            bgs |> Js.Array.forEach(x => playground->removeClass(x));
@@ -123,17 +133,17 @@ let setupUi = (game: Game.t): unit => {
   );
 };
 
-[@bs.send] external play: (HtmlElement.t, unit) => unit = "play";
-let setupSound = (): unit => {
-  let merge: HtmlElement.t = jquery("#sound-list > .merge")->get()[0];
-
-  CommandManager.onPost(cmd =>
-    switch (cmd) {
-    | Command.Merge(_) => merge->play()
-    | _ => ()
-    }
-  );
-};
+let setupSound = (app: app): unit =>
+  app.sounds
+  |> Element.querySelector(".merge")
+  |> Maybe.traverse_(elm =>
+       CommandManager.onPost(cmd =>
+         switch (cmd) {
+         | Command.Merge(_) => elm->play()
+         | _ => ()
+         }
+       )
+     );
 
 let connectGameChannel = (game: Game.t): unit => {
   let sub = GameChannel.subscribe(game);
@@ -145,18 +155,16 @@ let connectGameChannel = (game: Game.t): unit => {
   );
 };
 
-let play = (): unit => {
+let play = (app: app): unit => {
+  open Document;
+
   setupLogger();
 
-  let playboard = jquery("#playboard");
-
   let gameId =
-    playboard->data("game-id") |> Js.Nullable.toOption |> Maybe.fromMaybe(0);
-  let game =
-    document
-    |> getElementById("field")
-    |> Maybe.fromJust
-    |> Game.create(gameId);
+    jquery(app.playboard)->data("game-id")
+    |> Js.Nullable.toOption
+    |> Maybe.fromMaybe(0);
+  let game = Game.create(gameId, app.field);
   Js.log("game id: " ++ string_of_int(gameId));
   if (game.isStandalone) {
     Js.log("standalone: " ++ string_of_bool(game.isStandalone));
@@ -169,11 +177,12 @@ let play = (): unit => {
        PuzzleDrawer.create(game.image)
        |> PuzzleDrawer.draw(game.puzzle, game.puzzle.shape##graphics);
 
-       setupUi(game);
-       setupSound();
+       app |> setupUi(game);
+       app |> setupSound;
 
-       if (playboard->data("initial-view") !== Js.Nullable.undefined) {
-         let size = playboard->data("initial-view");
+       if (jquery(app.playboard)->data("initial-view")
+           !== Js.Nullable.undefined) {
+         let size = jquery(app.playboard)->data("initial-view");
          Rectangle.create(size##x, size##y, size##width, size##height)
          |> View.contain(game.puzzle);
        };
@@ -204,13 +213,22 @@ let play = (): unit => {
   if (game.isStandalone) {
     game
     |> Game.loadContent(
-         jquery(playboard->data("puzzle-content"))->getText(),
+         jquery(jquery(app.playboard)->data("puzzle-content"))->getText(),
        );
   } else {
     game |> connectGameChannel;
   };
 
-  game |> Game.loadImage(playboard->data("picture"));
+  game |> Game.loadImage(jquery(app.playboard)->data("picture"));
 };
 
-jquery(document)->ready(play);
+jquery(document)
+->ready(() => {
+    open Document;
+    let playboard = document |> getElementById("playboard") |> Maybe.fromJust;
+    let field = document |> getElementById("field") |> Maybe.fromJust;
+    let sounds = document |> getElementById("sounds") |> Maybe.fromJust;
+    let log = document |> getElementById("log");
+    let app: app = {playboard, field, sounds, log};
+    app |> play;
+  });
