@@ -97,7 +97,7 @@ let shuffle = (game: t): unit => {
   |> Js.Array.filter(Piece.isAlive)
   |> Array.iter(p => {
        let center = p |> Piece.center;
-       let center' = center |> toGlobalFrom(p |> Piece.unwrapShape);
+       let center' = p |> Piece.withActor(a => center |> toGlobalFrom(a));
        let degree = Js.Math.random() *. 360.0 -. 180.0;
        Command.rotate(p.id, center', degree)
        |> CommandManager.post(game.puzzle);

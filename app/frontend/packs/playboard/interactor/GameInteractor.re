@@ -59,32 +59,33 @@ let putToActiveLayer = (p: piece, game: t): unit => {
     |> toWindowFromLocal(game.puzzle.container)
     |> fromWindowToLocal(game.activeStage);
   p
-  |> Piece.withShape(s => {
-       s##x #= pt'##x;
-       s##y #= pt'##y;
-       s##rotation #= (p |> Piece.rotation);
-       game.activeStage->Container.addChild(s);
+  |> Piece.withActor(a => {
+       a##x #= pt'##x;
+       a##y #= pt'##y;
+       a##rotation #= (p |> Piece.rotation);
+       game.activeStage->Container.addChild(a);
        game.activeStage->Stage.update;
      });
 };
 
 let clearActiveLayer = (game: t): unit => {
   game.activePiece
-  |> Maybe.traverse_(p => {
-       let s = p |> Piece.unwrapShape;
-       s##x #= (p |> Piece.position)##x;
-       s##y #= (p |> Piece.position)##y;
-       s##rotation #= (p |> Piece.rotation);
-
-       game.puzzle.container->Container.addChild(s);
-     });
+  |> Maybe.traverse_(p =>
+       p
+       |> Piece.withActor(a => {
+            a##x #= (p |> Piece.position)##x;
+            a##y #= (p |> Piece.position)##y;
+            a##rotation #= (p |> Piece.rotation);
+            game.puzzle.container->Container.addChild(a);
+          })
+     );
   game.activePiece = None;
   jquery(game.activeStage->Stage.canvas)->hide();
 };
 
 let isCaptured = (piece_id: int, game: t): bool => {
   let p = game.puzzle |> Puzzle.findPiece(piece_id);
-  p |> Piece.unwrapShape |> DisplayObject.parent === Some(game.activeStage);
+  p |> Piece.withActor(DisplayObject.parent) === Some(game.activeStage);
 };
 
 let release = (piece_id: int, game: t): unit => {
@@ -112,7 +113,7 @@ let create = (puzzle: puzzle): t => {
   puzzle.pieces
   |> Array.iter(p =>
        shapeToPiece
-       ->Js.Dict.set((p |> Piece.unwrapShape)##id |> Js.Int.toString, p)
+       ->Js.Dict.set(p |> Piece.withActor(a => a##id) |> Js.Int.toString, p)
      );
   let game = {puzzle, activeStage, shapeToPiece, activePiece: None};
 
@@ -128,11 +129,11 @@ let create = (puzzle: puzzle): t => {
     } else {
       let piece = puzzle |> Puzzle.findPiece(piece_id);
       piece
-      |> Piece.withShape(s => {
+      |> Piece.withActor(a => {
            let pt = piece |> Piece.position;
-           s##x #= pt##x;
-           s##y #= pt##y;
-           s##rotation #= (piece |> Piece.rotation);
+           a##x #= pt##x;
+           a##y #= pt##y;
+           a##rotation #= (piece |> Piece.rotation);
          });
       ();
     };
@@ -152,7 +153,7 @@ let create = (puzzle: puzzle): t => {
          | Command.Translate(cmd') =>
            let piece = puzzle |> Puzzle.findPiece(cmd'.piece_id);
            if (piece |> Piece.isAlive) {
-             let s = piece |> Piece.unwrapShape;
+             let s = piece |> Piece.unwrapActor;
              s##x #= cmd'.position##x;
              s##y #= cmd'.position##y;
              s##rotation #= cmd'.rotation;
@@ -160,7 +161,7 @@ let create = (puzzle: puzzle): t => {
          | Command.Rotate(cmd') =>
            let piece = puzzle |> Puzzle.findPiece(cmd'.piece_id);
            if (piece |> Piece.isAlive) {
-             let s = piece |> Piece.unwrapShape;
+             let s = piece |> Piece.unwrapActor;
              s##x #= cmd'.position##x;
              s##y #= cmd'.position##y;
              s##rotation #= cmd'.rotation;

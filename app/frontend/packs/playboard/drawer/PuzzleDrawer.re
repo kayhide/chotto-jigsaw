@@ -6,10 +6,7 @@ type t = {
   mutable drawsGuide: bool,
 };
 
-let create = (image: image): t => {
-  image,
-  drawsGuide: false,
-};
+let create = (image: image): t => {image, drawsGuide: false};
 
 let drawGuide = g: unit => {
   open Graphics;
@@ -50,11 +47,10 @@ let draw = (puzzle: puzzle, g, drawer: t): unit => {
 
   puzzle.pieces
   |> Array.iter(p => {
-       let s = p |> Piece.unwrapShape;
-       drawer' |> PieceDrawer.draw(p, s##graphics);
+       drawer' |> PieceDrawer.draw(p, p.shape##graphics);
        p |> Piece.cache(~scale=puzzle |> cacheScale);
        let shape = Shape.create();
        PieceDrawer.drawHitArea(p, shape##graphics);
-       s##hitArea #= shape;
+       p.shape##hitArea #= shape;
      });
 };

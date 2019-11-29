@@ -45,17 +45,14 @@ let parse = (puzzle: t, data: string): unit => {
   let content: puzzle_data('a) = parseData(data);
   puzzle.pieces = content |> piecesGet |> Array.map(Piece.parse);
   puzzle.pieces
-  |> Array.iter((p: piece) =>
-       p |> Piece.unwrapShape |> puzzle.container->Container.addChild
-     );
+  |> Array.iter(Piece.withActor(puzzle.container->Container.addChild));
   puzzle.linearMeasure = content |> linear_measureGet;
   puzzle.translationTolerance = puzzle.linearMeasure /. 4.0;
 };
 
 let piecesCount = (puzzle: t): int => puzzle.pieces |> Array.length;
 
-let isReady = (puzzle: t): bool =>
-  0 < (puzzle |> piecesCount)
+let isReady = (puzzle: t): bool => 0 < (puzzle |> piecesCount);
 
 let progress = puzzle: float => {
   let i =
