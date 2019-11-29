@@ -17,29 +17,22 @@ module X = {
     "commands": any,
     "content": string,
   };
-  type funcs = {
-    .
-    "received": data => unit,
-    "commit": CommandGroup.t => unit,
-    "report_progress": float => unit,
-  };
 
   type subscription = {
     .
     "identifier": identifier,
     /* "consumer": consumer, */
     [@bs.set] "token": token,
+    [@bs.set] "game": Game.t,
   };
+
+  type funcs = {. "received": [@bs.this] ((subscription, data) => unit)};
 };
 
 include ActionCable.Make(X);
 
-[@bs.send] external _perform: (subscription, string, 'a) => unit = "perform";
-
-let subscription: ref(option(subscription)) = ref(None);
-
-let retryOnFailAndThen = (action: string, data: X.data, f: unit => unit): unit => {
-  let this = subscription^ |> Maybe.fromJust;
+let retryOnFailAndThen =
+    (action: string, data: X.data, f: unit => unit, this: subscription): unit =>
   if (data##action == action) {
     if (data##success) {
       f();
@@ -47,77 +40,77 @@ let retryOnFailAndThen = (action: string, data: X.data, f: unit => unit): unit =
       Logger.trace("failed: " ++ data##action);
       let _ =
         Js.Global.setTimeout(
-          () => this->_perform("request_" ++ action, Js.Obj.empty()),
+          () => this->perform("request_" ++ action, Js.Obj.empty()),
           3000,
         );
       ();
     };
   };
-};
 
-let _received = (game: Game.t, data: X.data): unit => {
-  Logger.trace("received: " ++ data##action);
+let _received =
+  [@bs.this]
+  (
+    (this: subscription, data: X.data) => (
+      {
+        Logger.trace("received: " ++ data##action);
 
-  let this = subscription^ |> Maybe.fromJust;
-  retryOnFailAndThen(
-    "content",
-    data,
-    () => {
-      game |> Game.loadContent(data##content);
-      this->_perform("request_update", Js.Obj.empty());
-    },
+        let game = this##game;
+        this
+        |> retryOnFailAndThen(
+             "content",
+             data,
+             () => {
+               game |> Game.loadContent(data##content);
+               this->perform("request_update", Js.Obj.empty());
+             },
+           );
+        this
+        |> retryOnFailAndThen("update", data, () => game |> Game.setUpdated);
+
+        switch (data##action) {
+        | "init" =>
+          this##token #= data##token;
+          if (!(game |> Game.isReady)) {
+            this->perform("request_content", Js.Obj.empty());
+          };
+        | _ => ()
+        };
+        if (data##token !== this##token) {
+          switch (data##action) {
+          | "commit" =>
+            let cmds = CommandGroup.create();
+            data##commands
+            |> fromAny
+            |> Array.map(Bridge.decode)
+            |> Array.iter(x => cmds |> CommandGroup.squash(x));
+            game
+            |> Game.whenReady(() =>
+                 cmds |> CommandManager.receive(game.puzzle)
+               );
+          | _ => ()
+          };
+        };
+      }: unit
+    )
   );
-  retryOnFailAndThen("update", data, () => game |> Game.setUpdated);
 
-  switch (data##action) {
-  | "init" =>
-    this##token #= data##token;
-    if (!(game |> Game.isReady)) {
-      this->_perform("request_content", Js.Obj.empty());
-    };
-  | _ => ()
-  };
-  if (data##token !== this##token) {
-    switch (data##action) {
-    | "commit" =>
-      let cmds = CommandGroup.create();
-      data##commands
-      |> fromAny
-      |> Array.map(Bridge.decode)
-      |> Array.iter(x => cmds |> CommandGroup.squash(x));
-      game
-      |> Game.whenReady(() => cmds |> CommandManager.receive(game.puzzle));
-    | _ => ()
-    };
-  };
-};
-
-let commit = (cmds: CommandGroup.t): unit => {
-  let this = subscription^ |> Maybe.fromJust;
+let commit = (this: subscription, cmds: CommandGroup.t): unit =>
   if (cmds |> CommandGroup.intrinsic) {
     this
-    ->_perform(
+    ->perform(
         "commit",
         {"commands": cmds.commands |> Array.map(Bridge.encode)},
       );
   };
-};
 
-let report_progress = (x: float): unit => {
-  let this = subscription^ |> Maybe.fromJust;
-  this->_perform("report_progress", {"progress": x});
-};
+let report_progress = (this: subscription, x: float): unit =>
+  this->perform("report_progress", {"progress": x});
 
-let subscribe = (game: Game.t): unit => {
+let subscribe = (game: Game.t): subscription => {
   let identifier = {"channel": "GameChannel", "game_id": game.id};
-  let funcs = {
-    "received": _received(game),
-    "commit": commit,
-    "report_progress": report_progress,
-  };
+  let funcs = {"received": _received};
   let consumer = createConsumer();
   let sub = consumer##subscriptions->create(identifier, funcs);
-  subscription := Some(sub);
+  sub##game #= game;
+  sub;
 };
-
-let isSubscribing = (): bool => subscription^ |> Maybe.isSome;

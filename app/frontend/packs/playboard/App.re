@@ -136,11 +136,11 @@ let setupSound = (): unit => {
 };
 
 let connectGameChannel = (game: Game.t): unit => {
-  GameChannel.subscribe(game);
-  CommandManager.onCommit(GameChannel.commit);
+  let sub = GameChannel.subscribe(game);
+  CommandManager.onCommit(sub->GameChannel.commit);
   CommandManager.onCommit(cmds =>
     if (!cmds.extrinsic && cmds.commands |> Js.Array.some(Command.isMerge)) {
-      GameChannel.report_progress(game.puzzle |> Puzzle.progress);
+      sub->GameChannel.report_progress(game.puzzle |> Puzzle.progress);
     }
   );
 };

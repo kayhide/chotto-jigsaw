@@ -14,7 +14,10 @@ module Make = (X: T) => {
 
   [@bs.module "@rails/actioncable"]
   external createConsumer: unit => consumer = "createConsumer";
+
   [@bs.send]
   external create: (subscriptions, identifier, funcs) => subscription =
     "create";
+
+  [@bs.send] external perform: (subscription, string, 'a) => unit = "perform";
 };
