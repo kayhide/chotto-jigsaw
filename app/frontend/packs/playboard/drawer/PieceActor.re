@@ -10,39 +10,33 @@ let create = (body: Piece.t): t => {
   container: None,
 };
 
-let cache = (~scale=1.0, actor: t): unit => {
-  let rect = actor.body |> Piece.localBoundary |> Rectangle.inflate(4.0);
-  switch (actor.container) {
-  | None =>
-    actor.shape
-  |> DisplayObject.cache(rect##x, rect##y, rect##width, rect##height, scale)
-  | Some(c) =>
-    c
-  |> DisplayObject.cache(rect##x, rect##y, rect##width, rect##height, scale)
-  };
+let cache = (~scale=1.0, piece: t): unit => {
+  let rect = piece.body |> Piece.localBoundary |> Rectangle.inflate(4.0);
+  piece.shape
+  |> DisplayObject.cache(rect##x, rect##y, rect##width, rect##height, scale);
 };
 
-let unwrapActor = (actor: t): DisplayObject.t =>
-  actor.container |> Maybe.fromMaybe(actor.shape);
+let unwrapActor = (piece: t): DisplayObject.t =>
+  piece.container |> Maybe.fromMaybe(piece.shape);
 
-let withSkin = (f: DisplayObject.t => 'a, actor: t): 'a =>
-  actor |> unwrapActor |> f;
+let withSkin = (f: DisplayObject.t => 'a, piece: t): 'a =>
+  piece |> unwrapActor |> f;
 
-let enbox = (target: t, actor: t): unit => {
+let enbox = (target: t, piece: t): unit => {
   open DisplayObject;
 
   let container =
-    switch (actor.container) {
+    switch (piece.container) {
     | None =>
-      let s = actor.shape;
-      /* actor.shape##uncache(); */
+      let s = piece.shape;
+      /* piece.shape##uncache(); */
       let container = Container.create();
       s |> copyTransform(container);
       s |> clearTransform;
       s |> parent |> Maybe.traverse_(c => c->Container.addChild(container));
       container->Container.addChild(s);
-      /* container##actor #= actor; */
-      actor.container = Some(container);
+      /* container##piece #= piece; */
+      piece.container = Some(container);
       container;
     | Some(c) => c
     };
@@ -55,9 +49,22 @@ let enbox = (target: t, actor: t): unit => {
     c |> Container.transportTo(container);
     c |> Container.remove;
   };
-  /* actor.cache(); */
-  actor.body._localBoundary =
-    actor.body._localBoundary
+  /* piece.cache(); */
+  piece.body._localBoundary =
+    piece.body._localBoundary
     |> Maybe.map(Rectangle.addRectangle(target.body |> Piece.localBoundary));
-  actor.body._boundary = None;
+  piece.body._boundary = None;
+};
+
+let createHitArea = (piece: t): DisplayObject.t => {
+  let shape = Shape.create();
+  PieceDrawer.drawHitArea(piece.body, shape##graphics);
+  shape;
+};
+
+let drawWith = (drawer: PieceDrawer.t, piece: t): unit => {
+  let {body, shape} = piece;
+  drawer |> PieceDrawer.draw(body, shape##graphics);
+  piece |> cache;
+  shape##hitArea #= (piece |> createHitArea);
 };

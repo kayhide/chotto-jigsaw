@@ -131,22 +131,6 @@ let play = (app: app): unit => {
   |> Game.onReady(() => {
        Logger.trace("game ready");
 
-       PuzzleDrawer.(
-         create(game.image)
-         |> draw(game.puzzleActor.body, game.puzzleActor.shape##graphics)
-       );
-
-       PieceDrawer.(
-         create(game.image)
-         |> (
-           d =>
-             game.pieceActors
-             |> Array.iter((p: PieceActor.t) =>
-                  draw(p.body, p.shape##graphics, d)
-                )
-         )
-       );
-
        app |> setupUi(game);
        app |> setupSound;
 

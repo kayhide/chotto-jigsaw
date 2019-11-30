@@ -17,3 +17,6 @@ let create = (body: Puzzle.t): t => {
 };
 
 let currentScale = (a: t): float => a.container##scaleX;
+
+let drawWith = (drawer: PuzzleDrawer.t, {body, shape}: t): unit =>
+  drawer |> PuzzleDrawer.draw(body, shape##graphics);
