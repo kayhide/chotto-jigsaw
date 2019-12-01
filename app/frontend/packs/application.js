@@ -28,4 +28,17 @@ $(document).ready(() => {
   bsCustomFileInput.init();
   LoadingWatcher.init();
   BackgroundPicture.init();
+
+  if (document.location.hash !== "") {
+    $(`[href="${document.location.hash}"]`).trigger('click');
+  };
+
+  $('a[data-toggle="pill"]').on('show.bs.tab', (e) => {
+    if (e.target.dataset.url) {
+      history.pushState(history.state, document.title, e.target.dataset.url);
+    }
+    else {
+      history.pushState(history.state, document.tilte, e.target.href);
+    }
+  })
 })

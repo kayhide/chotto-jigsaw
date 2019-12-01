@@ -1,6 +1,6 @@
 ul.row.nav.nav-pills role="tablist"
   li.col-6.nav-item.px-2
-    a#pills-games-tab.nav-link.active data-toggle="pill" href="#games" role="tab" aria-controls="pills-games" aria-selected="true"
+    a#pills-games-tab.nav-link.active data-toggle="pill" href="#games" role="tab" aria-controls="pills-games" aria-selected="true" data-url=url_for(:root)
       i.fas.fa-play>
       | Games
   li.col-6.nav-item.px-2
@@ -14,16 +14,16 @@ ul.row.nav.nav-pills role="tablist"
       - @games.each do |game|
         - puzzle = game.puzzle
         .col-6.col-md-4.col-lg-2.p-2
-          .card.puzzle.rounded id=dom_id(game)
+          .game id=dom_id(game)
             = render "games/join", game: game do
-              = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
-            .progress class=puzzle.difficulty
+              = image_tag puzzle.picture.variant(resize_to_fill: [300, 300])
+            .progress.position-absolute.w-100 class=puzzle.difficulty
               .progress-bar style="width:#{game.progress * 100}%"
 
   #pictures.tab-pane.fade role="tabpanel" aria-labelledby="pills-pictures-tab"
     .row
       - @pictures.each do |picture|
         .col-6.col-md-4.col-lg-2.p-2
-          .card.picture id=dom_id(picture)
+          .picture id=dom_id(picture)
             = link_to [picture, :games] do
-              = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid border rounded)
+              = image_tag picture.variant(resize_to_fill: [300, 300])

@@ -1,18 +1,12 @@
 - width, height = @puzzle.picture.metadata.values_at("width", "height")
 - longer = [width, height].max
 - aspect_ratio = width.to_f / height.to_f
-- display_scale = 400.0 / longer.to_f
+- display_scale = 600.0 / longer.to_f
 - display_width = (width * display_scale).floor
 - display_height = (height * display_scale).floor
 
 .row
-  .col-6
-    .d-flex
-      .border.rounded.glassy-light.p-2.mx-auto
-        .puzzle-show
-          = image_tag @puzzle.picture.variant(resize_to_limit: [400, 400])
-          canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
-  .col-6
+  .col-12.col-lg-6.order-lg-12
     dl.row.rounded.p-2 class="glassy-#{@puzzle.difficulty}"
       dt.col-4 Difficulty
       dd.col-8 = @puzzle.difficulty.to_s.camelize
@@ -24,9 +18,18 @@
       dd.col-8 = "#{width} x #{height}"
       dt.col-4 Aspect Ratio
       dd.col-8 = "%0.2f" % aspect_ratio
+  .col-12.col-lg-6
+    .d-flex
+      .border.rounded.glassy-light.p-2.mx-auto
+        .puzzle-show
+          = image_tag @puzzle.picture.variant(resize_to_limit: [600, 600])
+          canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
+
+.fixed-bottom.m-3
+  = link_to @picture, class: %w(btn btn-outline-light glassy) do
+    i.fas.fa-chevron-left.fa-fw
 
 
-- gen = Random.new @puzzle.id
 ruby:
   instructions = @puzzle.pieces.map { |p|
     head, *tail = p.points
@@ -46,10 +49,10 @@ javascript:
   var ctx = canvas.getContext('2d');
   ctx.scale(#{display_scale}, #{display_scale});
 
-  ctx.strokeStyle = "hsla(0deg, 0%, 30%, 0.2)";
+  ctx.strokeStyle = "hsla(0deg, 0%, 50%, 0.5)";
   ctx.lineWidth = 4 / #{display_scale};
   #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
 
-  ctx.strokeStyle = "hsla(0deg, 0%, 30%, 0.9)";
+  ctx.strokeStyle = "hsla(0deg, 0%, 90%, 0.8)";
   ctx.lineWidth = 1 / #{display_scale};
   #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }

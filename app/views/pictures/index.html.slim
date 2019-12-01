@@ -1,7 +1,7 @@
 .row
-  .col-md-6
+  .col-md-6.px-2
     h2.pull-left Pictures
-  .col-md-6.align-self-center
+  .col-md-6.align-self-center.px-2
     = form_for Picture.new do |f|
       .input-group
           .custom-file
@@ -14,6 +14,7 @@
 .clearfix
 .row
   - @pictures.each do |picture|
-    .col-md-4.col-lg-2.py-3
-      = link_to [:picture, {id: picture.id}], class: %w() do
-        = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid rounded)
+    .col-md-4.col-lg-2.p-2
+      .picture
+        = link_to [:picture, {id: picture.id}], class: %w() do
+          = image_tag picture.variant(resize_to_fill: [600, 600]), class: %w(img-fluid rounded)

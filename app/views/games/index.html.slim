@@ -8,12 +8,17 @@
           = difficulty.humanize
 
 - if @games.present?
-  .list-group.mt-3.mb-2
+  .list-group.glassy-light.mt-3.mb-2
     - @games.each do |game|
-      = render "games/join", game: game, classes: %w(list-group-item list-group-item-action) do
+      .list-group-item.list-group-item-action
         .d-flex.align-items-center
           .flex-shrink-1
-            i.fas.fa-play.fa-fw class="text-#{game.puzzle.difficulty}"
+            = render "games/join", game: game, classes: %w(stretched-link) do
+              i.fas.fa-play.fa-fw class="text-#{game.puzzle.difficulty}"
           .progress.w-100.ml-3 class=game.puzzle.difficulty
             .progress-bar style="width:#{game.progress * 100}%"
-              .px-3 = game.puzzle.difficulty.capitalize
+
+
+.fixed-bottom.m-3
+  = link_to [:root, { anchor: "pictures" }], class: %w(btn btn-outline-light glassy) do
+    i.fas.fa-chevron-left.fa-fw

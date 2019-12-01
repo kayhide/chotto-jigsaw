@@ -28,10 +28,10 @@ nav {
 
 .background-picture {
   position: fixed;
-  height: 110vh;
-  width: 110%;
   top: 50vh;
   left: 50%;
+  height: 110vh;
+  width: 110%;
   transform: translate(-50%, -50%);
   z-index: -1;
 
@@ -63,9 +63,13 @@ nav {
 }
 
 .glassy {
-  background: none;
+  background-color: transparent;
   backdrop-filter: blur(5px);
   @extend .shadow;
+
+  &.list-group {
+    @extend .rounded;
+  }
 }
 
 @each $key, $color in map-merge($theme-colors, $difficulty-colors) {
@@ -76,10 +80,16 @@ nav {
 
     table {
       color: color-yiq($color);
+      background-color: transparent;
     }
 
     a {
       color: color-yiq($color);
+      background-color: transparent;
+    }
+
+    .list-group-item {
+      background-color: transparent;
     }
   }
 }
@@ -87,7 +97,7 @@ nav {
 .puzzle-show {
   position: relative;
   max-width: 100%;
-  background: $white;
+  background: $gray-600;
 
   img {
     max-width: 100%;
@@ -102,19 +112,43 @@ nav {
   }
 }
 
-.puzzle {
+.game {
+  position: relative;
+  @extend .rounded;
+
+  img {
+    @extend .border;
+    @extend .rounded;
+    @extend .img-fluid;
+  }
+
   .progress {
+    bottom: 0;
+    height: 6px;
     margin: 0;
     padding: 0;
-    height: 6px;
 
-    @extend .rounded-0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    @extend .border-left;
+    @extend .border-right;
 
     &.offline {
       .progress-bar {
         width: 100%;
       }
     }
+  }
+}
+
+.picture {
+  position: relative;
+  @extend .rounded;
+
+  img {
+    @extend .border;
+    @extend .rounded;
+    @extend .img-fluid;
   }
 }
 
