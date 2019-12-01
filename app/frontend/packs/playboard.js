@@ -3,7 +3,13 @@
 // a relevant structure within app/frontend and only use these pack files to reference
 // that code so it'll be compiled.
 
+import $ from "jquery";
 import "bootstrap";
 import "../styles/playboard";
 
+import FabAction from "./fab-action";
 import "./playboard/App.bs";
+
+$(document).ready(() => {
+  FabAction.init();
+});

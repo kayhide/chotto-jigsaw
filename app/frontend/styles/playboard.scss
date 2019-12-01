@@ -33,25 +33,6 @@ body {
   @extend .no-interaction;
 }
 
-#back-button {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-}
-
-#menu-button {
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-}
-
-
-#buttons {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-}
-
 #game-progress {
   position: absolute;
   left: 1rem;

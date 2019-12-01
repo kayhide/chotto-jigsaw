@@ -16,31 +16,27 @@
   .col-6
     = image_tag @puzzle.picture.variant(resize_to_fill: [800, 600]), class: %w(img-fluid)
 
-#back-button
-  = link_to :root, class: %w(btn btn-fab btn-sm btn-dark) do
-    i.fas.fa-chevron-left
+.position-absolute.top-0.left-0.m-3
+  = link_to :root, class: %w(btn btn-outline-dark btn-sm glassy) do
+    i.fas.fa-home.fa-fw
 
-.dropdown.fab-action
-  button#menu-button.shadow-sm.btn.btn-fab.btn-dark data-toggle="dropdown"
-    i.fas.fa-bars
-  .dropdown-menu.dropdown-menu-right
-    .dropdown-menu-left
-      button.shadow-sm.btn.btn-fab.bg-dark-green data-action="playboard-background"
-      button.shadow-sm.btn.btn-fab.bg-cool-sky data-action="playboard-background"
-      button.shadow-sm.btn.btn-fab.bg-cinnamint data-action="playboard-background"
-      button.shadow-sm.btn.btn-fab.bg-margo data-action="playboard-background"
-    .dropdown-menu-down
-      button.shadow-sm.btn.btn-fab.btn-info data-action="fullscreen"
+.position-absolute.top-0.right-0.m-3
+  .fab-action
+    button#menu-button.btn.btn-sm.btn-outline-dark.glassy data-toggle="fab-action"
+      i.fas.fa-bars.fa-fw
+    .fab-action-menu.fab-action-menu-left
+      button.shadow.btn.btn-fab.bg-dark-green data-action="playboard-background"
+      button.shadow.btn.btn-fab.bg-cool-sky data-action="playboard-background"
+      button.shadow.btn.btn-fab.bg-cinnamint data-action="playboard-background"
+      button.shadow.btn.btn-fab.bg-margo data-action="playboard-background"
+    .fab-action-menu.fab-action-menu-down
+      button.shadow.btn.btn-fab.btn-outline-dark.glassy data-action="fullscreen"
         i.fas.fa-expand
 
 a#log-button.btn.btn-sm.btn-fab.text-muted href="#"
   i.fas.fa-caret-up
 
-#log.white-text.hidden
-
-#buttons
-  button#fullscreen.btn.btn-fab.btn-sm.btn-info.hidden
-    i.fas.fa-expand
+#log.glassy-dark.hidden
 
 #sounds
   audio.merge src="/sounds/merge.mp3"

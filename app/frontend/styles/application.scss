@@ -62,38 +62,6 @@ nav {
   padding-bottom: 1rem;
 }
 
-.glassy {
-  background-color: transparent;
-  backdrop-filter: blur(5px);
-  @extend .shadow;
-
-  &.list-group {
-    @extend .rounded;
-  }
-}
-
-@each $key, $color in map-merge($theme-colors, $difficulty-colors) {
-  .glassy-#{$key} {
-    @extend .glassy;
-    color: color-yiq($color);
-    background-color: rgba($color, 0.5);
-
-    table {
-      color: color-yiq($color);
-      background-color: transparent;
-    }
-
-    a {
-      color: color-yiq($color);
-      background-color: transparent;
-    }
-
-    .list-group-item {
-      background-color: transparent;
-    }
-  }
-}
-
 .puzzle-show {
   position: relative;
   max-width: 100%;
@@ -132,12 +100,6 @@ nav {
     border-top-right-radius: 0;
     @extend .border-left;
     @extend .border-right;
-
-    &.offline {
-      .progress-bar {
-        width: 100%;
-      }
-    }
   }
 }
 

@@ -24,26 +24,49 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
 }
 
 .fab-action {
-  .dropdown-menu {
-    background: none;
-    border: none;
-    min-width: 0;
-    padding: 0;
-    margin-top: -$btn-fab-size;
+  position: relative;
+  width: 100%;
+  border: none;
 
-    .dropdown-menu-left {
-      text-align: right;
-      padding-right: $btn-fab-size;
-      button {
-        display: inline;
-        @extend .mr-2;
+  .fab-action-menu {
+    button {
+      position: absolute;
+      will-change: transform, opacity;
+      transition-property: transform, opacity;
+      transition-duration: 100ms;
+      opacity: 0;
+      &.show {
+        opacity: 1;
+      }
+      @for $i from 0 through 20 {
+        &:nth-child(#{$i}) {
+          transition-delay: 20ms * $i;
+        }
       }
     }
-    .dropdown-menu-down {
-      button {
-        display: block;
-        margin-left: auto;
-        @extend .mt-2;
+  }
+
+
+  @for $i from 0 through 20 {
+    .fab-action-menu-left {
+      button:nth-child(#{$i}) {
+        top: 50%;
+        transform: translate(- $i * 100%, -50%);
+        &.show {
+          transform: translate(- $i * 140%, -50%);
+        }
+      }
+    }
+  }
+
+  @for $i from 0 through 20 {
+    .fab-action-menu-down {
+      button:nth-child(#{$i}) {
+        left: 50%;
+        transform: translate(-50%, $i * 100% - 100%);
+        &.show {
+          transform: translate(-50%, $i * 140% - 100%);
+        }
       }
     }
   }
