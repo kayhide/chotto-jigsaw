@@ -8,6 +8,6 @@
     = f.button type: :submit, class: %W(btn btn-block bg-#{difficulty}) do
       == yield
 - else
-  button.btn.btn-block.disabled class="bg-#{difficulty}" data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_host_a_new_game.to_str
+  button.btn.btn-block.disabled class="bg-#{difficulty}" data-toggle="tooltip" data-placement="top" data-html="true" title=login_to_host_a_new_game.to_str
     == yield
   i.fas.fa-lock.fa-2x.overlay

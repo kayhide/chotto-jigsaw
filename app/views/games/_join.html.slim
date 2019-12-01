@@ -7,6 +7,6 @@
   = link_to game, class: classes do
     == yield
 - else
-  span class=classes data-toggle="popover" data-placement="top" data-html="true" data-content=login_to_join_this_game.to_str
+  span class=classes data-toggle="tooltip" data-placement="top" data-html="true" title=login_to_join_this_game.to_str
     == yield
     i.fas.fa-lock.fa-2x.overlay
