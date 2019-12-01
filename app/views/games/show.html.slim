@@ -17,20 +17,23 @@
     = image_tag @puzzle.picture.variant(resize_to_fill: [800, 600]), class: %w(img-fluid)
 
 .position-absolute.top-0.left-0.m-3
-  = link_to :root, class: %w(btn btn-outline-dark btn-sm glassy) do
-    i.fas.fa-home.fa-fw
+  = link_to :root, class: %w(btn btn-fab btn-outline-dark glassy) do
+    i.fas.fa-home
 
 .position-absolute.top-0.right-0.m-3
   .fab-action
-    button#menu-button.btn.btn-sm.btn-outline-dark.glassy data-toggle="fab-action"
-      i.fas.fa-bars.fa-fw
+    button#menu-button.btn.btn-fab.btn-outline-dark.glassy data-toggle="fab-action"
+      i.fas.fa-bars
     .fab-action-menu.fab-action-menu-left
-      button.shadow.btn.btn-fab.bg-dark-green data-action="playboard-background"
-      button.shadow.btn.btn-fab.bg-cool-sky data-action="playboard-background"
-      button.shadow.btn.btn-fab.bg-cinnamint data-action="playboard-background"
-      button.shadow.btn.btn-fab.bg-margo data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-dark-green data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-cool-sky data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-cinnamint data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-margo data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-piggy-pink data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-lawrencium data-action="playboard-background"
+      button.shadow.btn.btn-fab.btn-outline-light.bg-hersheys data-action="playboard-background"
     .fab-action-menu.fab-action-menu-down
-      button.shadow.btn.btn-fab.btn-outline-dark.glassy data-action="fullscreen"
+      button.shadow.btn.btn-fab.btn-outline-light.glassy-dark data-action="fullscreen"
         i.fas.fa-expand
 
 a#log-button.btn.btn-sm.btn-fab.text-muted href="#"

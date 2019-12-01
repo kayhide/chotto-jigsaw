@@ -10,6 +10,8 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
   width: $btn-fab-size;
   height: $btn-fab-size;
 
+  position: relative;
+
   &.btn-sm {
     @extend .btn-sm;
     width: $btn-fab-size-sm;
@@ -20,6 +22,13 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
     @extend .btn-lg;
     width: $btn-fab-size-lg;
     height: $btn-fab-size-lg;
+  }
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 
@@ -32,15 +41,17 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
     button {
       position: absolute;
       will-change: transform, opacity;
-      transition-property: transform, opacity;
+      transition-property: transform, opacity, visibility;
       transition-duration: 100ms;
       opacity: 0;
+      visibility: hidden;
       &.show {
         opacity: 1;
+        visibility: visible;
       }
       @for $i from 0 through 20 {
         &:nth-child(#{$i}) {
-          transition-delay: 20ms * $i;
+          transition-delay: 30ms * $i;
         }
       }
     }
@@ -51,7 +62,7 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
     .fab-action-menu-left {
       button:nth-child(#{$i}) {
         top: 50%;
-        transform: translate(- $i * 100%, -50%);
+        transform: translate(- ($i - 1)* 140%, -50%);
         &.show {
           transform: translate(- $i * 140%, -50%);
         }
@@ -63,7 +74,7 @@ $btn-fab-size-lg: $font-size-lg * 2.5;
     .fab-action-menu-down {
       button:nth-child(#{$i}) {
         left: 50%;
-        transform: translate(-50%, $i * 100% - 100%);
+        transform: translate(-50%, ($i - 1) * 140% - 100%);
         &.show {
           transform: translate(-50%, $i * 140% - 100%);
         }

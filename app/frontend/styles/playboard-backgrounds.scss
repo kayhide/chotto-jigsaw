@@ -6,19 +6,31 @@ $playboard-backgrounds: dark-green, cool-sky, cinnamint, margo;
 }
 
 .bg-cool-sky {
-  background: #2980B9;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #2980B9;
+  background: linear-gradient(to top, #ffffff, #6dd5fa, #2980b9);
 }
 
 .bg-cinnamint {
-  background: #4AC29A;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to bottom, #BDFFF3, #4AC29A);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to bottom, #BDFFF3, #4AC29A); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #4ac29a;
+  background: linear-gradient(to bottom, #bdfff3, #4ac29a);
 }
 
 .bg-margo {
-  background: #FFEFBA;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to bottom, #FFFFFF, #FFEFBA);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to bottom, #FFFFFF, #FFEFBA); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #ffefba;
+  background: linear-gradient(to bottom, #ffffff, #ffefba);
+}
+
+.bg-piggy-pink {
+  background: #ee9ca7;
+  background: linear-gradient(to bottom, #ffdde1, #ee9ca7);
+}
+
+.bg-lawrencium {
+  background: #0f0c29;
+  background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+}
+
+.bg-hersheys {
+  background: #1e130c;
+  background: linear-gradient(to bottom, #9a8478, #1e130c);
 }
