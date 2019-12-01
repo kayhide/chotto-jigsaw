@@ -60,25 +60,45 @@ nav {
 .container {
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+
+.glassy {
+  background: none;
   backdrop-filter: blur(5px);
   @extend .shadow;
 }
 
+@each $key, $color in map-merge($theme-colors, $difficulty-colors) {
+  .glassy-#{$key} {
+    @extend .glassy;
+    color: color-yiq($color);
+    background-color: rgba($color, 0.5);
+
+    table {
+      color: color-yiq($color);
+    }
+
+    a {
+      color: color-yiq($color);
+    }
+  }
+}
 
 .puzzle-show {
   position: relative;
   max-width: 100%;
-  background-size: cover;
+  background: $white;
 
   img {
-    position: absolute;
     max-width: 100%;
     opacity: 0.5;
   }
 
   canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     max-width: 100%;
-    opacity: 1;
   }
 }
 

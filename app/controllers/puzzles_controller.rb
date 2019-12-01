@@ -1,7 +1,7 @@
 class PuzzlesController < ApplicationController
   before_action :authenticate!
   before_action :set_puzzle, only: [:show, :edit, :update, :destroy, :row]
-  before_action :set_picture, only: [:create]
+  before_action :set_picture, only: [:show, :create]
 
   def index
     @puzzles = Puzzle.all
@@ -52,7 +52,7 @@ class PuzzlesController < ApplicationController
   end
 
   def set_picture
-    @picture = params[:picture_id] && Picture.find(params[:picture_id])
+    @picture = @puzzle&.picture_blob&.becomes(Picture) || params[:picture_id] && Picture.find(params[:picture_id])
   end
 
   def puzzle_params

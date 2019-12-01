@@ -1,65 +1,55 @@
-h2 = @puzzle.difficulty.to_s.camelize
-
 - width, height = @puzzle.picture.metadata.values_at("width", "height")
+- longer = [width, height].max
 - aspect_ratio = width.to_f / height.to_f
+- display_scale = 400.0 / longer.to_f
+- display_width = (width * display_scale).floor
+- display_height = (height * display_scale).floor
 
-.row.justify-content-md-center
-  .col-md-auto
-    .text-sm = @puzzle.picture.filename
-    .text-sm
-      span = @puzzle.pieces_count
-      span< pcs
-      span<> size:
-      span = width
-      span<> x
-      span = height
-      span<> aspect ratio:
-      span = "%0.2f" % aspect_ratio
+.row
+  .col-6
+    .d-flex
+      .border.rounded.glassy-light.p-2.mx-auto
+        .puzzle-show
+          = image_tag @puzzle.picture.variant(resize_to_limit: [400, 400])
+          canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
+  .col-6
+    dl.row.rounded.p-2 class="glassy-#{@puzzle.difficulty}"
+      dt.col-4 Difficulty
+      dd.col-8 = @puzzle.difficulty.to_s.camelize
+      dt.col-4 Name
+      dd.col-8 = @puzzle.picture.filename
+      dt.col-4 Pieces Count
+      dd.col-8 = "#{@puzzle.pieces_count} pcs"
+      dt.col-4 Size
+      dd.col-8 = "#{width} x #{height}"
+      dt.col-4 Aspect Ratio
+      dd.col-8 = "%0.2f" % aspect_ratio
 
-    - if 1.33 < aspect_ratio
-      - display_width = 800
-      - display_scale = display_width.to_f / width.to_f
-      - display_height = height * display_scale
-    - else
-      - display_height = 600
-      - display_scale = display_height.to_f / height.to_f
-      - display_width = width * display_scale
-
-    .puzzle-show.mx-auto
-      = image_tag @puzzle.picture.variant(resize_to_fit: [display_width, display_height])
-      canvas id=dom_id(@puzzle, :canvas) width=display_width height=display_height
 
 - gen = Random.new @puzzle.id
-
-javascript:
-  var canvas = document.getElementById('#{dom_id @puzzle, :canvas}');
-  var ctx = canvas.getContext('2d');
-  ctx.scale(#{display_scale}, #{display_scale});
-  ctx.strokeStyle = "0deg, 0%, 20%)";
-  ctx.lineWidth = 3 / #{display_scale};
-
-- @puzzle.pieces.each do |p|
-  ruby:
+ruby:
+  instructions = @puzzle.pieces.map { |p|
     head, *tail = p.points
-    instructions = [
+    [
       ['beginPath', ''],
       ['moveTo', head.join(',')],
       *tail.each_slice(3).map { |pts|
         [pts.all? ? 'bezierCurveTo' : 'lineTo', pts.compact.join(',')]
       },
+      ['closePath', ''],
       ['stroke', ''],
-      ['fill', '']
     ]
+  }.inject(:+)
 
-  javascript:
-    ctx.fillStyle = "hsla(0deg, 0%, #{gen.rand(20) + 70}%, 0.8)";
-    #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
+javascript:
+  var canvas = document.getElementById('#{dom_id @puzzle, :canvas}');
+  var ctx = canvas.getContext('2d');
+  ctx.scale(#{display_scale}, #{display_scale});
 
+  ctx.strokeStyle = "hsla(0deg, 0%, 30%, 0.2)";
+  ctx.lineWidth = 4 / #{display_scale};
+  #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }
 
-h2 Games
-
-.list-group
-  - @puzzle.games.order(id: :desc).each do |game|
-    = link_to game, class: %w(list-group-item list-group-item-action) do
-      .text-sm =l game.created_at
-      .text-info = '.' * (game.commands.count / 10)
+  ctx.strokeStyle = "hsla(0deg, 0%, 30%, 0.9)";
+  ctx.lineWidth = 1 / #{display_scale};
+  #{raw instructions.map { |m, args| "ctx.#{m}(#{args})" }.join(';') }

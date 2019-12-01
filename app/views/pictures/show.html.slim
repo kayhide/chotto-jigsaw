@@ -1,29 +1,16 @@
-h2 Picture
+.d-flex
+  .border.rounded.glassy-light.p-2.mx-auto
+    = image_tag @picture.variant(resize_to_limit: [400, 400])
 
-.row
-  .col-md-5.pb-1
-    = image_tag @picture.variant(resize_to_limit: [200, 150])
-  .col-md-7.pb-1
-    .row
-      - Puzzle::DIFFICULTIES.take(5).each do |difficulty|
-        .col
-          - puzzle = Puzzle.new(difficulty: difficulty)
-          = form_for puzzle, url: [@picture, :puzzles], remote: true do |f|
-            = f.hidden_field :difficulty
-            = f.submit t(difficulty, scope: :difficulties), class: %w(btn btn-success btn-block)
+.card.glassy-dark.p-3.mt-3
+  h2 Puzzles
 
-
-.text-right.puzzles-count
-  = @puzzles.count
-
-.card.mt-1.mb-3
   table.table.puzzle-list
     thead
       tr
         th Difficulty
         th.text-right Pieces Count
         th.text-right Games Count
-        th
 
     tbody.loading-watcher
       - @puzzles.each do |puzzle|
