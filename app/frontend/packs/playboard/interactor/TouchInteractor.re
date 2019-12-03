@@ -62,7 +62,7 @@ let attach = (gi: GameInteractor.t): unit => {
       Logger.trace(e##"type");
       dragger := dragger^.finish();
       hammer |> updateListeners;
-      gi.game |> View.fit;
+      gi |> GameInteractor.fit;
     });
 
   hammer

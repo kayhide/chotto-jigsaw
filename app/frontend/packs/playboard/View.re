@@ -1,9 +1,6 @@
 open Webapi.Dom;
 
-type puzzle = Puzzle.t;
-type rectangle = Rectangle.t;
-
-let contain = (game: Game.t, rect: rectangle): unit => {
+let contain = (rect: Rectangle.t, game: Game.t): unit => {
   let margin = game.puzzleActor.body.linearMeasure;
   let width = window |> Window.innerWidth |> float_of_int;
   let height = window |> Window.innerHeight |> float_of_int;
@@ -18,4 +15,4 @@ let contain = (game: Game.t, rect: rectangle): unit => {
 };
 
 let fit = (game: Game.t): unit =>
-  game.puzzleActor.body |> Puzzle.boundary |> contain(game);
+  game |> contain(game.puzzleActor.body |> Puzzle.boundary);

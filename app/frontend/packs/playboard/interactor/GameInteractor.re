@@ -344,7 +344,14 @@ and capture = (piece: piece, pt: point, gi: t): dragger => {
   dragger;
 };
 
-[@bs.send] external update: (DisplayObject.t, unit) => unit = "update";
-[@bs.send] external invalidate: (DisplayObject.t, unit) => unit = "invalidate";
+let invalidate = (gi: t): unit => gi.baseStage |> Stage.invalidate;
 
-let invalidate = (gi: t): unit => gi.baseStage->invalidate();
+let contain = (rect: Rectangle.t, gi: t): unit => {
+  gi.game |> View.contain(rect);
+  gi |> invalidate;
+};
+
+let fit = (gi: t): unit => {
+  gi.game |> View.fit;
+  gi |> invalidate;
+};

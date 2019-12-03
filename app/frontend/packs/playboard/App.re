@@ -134,13 +134,6 @@ let play = (app: app): unit => {
        app |> setupUi(game);
        app |> setupSound;
 
-       if (jquery(app.playboard)->data("initial-view")
-           !== Js.Nullable.undefined) {
-         let size = jquery(app.playboard)->data("initial-view");
-         Rectangle.create(size##x, size##y, size##width, size##height)
-         |> View.contain(game);
-       };
-
        let gi = GameInteractor.create(game);
        gi |> BrowserInteractor.attach;
        gi |> GuideInteractor.attach;
@@ -150,20 +143,29 @@ let play = (app: app): unit => {
          gi |> MouseInteractor.attach;
        };
 
+       if (jquery(app.playboard)->data("initial-view")
+           !== Js.Nullable.undefined) {
+         let size = jquery(app.playboard)->data("initial-view");
+         gi
+         |> GameInteractor.contain(
+              Rectangle.create(size##x, size##y, size##width, size##height),
+            );
+       };
+
        if (game.isStandalone) {
          game |> Game.shuffle;
          let _ = Js.Global.setTimeout(() => game |> Game.setUpdated, 0);
          ();
        };
 
-       jquery("#picture")->fadeOut("slow");
-     });
+       let _ = jquery("#picture")->fadeOut("slow");
 
-  game
-  |> Game.onUpdated(() => {
-       Logger.trace("game updated");
-       let _ = jquery("#game-progress .loading")->fadeOut("slow");
-       game |> View.fit;
+       game
+       |> Game.onUpdated(() => {
+            Logger.trace("game updated");
+            let _ = jquery("#game-progress .loading")->fadeOut("slow");
+            gi |> GameInteractor.fit;
+          });
      });
 
   if (game.isStandalone) {
