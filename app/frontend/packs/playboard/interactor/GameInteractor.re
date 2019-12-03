@@ -90,9 +90,8 @@ let clearActiveLayer = (gi: t): unit => {
 };
 
 let isCaptured = (piece_id: int, gi: t): bool => {
-  let p = gi.game.puzzleActor.body |> Puzzle.findPiece(piece_id);
   gi.game
-  |> Game.findPieceActor(p.id)
+  |> Game.findPieceActor(piece_id)
   |> PieceActor.withSkin(DisplayObject.parent) === Some(gi.activeStage);
 };
 
@@ -267,10 +266,7 @@ let rec defaultDragger = (gi: t): dragger => {
 and dragStart = (pt: point, gi: t): dragger =>
   pt
   |> gi.baseStage->DisplayObject.getObjectUnderPoint
-  |> Maybe.bind(x => gi |> findPiece(x))
-  |> Maybe.map((a: piece) =>
-       gi.game |> Game.findPieceEntityActor(a.body.id)
-     )
+  |> Maybe.bind(x => gi |> findPieceEntity(x))
   |> Maybe.maybe(gi |> defaultDragger, (piece: piece) =>
        gi |> capture(piece, pt)
      )
@@ -328,7 +324,7 @@ and capture = (piece: piece, pt: point, gi: t): dragger => {
         pt'
         |> fromWindowToLocal(gi.activeStage)
         |> gi.activeStage->getObjectUnderPoint
-        |> Maybe.bind(x => gi |> findPiece(x))
+        |> Maybe.bind(x => gi |> findPieceEntity(x))
         |> Maybe.guard(piece' => piece' === piece);
 
       switch (piece') {
