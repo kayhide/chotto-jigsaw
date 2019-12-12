@@ -99,7 +99,7 @@ RSpec.describe GamesController, type: :controller do
         let(:params) {
           { picture_id: picture.id, puzzle: {} }
         }
-        fit "redirects to the created game" do
+        it "redirects to the created game" do
           post :create, params: params
           expect(response).to redirect_to([picture, :games])
         end

@@ -21,7 +21,7 @@ RSpec.describe LoginsController, type: :controller do
       it "sets current_user" do
         expect {
           post :create, params: { login: { email: user.email } }
-        }.to change(controller, :current_user).from(nil).to(user)
+        }.to change(controller, :current_user).to(user)
       end
     end
 
