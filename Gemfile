@@ -15,6 +15,7 @@ gem 'rails-i18n'
 gem 'redis', '~> 4.0'
 gem 'slim-rails'
 gem 'webpacker', '~> 4.0'
+gem 'google-cloud-firestore'
 
 # gem 'bcrypt', '~> 3.1.7'
 
