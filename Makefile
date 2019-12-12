@@ -1,37 +1,30 @@
 RAILS_ENV ?= development
-COMPOSE_PROJECT_NAME := chotto-jigsaw
+COMPOSE_PROJECT_NAME := $(shell basename $(shell pwd))
 COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	@$$($(MAKE) --no-print-directory envs) && hivemind Procfile.dev
+	@hivemind $${PORT:+--port $$PORT} --port-step 1 Procfile.dev
 .PHONY: dev
 
 guard:
-	@$$($(MAKE) --no-print-directory envs) && bundle exec guard --plugin RSpec
+	@bin/bundle exec guard --plugin RSpec
 .PHONY: guard
 
-infra-up:
+provision:
 	${COMPOSE_COMMAND} up -d
-	@$$($(MAKE) --no-print-directory envs) && bin/spring stop
-	@$$($(MAKE) --no-print-directory envs) && rails db:setup || rails db:migrate
-.PHONY: infra-up
+	@bin/spring stop
+	@$$($(MAKE) --no-print-directory envs) \
+	&& (bin/rails db:migrate 2> /dev/null) || bin/rails db:setup
+.PHONY: provision
 
-infra-down:
+unprovision:
 	${COMPOSE_COMMAND} down
-	@bundle exec spring stop
-.PHONY: infra-down
+	@bin/spring stop
+.PHONY: unprovision
 
 envs:
 	$(eval DB_CONTAINER := $(shell docker ps -q --filter 'name=${COMPOSE_PROJECT_NAME}_db_*'))
 	$(eval DB_PORT := $(shell docker port ${DB_CONTAINER} | cut -d ':' -f 2))
 	@echo "export DB_PORT=${DB_PORT}"
 .PHONY: envs
-
-rails-console:
-	@$$($(MAKE) --no-print-directory envs) && rails console
-.PHONY: rails-console
-
-db-console:
-	@$$($(MAKE) --no-print-directory envs) && rails dbconsole
-.PHONY: db-console
