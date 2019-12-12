@@ -23,8 +23,9 @@ unprovision:
 	@bin/spring stop
 .PHONY: unprovision
 
+envs: DB_PORT := $(shell docker-compose port db 5432 | cut -d ':' -f 2)
+envs: FIRESTORE_PORT := $(shell docker-compose port firestore 8080 | cut -d ':' -f 2)
 envs:
-	$(eval DB_CONTAINER := $(shell docker ps -q --filter 'name=${COMPOSE_PROJECT_NAME}_db_*'))
-	$(eval DB_PORT := $(shell docker port ${DB_CONTAINER} | cut -d ':' -f 2))
 	@echo "export DB_PORT=${DB_PORT}"
+	@echo "export FIRESTORE_PORT=${FIRESTORE_PORT}"
 .PHONY: envs

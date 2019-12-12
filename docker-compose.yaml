@@ -4,3 +4,8 @@ services:
     image: postgres:10.5-alpine
     ports:
       - 5432
+
+  firestore:
+    image: firestore-emulator:latest
+    ports:
+      - 8080
