@@ -1,9 +1,7 @@
 class TransformCommand < Command
-  include PrefixAttribute
-
-  prefix_attribute :transform, :position_x
-  prefix_attribute :transform, :position_y
-  prefix_attribute :transform, :rotation
+  attribute :position_x, :float
+  attribute :position_y, :float
+  attribute :rotation, :float
 
   validates :position_x, presence: true
   validates :position_y, presence: true

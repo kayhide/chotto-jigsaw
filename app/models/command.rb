@@ -1,6 +1,10 @@
-class Command < ApplicationRecord
-  belongs_to :user, optional: true
+class Command
+  include FireRecord::Document
+
+  has_one :user
   belongs_to :game
+  attribute :piece_id, :integer
+  attribute :created_at, :datetime
 
   validates :piece_id, presence: true
 

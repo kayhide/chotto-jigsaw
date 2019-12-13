@@ -1,9 +1,7 @@
 class RotateCommand < TransformCommand
-  include PrefixAttribute
-
-  prefix_attribute :rotate, :pivot_x
-  prefix_attribute :rotate, :pivot_y
-  prefix_attribute :rotate, :delta_degree
+  attribute :pivot_x, :float
+  attribute :pivot_y, :float
+  attribute :delta_degree, :float
 
   validates :pivot_x, presence: true
   validates :pivot_y, presence: true
