@@ -164,4 +164,69 @@ RSpec.describe FireRecord::Document do
       end
     end
   end
+
+  describe "inherited model" do
+    class Animal
+      include FireRecord::Document
+      attribute :type, :string
+      attribute :name, :string
+    end
+
+    class Cat < Animal
+      attribute :mew, :string
+    end
+
+    class Dog < Animal
+      attribute :bow, :string
+    end
+
+    before do
+      Animal.delete_all
+    end
+
+    describe "base class" do
+      subject { Animal }
+
+      describe ".scope" do
+        it "returns a scope" do
+          expect(subject.scope.path).to be_end_with "animals"
+        end
+      end
+    end
+
+    describe "inherited class" do
+      describe ".scope" do
+        it "returns a scope of document defined" do
+          expect(Cat.scope.path).to be_end_with "animals"
+          expect(Dog.scope.path).to be_end_with "animals"
+        end
+      end
+
+      describe ".find" do
+        it "downcasts" do
+          mike = Cat.create! id: "mike", name: "Mike", mew: "Meeew"
+          taro = Dog.create! id: "taro", name: "Taro", bow: "Bowow"
+          expect(Animal.find("mike")).to eq mike
+          expect(Animal.find("taro")).to eq taro
+        end
+      end
+
+      describe ".all" do
+        it "downcasts" do
+          mike = Cat.create! id: "mike", name: "Mike", mew: "Meeew"
+          taro = Dog.create! id: "taro", name: "Taro", bow: "Bowow"
+          expect(Animal.all).to eq [mike, taro]
+        end
+      end
+    end
+
+    describe "instance" do
+      describe "#save!" do
+        it "sets type attribute" do
+          expect(Cat.new.save!.type).to eq "Cat"
+          expect(Dog.new.save!.type).to eq "Dog"
+        end
+      end
+    end
+  end
 end

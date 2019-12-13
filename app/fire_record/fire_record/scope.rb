@@ -4,9 +4,11 @@ module FireRecord
 
     def save!
       doc = id.present? ? scope.doc(id) : scope.doc
+      self.try(:type=, self.class.name)
       doc.set attributes.except(self.class.primary_key)
       self.id = doc.document_id
-      self.class.has_timestamp ? reload : self
+      self.instance_variable_set "@doc", doc
+      self
     end
 
     def update! attrs
@@ -15,7 +17,10 @@ module FireRecord
     end
 
     def reload
-      decode scope.doc(id).get
+      obj = self.class.decode scope.doc(id).get
+      self.instance_variable_set "@attributes", obj.instance_variable_get("@attributes")
+      self.instance_variable_set "@doc", obj.instance_variable_get("@doc")
+      self
     end
 
     def scope
@@ -24,7 +29,11 @@ module FireRecord
 
     module ClassMethods
       def scope
-        ::FireRecord.client.col(model_name.plural)
+        klass = ancestors
+                  .take_while { |m| m != FireRecord::Document }
+                  .filter {|m| m.is_a? Class}
+                  .last
+        ::FireRecord.client.col(klass.model_name.plural)
       end
 
       def build attrs = {}
@@ -36,12 +45,12 @@ module FireRecord
       end
 
       def find id
-        build.decode scope.doc(id).get
+        decode scope.doc(id).get
       end
 
       def all
         scope.get.map do |doc|
-          new.decode(doc)
+          decode(doc)
         end
       end
 

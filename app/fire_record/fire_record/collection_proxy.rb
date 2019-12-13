@@ -20,6 +20,8 @@ module FireRecord
         built
       end
       alias_method :new, :build
+
+      delegate :decode, to: :@klass
     end
 
     def initialize klass, name, owner

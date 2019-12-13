@@ -6,23 +6,24 @@ module FireRecord
     include FireRecord::Reflection
     include FireRecord::Scope
 
-    def decode doc
-      self.attributes = {
-        id: doc.document_id,
-        **doc.data
-      }
-      if (self.class.has_timestamp)
-        self&.created_at = doc.create_time
-        self&.updated_at = doc.update_time
-      end
+    attr_reader :doc
 
-      self
+    def created_at
+      doc&.create_time
+    end
+
+    def updated_at
+      doc&.update_time
     end
 
     def becomes klass
       became = klass.allocate
       became.send(:initialize)
+      @attributes.instance_variable_get("@attributes").merge!(
+        became.instance_variable_get("@attributes").instance_variable_get("@attributes")
+      )
       became.instance_variable_set("@attributes", @attributes)
+      became.instance_variable_set("@doc", @doc)
       this_scope = scope
       became.define_singleton_method :scope do
         this_scope
@@ -60,8 +61,14 @@ module FireRecord
         "id"
       end
 
-      def has_timestamp
-        (attribute_names & %w(created_at updated_at)).present?
+      def decode doc
+        klass = doc.data[:type]&.constantize || self
+        obj = klass.new(
+          id: doc.document_id,
+          **doc.data.slice(*klass.attribute_names.map(&:to_sym))
+        )
+        obj.instance_variable_set "@doc", doc
+        obj
       end
     end
   end
