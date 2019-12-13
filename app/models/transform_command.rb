@@ -7,10 +7,6 @@ class TransformCommand < Command
   validates :position_y, presence: true
   validates :rotation, presence: true
 
-  def command_attributes
-    super.merge(attributes.slice %w(position_x position_y rotation))
-  end
-
   def position
     Vector[position_x, position_y]
   end

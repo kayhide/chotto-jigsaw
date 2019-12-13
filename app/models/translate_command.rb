@@ -5,10 +5,6 @@ class TranslateCommand < TransformCommand
   validates :delta_x, presence: true
   validates :delta_y, presence: true
 
-  def command_attributes
-    super.merge(attributes.slice %w(delta_x delta_y))
-  end
-
   def delta
     Vector[delta_x, delta_y]
   end

@@ -13,13 +13,14 @@ class GameChannel < ApplicationCable::Channel
 
   def commit data
     commands = data["commands"].map do |x|
-      game.commands.create!(x.merge(user: current_user))
+      klass = x["type"].constantize
+      game.commands.build.becomes(klass).update!(x.merge(user: current_user))
     end
     broadcast_to(
       game,
       action: :commit,
       token: @connection_token,
-      commands: commands.map(&:command_attributes)
+      commands: commands.map(&:attributes)
     )
   end
 
@@ -44,15 +45,17 @@ class GameChannel < ApplicationCable::Channel
   def request_update data
     game.reload
     if game.shuffled_at?
-      commands = game.commands.order(:id)
+      commands = game.commands.scope.order(:created_at)
       if since = data["since"]
-        commands = commands.where(created_at: since .. DateTime.current)
+        commands = commands.where(:created_at, :>, since)
       end
-      commands.in_batches(of: COMMIT_BATCH_SIZE) do |cmds|
+      commands.get
+        .map { |doc| Command.decode(doc).attributes }
+        .each_slice(COMMIT_BATCH_SIZE) do |cmds|
         transmit(
           action: :commit,
           token: nil,
-          commands: cmds.map(&:command_attributes)
+          commands: cmds
         )
       end
       transmit(
