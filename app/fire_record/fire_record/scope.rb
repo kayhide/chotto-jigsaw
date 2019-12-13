@@ -3,12 +3,8 @@ module FireRecord
     extend ActiveSupport::Concern
 
     def save!
+      presave
       doc = id.present? ? scope.doc(id) : scope.doc
-      self.try(:type=, self.class.name)
-      if new_record?
-        self.try(:created_at=, ::FireRecord.client.field_server_time)
-      end
-      self.try(:update_at=, ::FireRecord.client.field_server_time)
       doc.set attributes.except(self.class.primary_key)
       self.id = doc.document_id
       self.instance_variable_set "@doc", doc
@@ -35,6 +31,15 @@ module FireRecord
       self.class.scope
     end
 
+    def presave
+      try(:type=, self.class.name)
+      if new_record?
+        try(:created_at=, ::FireRecord.client.field_server_time)
+      end
+      try(:update_at=, ::FireRecord.client.field_server_time)
+      self
+    end
+
     module ClassMethods
       def scope
         klass = ancestors
@@ -53,18 +58,20 @@ module FireRecord
       end
 
       def find id
-        decode scope.doc(id).get
+        doc = scope.doc(id).get
+        raise FireRecord::DocumentNotFound if doc.data.nil?
+        decode doc
       end
 
       def all
-        scope.get.map do |doc|
-          decode(doc)
-        end
+        scope.get.map(&method(:decode))
       end
 
       def delete_all
-        scope.get do |doc|
-          ::FireRecord.client.doc(doc.document_path).delete
+        ::FireRecord.client.batch do |b|
+          scope.get do |doc|
+            b.delete(doc.document_path)
+          end
         end
       end
     end

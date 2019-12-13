@@ -42,6 +42,12 @@ RSpec.describe FireRecord::Document do
           tokyo = subject.create! id: "tky", name: "Tokyo"
           expect(subject.find("tky")).to eq tokyo
         end
+
+        it "raises DocumentNotFound when not found" do
+          expect{
+            subject.find("zzz")
+          }.to raise_error(FireRecord::DocumentNotFound)
+        end
       end
 
       describe ".all" do
@@ -250,6 +256,10 @@ RSpec.describe FireRecord::Document do
     describe "belonged inherited class" do
       let(:owner) { Owner.create! }
       subject { owner.animals }
+
+      before do
+        subject.delete_all
+      end
 
       describe ".find" do
         it "downcasts and sets reference attribute" do
