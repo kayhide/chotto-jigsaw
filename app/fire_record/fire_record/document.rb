@@ -3,8 +3,27 @@ module FireRecord
     extend ActiveSupport::Concern
     include ActiveModel::Model
     include ActiveModel::Attributes
+    include FireRecord::Reflection
+    include FireRecord::Scope
 
-    def push!
+    def decode doc
+      self.attributes = {
+        id: doc.document_id,
+        **doc.data
+      }
+      if (self.class.has_timestamp)
+        self&.created_at = doc.create_time
+        self&.updated_at = doc.update_time
+      end
+
+      self
+    end
+
+    def ==(comparison_object)
+      super ||
+        comparison_object.instance_of?(self.class) &&
+        !id.nil? &&
+        comparison_object.id == id
     end
 
     def inspect
@@ -22,40 +41,20 @@ module FireRecord
     end
 
     included do
-      attribute :id, :integer
+      attribute primary_key, :string
     end
 
     module ClassMethods
-      def belongs_to name
-        raise "Cannot belong to more than one model" if @document_belongs_to.present?
-
-        klass = name.to_s.classify.constantize
-        @document_belongs_to = klass
-        attribute "#{name}_#{klass.primary_key}", klass.attribute_types[klass.primary_key]
+      def primary_key
+        "id"
       end
 
-      def has_one name
-        klass = name.to_s.classify.constantize
-        key_name = "#{name}_#{klass.primary_key}"
-        attribute key_name, klass.attribute_types[klass.primary_key]
-        define_method name do
-          klass.find_by({ "#{klass.primary_key}": send(key_name) })
-        end
-        define_method "#{name}=" do |arg|
-          send("#{key_name}=", arg&.send(klass.primary_key))
-        end
+      def scope
+        ::FireRecord.client.col(model_name.plural)
       end
 
-      def col_path
-        @document_belongs_to
-      end
-
-      def first
-        ::FireRecord.client.col(self.model_name.plural).limit(1).get.to_a.first
-      end
-
-      def all
-        ::FireRecord.client.col(self.model_name.plural).get.to_a
+      def has_timestamp
+        (attribute_names & %w(created_at updated_at)).present?
       end
     end
   end
