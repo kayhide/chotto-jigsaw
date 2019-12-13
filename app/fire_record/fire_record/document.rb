@@ -8,14 +8,6 @@ module FireRecord
 
     attr_reader :doc
 
-    def created_at
-      doc&.create_time
-    end
-
-    def updated_at
-      doc&.update_time
-    end
-
     def becomes klass
       became = klass.allocate
       became.send(:initialize)

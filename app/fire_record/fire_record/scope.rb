@@ -5,6 +5,10 @@ module FireRecord
     def save!
       doc = id.present? ? scope.doc(id) : scope.doc
       self.try(:type=, self.class.name)
+      if new_record?
+        self.try(:created_at=, ::FireRecord.client.field_server_time)
+      end
+      self.try(:update_at=, ::FireRecord.client.field_server_time)
       doc.set attributes.except(self.class.primary_key)
       self.id = doc.document_id
       self.instance_variable_set "@doc", doc
@@ -14,6 +18,10 @@ module FireRecord
     def update! attrs
       self.attributes = attrs
       save!
+    end
+
+    def new_record?
+      @doc.nil?
     end
 
     def reload
