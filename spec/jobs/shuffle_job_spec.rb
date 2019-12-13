@@ -10,7 +10,7 @@ RSpec.describe ShuffleJob, type: :job do
       it 'creates commands' do
         expect {
           subject.perform game
-        }.to change(Command, :count).by(80)
+        }.to change { game.commands.all.count }.by(80)
       end
 
       it 'scatters pieces in a specific area' do
@@ -18,7 +18,7 @@ RSpec.describe ShuffleJob, type: :job do
 
         pieces = puzzle.pieces
         positions = pieces.map { |p| Vector[*p.center.to_a, 1] }
-        game.transform_commands.each do |cmd|
+        game.commands.scope.order(:created_at).get.map(&Command.method(:decode)).each do |cmd|
           positions[cmd.piece_id] = cmd.matrix * positions[cmd.piece_id]
         end
 

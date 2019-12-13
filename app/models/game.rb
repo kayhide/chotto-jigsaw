@@ -1,5 +1,8 @@
 class Game < ApplicationRecord
+  include FireRecord::Collection
+
   belongs_to :puzzle
+  has_many_docs :commands
   # has_many :commands, dependent: :destroy
   # has_many :merge_commands
   # has_many :transform_commands
