@@ -7,26 +7,27 @@ module FireRecord
       end
 
       def scope
-        @owner.scope.doc(@owner.id).col(model_name.plural)
+        @owner.scope.doc(@owner.id).col(@klass.model_name.plural)
       end
 
       def build attrs = {}
+        built = @klass.new(attrs)
+        built.attributes = { @owner.model_name.singular => @owner }
         this_scope = scope
-        @klass.new({ @reflection.name => @owner }.merge(attrs)).tap do |obj|
-          obj.define_singleton_method :scope do
-            this_scope
-          end
+        built.define_singleton_method :scope do
+          this_scope
         end
+        built
       end
       alias_method :new, :build
     end
 
-    def initialize klass, reflection, owner
+    def initialize klass, name, owner
       extend ::FireRecord::Scope::ClassMethods
       extend OverloadedMethods
 
       @klass = klass
-      @reflection = reflection
+      @name = name
       @owner = owner
     end
   end

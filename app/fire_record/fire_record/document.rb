@@ -19,6 +19,17 @@ module FireRecord
       self
     end
 
+    def becomes klass
+      became = klass.allocate
+      became.send(:initialize)
+      became.instance_variable_set("@attributes", @attributes)
+      this_scope = scope
+      became.define_singleton_method :scope do
+        this_scope
+      end
+      became
+    end
+
     def ==(comparison_object)
       super ||
         comparison_object.instance_of?(self.class) &&

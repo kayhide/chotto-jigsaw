@@ -31,13 +31,11 @@ module FireRecord
         if reflections.values.any? { |ref| ref.is_a?(BelongsTo) }
           raise "Cannot belong to more than one model"
         end
-        ref = define_one_association name, BelongsTo
-        define_inverse_association ref
+        define_one_association name, BelongsTo
       end
 
       def has_one name
-        ref = define_one_association name, HasOne
-        define_inverse_association ref
+        define_one_association name, HasOne
       end
 
       def define_one_association name, ref
@@ -64,15 +62,6 @@ module FireRecord
           name: name,
           plural_name: name.to_s.pluralize
         )
-      end
-
-      def define_inverse_association ref
-        this = self
-        ref.klass.define_method self.model_name.plural do
-          ref_obj = self
-          doc_path = [ref.klass.model_name.plural, send(ref.klass.primary_key)].join('/')
-          ::FireRecord::CollectionProxy.new(this, ref, self)
-        end
       end
     end
   end

@@ -3,7 +3,10 @@ require "rails_helper"
 RSpec.describe FireRecord::Document do
   class City
     include FireRecord::Document
+    include FireRecord::Collection
     attribute :name, :string
+
+    has_many_docs :streets
   end
 
   class Street
