@@ -1,0 +1,14 @@
+emulator: &emulator
+  emulator_host: localhost
+  emulator_port: <%= ENV['FIRESTORE_PORT'] %>
+
+development:
+  <<: *emulator
+  project_id: chotto-jigsaw-development
+
+test:
+  <<: *emulator
+  project_id: chotto-jigsaw-test
+
+production:
+  project_id: <%= ENV['FIRESTORE_PROJECT_ID'] %>
