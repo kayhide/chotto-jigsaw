@@ -13,7 +13,7 @@ module FireRecord
       became.send(:initialize)
       @attributes.instance_variable_get("@attributes").merge!(
         became.instance_variable_get("@attributes").instance_variable_get("@attributes")
-      )
+      ) { |key, old, new| old }
       became.instance_variable_set("@attributes", @attributes)
       became.instance_variable_set("@doc", @doc)
       this_scope = scope

@@ -125,6 +125,11 @@ RSpec.describe FireRecord::Document do
           eitai = subject.create! id: "et", name: "Eitai Street"
           expect(subject.find("et")).to eq eitai
         end
+
+        it "sets reference attribute" do
+          eitai = subject.create! id: "et", name: "Eitai Street"
+          expect(subject.find("et").city_id).to eq city.id
+        end
       end
 
       describe ".all" do
@@ -132,6 +137,12 @@ RSpec.describe FireRecord::Document do
           eitai = subject.create! name: "Eitai Street"
           meiji = subject.create! name: "Meiji Street"
           expect(subject.all).to match_array [eitai, meiji]
+        end
+
+        it "sets reference attribute" do
+          eitai = subject.create! name: "Eitai Street"
+          meiji = subject.create! name: "Meiji Street"
+          expect(subject.all.map(&:city_id)).to all eq city.id
         end
       end
     end
@@ -166,8 +177,15 @@ RSpec.describe FireRecord::Document do
   end
 
   describe "inherited model" do
+    class Owner
+      include FireRecord::Document
+      include FireRecord::Collection
+      has_many_docs :animals
+    end
+
     class Animal
       include FireRecord::Document
+      belongs_to :owner
       attribute :type, :string
       attribute :name, :string
     end
@@ -225,6 +243,28 @@ RSpec.describe FireRecord::Document do
         it "sets type attribute" do
           expect(Cat.new.save!.type).to eq "Cat"
           expect(Dog.new.save!.type).to eq "Dog"
+        end
+      end
+    end
+
+    describe "belonged inherited class" do
+      let(:owner) { Owner.create! }
+      subject { owner.animals }
+
+      describe ".find" do
+        it "downcasts and sets reference attribute" do
+          mike = subject.build.becomes(Cat).update! id: "mike", name: "Mike", mew: "Meeew"
+          taro = subject.build.becomes(Dog).update! id: "taro", name: "Taro", bow: "Bowow"
+          expect(subject.find("mike").owner_id).to eq owner.id
+          expect(subject.find("taro").owner_id).to eq owner.id
+        end
+      end
+
+      describe ".all" do
+        it "downcasts and sets reference attribute" do
+          mike = subject.build.becomes(Cat).update! id: "mike", name: "Mike", mew: "Meeew"
+          taro = subject.build.becomes(Dog).update! id: "taro", name: "Taro", bow: "Bowow"
+          expect(subject.all.map(&:owner_id)).to all eq owner.id
         end
       end
     end
