@@ -38,12 +38,11 @@ let isReady = (game: t): bool =>
   game.puzzleActor.body |> Puzzle.isReady && game.isImageLoaded;
 
 let beforeReady = (game: t): unit => {
-  PuzzleDrawer.create(game.image) |>
-    (drawer => game.puzzleActor |> PuzzleActor.drawWith(drawer));
+  PuzzleDrawer.create(game.image)
+  |> (drawer => game.puzzleActor |> PuzzleActor.drawWith(drawer));
 
   PieceDrawer.create(game.image)
-    |> (drawer =>
-  game.pieceActors |> Array.iter(PieceActor.drawWith(drawer)));
+  |> (drawer => game.pieceActors |> Array.iter(PieceActor.drawWith(drawer)));
 };
 
 let fireUpdated = (game: t): unit =>
@@ -72,11 +71,11 @@ let loadImage = (url: string, game: t): unit => {
   open JQuery;
   open Webapi.Dom;
 
-  game.isImageLoaded = true;
   let _ =
     jquery(game.image)
     ->on("load", _e => {
         Logger.trace("image loaded: " ++ Filename.basename(url));
+        game.isImageLoaded = true;
         game |> fireReady;
       });
 
