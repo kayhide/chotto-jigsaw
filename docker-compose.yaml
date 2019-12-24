@@ -5,6 +5,11 @@ services:
     ports:
       - 5432
 
+  redis:
+    image: redis:5.0-alpine
+    ports:
+      - 6379
+
   firestore:
     image: firestore-emulator:latest
     ports:

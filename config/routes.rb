@@ -19,4 +19,7 @@ Rails.application.routes.draw do
   end
 
   resource :login, only: [:show, :create, :destroy]
+
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
 end

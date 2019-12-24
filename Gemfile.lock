@@ -83,6 +83,7 @@ GEM
     byebug (11.0.1)
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
+    connection_pool (2.2.2)
     crass (1.0.5)
     debug_inspector (0.0.3)
     diff-lcs (1.3)
@@ -213,6 +214,8 @@ GEM
     rack (2.0.8)
     rack-livereload (0.3.17)
       rack
+    rack-protection (2.0.7)
+      rack
     rack-proxy (0.6.5)
       rack
     rack-test (1.1.0)
@@ -252,6 +255,8 @@ GEM
       ffi (~> 1.0)
     rbtree (0.4.2)
     redis (4.1.3)
+    redis-namespace (1.7.0)
+      redis (>= 3.0.4)
     rly (0.2.3)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
@@ -278,6 +283,15 @@ GEM
       ffi (~> 1.9)
     ruby_dep (1.5.0)
     shellany (0.0.1)
+    sidekiq (6.0.4)
+      connection_pool (>= 2.2.2)
+      rack (>= 2.0.0)
+      rack-protection (>= 2.0.0)
+      redis (>= 4.1.0)
+    sidekiq-history (0.0.11)
+      sidekiq (>= 3.0.0)
+    sidekiq-limit_fetch (3.4.0)
+      sidekiq (>= 4)
     signet (0.12.0)
       addressable (~> 2.3)
       faraday (~> 0.9)
@@ -347,7 +361,11 @@ DEPENDENCIES
   rails (~> 6.0.0)
   rails-i18n
   redis (~> 4.0)
+  redis-namespace
   rspec-rails (~> 4.0.0.beta2)
+  sidekiq
+  sidekiq-history
+  sidekiq-limit_fetch
   slim-rails
   spring
   spring-commands-rspec

@@ -7,5 +7,6 @@ ul.navbar-nav.ml-auto
     .dropdown-menu.dropdown-menu-right aria-labelledby="navbarDropdown"
       .dropdown-header = current_user.email
       = link_to 'Users', [:users], class: %w(dropdown-item)
+      = link_to 'Sidekiq', [:sidekiq_web], class: %w(dropdown-item)
       .dropdown-divider
       = link_to 'Logout', [:login], method: :delete, class: %w(dropdown-item)

@@ -24,6 +24,8 @@ module ChottoJigsaw
   class Application < Rails::Application
     config.load_defaults 6.0
 
+    config.active_job.queue_adapter = :sidekiq
+
     config.generators.system_tests = nil
 
     config.generators do |g|

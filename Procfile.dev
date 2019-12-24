@@ -1,4 +1,5 @@
 web: rails server $([[ -n "$BINDING" ]] && echo -b "$BINDING")
+worker: bundle exec sidekiq
 webpack: bin/webpack-dev-server
 bsb: $(yarn bin)/bsb -make-world -w
 livereload: bundle exec guard --no-interactions --plugin LiveReload

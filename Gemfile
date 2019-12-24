@@ -6,6 +6,7 @@ ruby '2.6.5'
 gem 'rails', '~> 6.0.0'
 
 gem 'bootsnap', '>= 1.4.2', require: false
+gem 'google-cloud-firestore'
 gem 'image_processing', '~> 1.2'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'pry-doc'
@@ -13,9 +14,12 @@ gem 'pry-rails'
 gem 'puma', '~> 3.12'
 gem 'rails-i18n'
 gem 'redis', '~> 4.0'
+gem 'redis-namespace'
+gem 'sidekiq'
+gem 'sidekiq-history'
+gem 'sidekiq-limit_fetch'
 gem 'slim-rails'
 gem 'webpacker', '~> 4.0'
-gem 'google-cloud-firestore'
 
 # gem 'bcrypt', '~> 3.1.7'
 
