@@ -1,13 +1,8 @@
 .row
   - @puzzles.each do |puzzle|
-    .col-md-4.col-lg-2.py-3
-      .card.puzzle id=dom_id(puzzle)
+    .col-6.col-md-4.col-lg-2.p-2
+      .game id=dom_id(puzzle)
         = link_to [puzzle, :games, :standalone] do
           = image_tag puzzle.picture.variant(resize_to_fill: [600, 600]), class: %w(card-img-top img-fluid)
-        .progress.standalone class=puzzle.difficulty
-          .progress-bar.w-100
-        .card-body
-          = puzzle.pieces_count
-          span< pcs
-          .float-right
-            = puzzle.difficulty
+        .progress.position-absolute.w-100 class=puzzle.difficulty
+          .progress-bar.progress-bar-striped.w-100

@@ -1,5 +1,10 @@
 class Public::PuzzlesController < ApplicationController
   def index
-    @puzzles = Puzzle.order(id: :desc)
+    @puzzles =
+      Puzzle
+      .with_attached_picture
+      .order(id: :desc)
+      .take(200)
+      .filter(&:ready?)
   end
 end
