@@ -1,6 +1,7 @@
 let dragger: ref(GameInteractor.dragger) = ref(GameInteractor.emptyDragger);
 let mover: ref(option(GameInteractor.mover)) = ref(None);
 let scaler: ref(option(GameInteractor.scaler)) = ref(None);
+let pressed: ref(bool) = ref(false);
 
 let setupHammer = (canvas: Webapi.Dom.Element.t): Hammer.t => {
   open Hammer;
@@ -8,38 +9,24 @@ let setupHammer = (canvas: Webapi.Dom.Element.t): Hammer.t => {
 
   hammer
   ->get("pan")
-  ->set({"enable": true, "pointers": 2, "direction": Hammer.direction_all});
+  ->set({"enable": true, "pointers": 1, "direction": Hammer.direction_all});
   hammer->get("pinch")->set({"enable": true, "threshold": 0.1});
   hammer->get("pinch")->recognizeWith(hammer->get("pan"));
   hammer->get("tap")->set({"enable": true, "pointers": 1});
+  hammer->get("press")->set({"enable": true, "pointers": 1});
   hammer->get("doubletap")->set({"enable": true, "pointers": 2});
-  hammer
-  ->add(
-      Hammer.Pan.create({
-        "event": "drag",
-        "pointers": 1,
-        "direction": Hammer.direction_all,
-      }),
-    );
-  hammer
-  ->add(
-      Hammer.Rotate.create({"event": "spin", "enable": false, "pointers": 2}),
-    );
-  hammer->get("spin")->recognizeWith(hammer->get("tap"));
+  hammer->get("rotate")->set({"enable": false, "pointers": 2});
   hammer;
 };
 
 let updateListeners = (hammer: Hammer.t): unit =>
   Hammer.(
     if (dragger^.active) {
-      hammer->get("pan")->set({"enable": false});
       hammer->get("pinch")->set({"enable": false});
-      hammer->get("spin")->set({"enable": true});
+      hammer->get("rotate")->set({"enable": true});
     } else {
-      hammer->get("pan")->set({"enable": true});
       hammer->get("pinch")->set({"enable": true});
-      hammer->get("drag")->set({"enable": true});
-      hammer->get("spin")->set({"enable": false});
+      hammer->get("rotate")->set({"enable": false});
     }
   );
 
@@ -54,6 +41,7 @@ let attach = (gi: GameInteractor.t): unit => {
       Logger.trace(e##"type");
       dragger := dragger^.continue(e##center);
       dragger := dragger^.attempt();
+      pressed := true;
       hammer |> updateListeners;
     });
 
@@ -63,6 +51,15 @@ let attach = (gi: GameInteractor.t): unit => {
       dragger := dragger^.finish();
       hammer |> updateListeners;
       gi |> GameInteractor.fit;
+    });
+
+  hammer
+  ->on("press", e => {
+      Logger.trace(e##"type");
+      dragger := dragger^.finish();
+      mover := gi |> GameInteractor.getMover(e##center) |> Maybe.pure;
+      pressed := true;
+      hammer |> updateListeners;
     });
 
   hammer
@@ -81,38 +78,33 @@ let attach = (gi: GameInteractor.t): unit => {
   hammer
   ->on("panstart", e => {
       Logger.trace(e##"type");
-      mover := gi |> GameInteractor.getMover(e##center) |> Maybe.pure;
+      if (! pressed^) {
+        dragger := dragger^.continue(e##center);
+      };
+      if (dragger^.active) {
+        mover := None;
+      } else {
+        dragger := dragger^.attempt();
+        mover := gi |> GameInteractor.getMover(e##center) |> Maybe.pure;
+      };
       hammer |> updateListeners;
     });
-  hammer->on("panmove", e => mover^ |> Maybe.traverse_(f => f(e##center)));
-
   hammer
-  ->on("dragstart", e => {
-      Logger.trace(e##"type");
-      dragger := dragger^.continue(e##center);
-      hammer |> updateListeners;
+  ->on("panmove", e => {
+      dragger^.move(e##center);
+      mover^ |> Maybe.traverse_(f => f(e##center));
     });
-  hammer->on("dragmove", e => dragger^.move(e##center));
   hammer
-  ->on("dragend", _ => {
+  ->on("panend", _ => {
       dragger := dragger^.attempt();
+      pressed := false;
       hammer |> updateListeners;
     });
 
   hammer
-  ->on("spinstart", e => {
+  ->on("rotatestart", e => {
       Logger.trace(e##"type");
       hammer->get("drag")->set({"enable": false});
-      dragger^.resetSpin(e##rotation *. 3.0);
     });
-  hammer->on("spinmove", e => dragger^.spin(e##rotation *. 3.0));
-  hammer
-  ->on("spinend", _ => {
-      let _ =
-        Js.Global.setTimeout(
-          () => hammer->get("drag")->set({"enable": true}),
-          100,
-        );
-      ();
-    });
+  hammer->on("rotatemove", e => dragger^.spin(e##rotation *. 3.0));
 };

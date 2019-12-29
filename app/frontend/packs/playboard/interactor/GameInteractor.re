@@ -89,11 +89,10 @@ let clearActiveLayer = (gi: t): unit => {
   jquery(gi.activeStage->Stage.canvas)->hide();
 };
 
-let isCaptured = (piece_id: int, gi: t): bool => {
+let isCaptured = (piece_id: int, gi: t): bool =>
   gi.game
   |> Game.findPieceActor(piece_id)
   |> PieceActor.withSkin(DisplayObject.parent) === Some(gi.activeStage);
-};
 
 let release = (piece_id: int, gi: t): unit => {
   Logger.trace("released[" ++ string_of_int(piece_id) ++ "]");
@@ -253,6 +252,12 @@ let getMover = (pt: point, gi: t): mover => {
   );
 };
 
+let getAngle = (dst: float, src: float): float => {
+  let i = (dst -. src |> Js.Math.floor_int) mod 360;
+
+  (i < (-180) ? i + 360 : 180 <= i ? i - 360 : i) |> Js.Int.toFloat;
+};
+
 let rec defaultDragger = (gi: t): dragger => {
   active: false,
   piece: None,
@@ -290,8 +295,11 @@ and capture = (piece: piece, pt: point, gi: t): dragger => {
       pt0 := pt1;
     },
     spin: (deg: float) => {
-      Command.rotate(piece.body.id, pt0^, deg -. deg0^)
-      |> CommandManager.post(gi.game.puzzleActor.body);
+      let d = deg0^ |> getAngle(deg);
+      if ((-15.0) < d && d < 15.0) {
+        Command.rotate(piece.body.id, pt0^, d)
+        |> CommandManager.post(gi.game.puzzleActor.body);
+      };
       deg0 := deg;
     },
     resetSpin: deg => deg0 := deg,
