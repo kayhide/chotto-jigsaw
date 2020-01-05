@@ -114,7 +114,21 @@ let connectGameChannel = (game: Game.t): unit => {
   );
 };
 
-let play = (app: app): unit => {
+type app' = {.
+             "playboard": Webapi.Dom.Element.t,
+             "field": Webapi.Dom.Element.t,
+             "sounds": Webapi.Dom.Element.t,
+             "log": option(Webapi.Dom.Element.t),
+};
+
+let play = (app': app'): unit => {
+  let app = {
+    playboard: app'##playboard,
+    field: app'##field,
+    sounds: app'##sounds,
+    log: app'##log
+  };
+  Js.log(app);
   setupLogger();
 
   let gameId =
@@ -180,13 +194,13 @@ let play = (app: app): unit => {
   game |> Game.loadImage(jquery(app.playboard)->data("picture"));
 };
 
-jquery(document)
-->ready(() => {
-    open Document;
-    let playboard = document |> getElementById("playboard") |> Maybe.fromJust;
-    let field = document |> getElementById("field") |> Maybe.fromJust;
-    let sounds = document |> getElementById("sounds") |> Maybe.fromJust;
-    let log = document |> getElementById("log");
-    let app: app = {playboard, field, sounds, log};
-    app |> play;
-  });
+/* jquery(document) */
+/* ->ready(() => { */
+/*     open Document; */
+/*     let playboard = document |> getElementById("playboard") |> Maybe.fromJust; */
+/*     let field = document |> getElementById("field") |> Maybe.fromJust; */
+/*     let sounds = document |> getElementById("sounds") |> Maybe.fromJust; */
+/*     let log = document |> getElementById("log"); */
+/*     let app: app = {playboard, field, sounds, log}; */
+/*     app |> play; */
+/*   }); */

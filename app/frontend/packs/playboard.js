@@ -8,10 +8,9 @@ import "bootstrap";
 import "../styles/playboard";
 
 import FabAction from "./fab-action";
-import Main from "./Main";
-import "./playboard/App.bs";
+import App from "./App/App";
 
 $(document).ready(() => {
   FabAction.init();
-  Main.main();
+  App.init();
 });
