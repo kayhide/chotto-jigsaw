@@ -1,3 +1,7 @@
+# Spago
+.spago
+
+
 # ReasonML
 
 *.bs.js
@@ -63,5 +67,17 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+### https://raw.github.com/github/gitignore/c0c1a480a906df0e023f3250cf2ad82f1612be67/PureScript.gitignore
+
+# Dependencies
+.psci_modules
+bower_components
+node_modules
+
+# Generated files
+.psci
+output
 
 

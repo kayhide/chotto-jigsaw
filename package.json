@@ -16,7 +16,10 @@
     "hammerjs": "^2.0.8",
     "jquery": "^3.4.1",
     "lodash": "^4.17.15",
-    "popper.js": "^1.16.0"
+    "popper.js": "^1.16.0",
+    "purescript": "^0.13.5",
+    "purs-loader": "^3.7.1",
+    "spago": "^0.13.0"
   },
   "version": "0.1.0",
   "devDependencies": {
@@ -29,7 +32,7 @@
     "webpack-dev-server": "^3.8.2"
   },
   "scripts": {
-    "postinstall": "$(yarn bin)/bsb -make-world",
+    "postinstall": "$(yarn bin)/spago install && $(yarn bin)/bsb -make-world",
     "lint": "$(yarn bin)/stylelint 'app/frontend/**/*.scss'",
     "deps": "$(yarn bin)/madge app/frontend/packs/playboard/App.bs.js --basedir app/frontend/packs/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg"
   }
