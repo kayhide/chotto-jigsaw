@@ -193,14 +193,3 @@ let play = (app': app'): unit => {
 
   game |> Game.loadImage(jquery(app.playboard)->data("picture"));
 };
-
-/* jquery(document) */
-/* ->ready(() => { */
-/*     open Document; */
-/*     let playboard = document |> getElementById("playboard") |> Maybe.fromJust; */
-/*     let field = document |> getElementById("field") |> Maybe.fromJust; */
-/*     let sounds = document |> getElementById("sounds") |> Maybe.fromJust; */
-/*     let log = document |> getElementById("log"); */
-/*     let app: app = {playboard, field, sounds, log}; */
-/*     app |> play; */
-/*   }); */

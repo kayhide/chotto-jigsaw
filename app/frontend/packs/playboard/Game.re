@@ -12,6 +12,9 @@ type t = {
   mutable updatedHandlers: EventHandler.handlers(unit),
 };
 
+let image = (game: t): image => game.image;
+let puzzleActor = (game: t): PuzzleActor.t => game.puzzleActor;
+
 let create = (id: int, canvas): t => {
   open Webapi.Dom;
 

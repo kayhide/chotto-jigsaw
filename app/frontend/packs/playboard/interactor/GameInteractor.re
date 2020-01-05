@@ -359,3 +359,9 @@ let fit = (gi: t): unit => {
   gi.game |> View.fit;
   gi |> invalidate;
 };
+
+let getBaseStage = (gi: t): DisplayObject.t =>
+  gi.baseStage;
+
+let getActiveStage = (gi: t): DisplayObject.t =>
+  gi.activeStage;

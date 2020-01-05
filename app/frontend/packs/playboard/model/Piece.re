@@ -72,6 +72,12 @@ let addLoop = (lp, piece): unit => piece.loops = [lp, ...piece.loops];
 let removeLoop = (lp, piece): unit =>
   piece.loops = piece.loops |> List.filter(lp' => lp' !== lp);
 
+let getLoops = (piece: t): array(loop) =>
+  Array.of_list(piece.loops);
+
+let setLoops = (lps: array(loop), piece: t): unit =>
+  piece.loops = Array.to_list(lps);
+
 let rec entity = piece: t => piece._merger |> Maybe.maybe(piece, entity);
 
 let merger = piece: option(t) => piece._merger |> Maybe.map(entity);
@@ -79,6 +85,10 @@ let merger = piece: option(t) => piece._merger |> Maybe.map(entity);
 let setMerger = (merger: t, piece: t): unit => piece._merger = Some(merger);
 
 let isAlive = piece: bool => piece._merger |> Maybe.isNone;
+
+let getNeighborIds = (piece: t): array(int) => piece.neighborIds |> IntSet.elements |> Array.of_list;
+
+let setNeighborIds = (piece: t, ids: array(int)): unit => piece.neighborIds = ids |> Array.to_list |> IntSet.of_list;
 
 let getDegreeTo = (target, piece): float => {
   let deg = target._rotation -. piece._rotation |> mod_float(360.0);
