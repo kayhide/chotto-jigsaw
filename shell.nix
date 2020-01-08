@@ -1,13 +1,11 @@
 with import <nixpkgs> {};
 
-stdenv.mkDerivation rec {
-  pname = "chotto-jigsaw-shell";
-  version = "0.1.0";
+pkgs.mkShell {
   buildInputs = with pkgs; [
     docker
     gnumake
     hivemind
-    nodejs
+    nodejs-13_x
     yarn
   ];
 }
