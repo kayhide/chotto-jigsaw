@@ -8,6 +8,7 @@ gem 'rails', '~> 6.0.0'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'google-cloud-firestore'
 gem 'image_processing', '~> 1.2'
+gem 'jwt'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'pry-doc'
 gem 'pry-rails'

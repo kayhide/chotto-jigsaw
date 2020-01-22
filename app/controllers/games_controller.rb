@@ -1,6 +1,7 @@
 class GamesController < ApplicationController
   before_action :authenticate!
   before_action :set_game, only: [:show, :destroy]
+  before_action :set_firebase_token, only: [:show]
   before_action :set_puzzle
   before_action :set_picture
 
@@ -51,6 +52,14 @@ class GamesController < ApplicationController
 
   def set_game
     @game = Game.find(params[:id])
+  end
+
+  def set_firebase_token
+    if @game
+      uid = current_user_id ? "user-#{current_user_id}" : "guest"
+      @firebase_token =
+        FireRecord::Client.create_custom_token uid, game_id: @game.id.to_s
+    end
   end
 
   def set_puzzle

@@ -3,7 +3,7 @@ emulator: &emulator
   emulator_port: <%= ENV['FIRESTORE_PORT'] %>
 
 development:
-  <<: *emulator
+  # <<: *emulator
   project_id: chotto-jigsaw-development
 
 test:

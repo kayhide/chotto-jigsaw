@@ -4,7 +4,7 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	@hivemind $${PORT:+--port $$PORT} --port-step 1 Procfile.dev
+	@DISABLE_SPRING=1 hivemind $${PORT:+--port $$PORT} --port-step 1 Procfile.dev
 .PHONY: dev
 
 guard:

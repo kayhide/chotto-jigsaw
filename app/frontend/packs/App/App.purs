@@ -10,6 +10,7 @@ import App.Drawer.PieceActor as PieceActor
 import App.EaselJS.Rectangle as Rectangle
 import App.EaselJS.Stage as Stage
 import App.EaselJS.Ticker as Ticker
+import App.Firestore as Firestore
 import App.Game (Game)
 import App.Game as Game
 import App.Interactor.BrowserInteractor as BrowserInteractor
@@ -153,23 +154,25 @@ setupOnlinePuzzle gameId = do
 
 updateOnlineGame :: GameInteractor -> GameChannel.Subscription -> Aff Unit
 updateOnlineGame gi sub = do
-  liftEffect $ CommandManager.onCommit \group -> do
-    when group.extrinsic do
-      Ref.read group.commands
-        >>= traverse_ \cmd -> do
-          actor <- Game.findPieceActor gi.game (Command.pieceId cmd)
-          alive <- PieceActor.isAlive actor
-          when alive do
-            PieceActor.updateFace actor
-      Stage.invalidate gi.baseStage
-    when (not group.extrinsic) do
-      cmds <- Ref.read group.commands
-      GameChannel.commit sub cmds
-      when (Array.any Command.isMerge cmds) do
-        GameChannel.reportProgress sub =<< Game.progress gi.game
+  liftEffect $ do
+    firestore <- Firestore.connect
+    firestore # Firestore.onCommandAdd \cmd -> do
+      actor <- Game.findPieceActor gi.game (Command.pieceId cmd)
+      alive <- PieceActor.isAlive actor
+      when alive do
+        Command.execute gi.game cmd
+        PieceActor.updateFace actor
+        Stage.invalidate gi.baseStage
+
+    CommandManager.onCommit \group -> do
+      when (not group.extrinsic) do
+        cmds <- Ref.read group.commands
+        cmds # traverse_ \cmd ->
+          Firestore.postCommand cmd firestore
 
   Utils.retryOnFailAfter (Milliseconds 5000.0) do
     GameChannel.requestUpdate sub
+
 
 setupLogger :: App -> Effect Unit
 setupLogger app = do

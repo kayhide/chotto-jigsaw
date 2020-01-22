@@ -54,8 +54,7 @@ subscribe gameId =
   liftEffect createConsumer
   >>= createSubscription
       { channel: "GameChannel", game_id: gameId }
-      { commit: onCommit
-      }
+      {}
 
 onCommit :: { commands :: Json } -> Effect Unit
 onCommit { commands } = do

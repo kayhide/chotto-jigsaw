@@ -350,6 +350,7 @@ DEPENDENCIES
   guard-livereload
   guard-rspec
   image_processing (~> 1.2)
+  jwt
   listen (>= 3.0.5, < 3.2)
   pg (>= 0.18, < 2.0)
   pry-byebug
