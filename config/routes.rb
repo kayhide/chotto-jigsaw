@@ -20,6 +20,10 @@ Rails.application.routes.draw do
 
   resource :login, only: [:show, :create, :destroy]
 
+  namespace :api do
+    resources :games, only: [:show, :update]
+  end
+
   require 'sidekiq/web'
   mount Sidekiq::Web => '/sidekiq'
 end
