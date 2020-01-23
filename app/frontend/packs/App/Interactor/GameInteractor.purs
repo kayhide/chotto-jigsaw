@@ -19,8 +19,8 @@ import App.EaselJS.Shape as Shape
 import App.EaselJS.Stage as Stage
 import App.EaselJS.Ticker as Ticker
 import App.EaselJS.Type (Stage, DisplayObject)
-import App.Game (Game)
-import App.Game as Game
+import App.GameManager (GameManager)
+import App.GameManager as GameManager
 import App.Logger as Logger
 import Data.Array as Array
 import Data.Int as Int
@@ -36,7 +36,7 @@ import Web.HTML as HTML
 import Web.HTML.Window as Window
 
 type GameInteractor =
-  { game :: Game
+  { game :: GameManager
   , translationTolerance :: Number
   , rotationTolerance :: Number
   , baseStage :: Stage
@@ -45,7 +45,7 @@ type GameInteractor =
   , shapeToPiece :: Ref (Object PieceActor)
   }
 
-create :: Game -> Element -> Element -> Effect GameInteractor
+create :: GameManager -> Element -> Element -> Effect GameInteractor
 create game baseCanvas activeCanvas = do
   baseStage <- Stage.create baseCanvas
   activeStage <- Stage.create activeCanvas
@@ -72,7 +72,7 @@ create game baseCanvas activeCanvas = do
     Stage.update baseStage
 
   CommandManager.onPost \cmd -> do
-    actor <- Game.findPieceActor game $ Command.pieceId cmd
+    actor <- GameManager.findPieceActor game $ Command.pieceId cmd
     PieceActor.updateFace actor
 
   pure { game, translationTolerance, rotationTolerance, baseStage, activeStage, dragger, shapeToPiece }
@@ -133,7 +133,7 @@ putToActiveLayer actor gi = do
 lookupPieceActor :: GameInteractor -> DisplayObject -> Effect (Maybe PieceActor)
 lookupPieceActor gi obj =
   Object.lookup (show obj.id) <$> Ref.read gi.shapeToPiece
-  >>= traverse (Game.entity gi.game)
+  >>= traverse (GameManager.entity gi.game)
 
 
 
@@ -294,7 +294,7 @@ findMeargeableOn gi pt sbj = do
   ids <- Array.fromFoldable <$> Ref.read sbj.neighborIds
   actors <-
     Array.filter (\obj -> obj.body.id /=  sbj.body.id) <<< Array.nubBy (compare `on` _.body.id)
-    <$> traverse (Game.entity gi.game <=< Game.findPieceActor gi.game) ids
+    <$> traverse (GameManager.entity gi.game <=< GameManager.findPieceActor gi.game) ids
   Array.head <$> Array.filterA (\obj -> isWithinTolerance gi sbj obj pt) actors
 
 isWithinTolerance :: GameInteractor -> PieceActor -> PieceActor -> Point -> Effect Boolean

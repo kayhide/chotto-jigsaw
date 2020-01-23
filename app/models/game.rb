@@ -15,6 +15,8 @@ class Game < ApplicationRecord
   scope :finished, -> () { where(progress: 1.0) }
   scope :active, -> () { started.not_finished }
 
+  validates :progress, presence: true
+
   def ready?
     shuffled_at?
   end

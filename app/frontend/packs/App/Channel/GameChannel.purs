@@ -56,15 +56,6 @@ subscribe gameId =
       { channel: "GameChannel", game_id: gameId }
       {}
 
-onCommit :: { commands :: Json } -> Effect Unit
-onCommit { commands } = do
-  cmds <- throwOnLeft $ decodeJson commands
-  CommandManager.receive cmds
-
-commit :: Subscription -> Array Command -> Effect Unit
-commit sub commands =
-  perform sub "commit" $ encodeJson { commands }
-
 reportProgress :: Subscription -> Number -> Effect Unit
 reportProgress sub progress =
   perform sub "report_progress" $ encodeJson { progress }

@@ -21,16 +21,26 @@ RSpec.describe Api::GamesController, type: :controller do
       { progress: 0.75 }
     }
 
-    it "returns no_content" do
-      patch :update, xhr: true, params: { id: game.id }.merge(new_attributes)
-      expect(response).to have_http_status(:no_content)
+    context "with valid params" do
+      it "returns no_content" do
+        patch :update, xhr: true, params: { id: game.id, game: new_attributes }
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it "updates attributes" do
+        expect {
+          patch :update, xhr: true, params: { id: game.id, game: new_attributes }
+        }.to change { game.reload.attributes }
+        expect(game.progress).to eq 0.75
+      end
     end
 
-    it "updates attributes" do
-      expect {
-        patch :update, xhr: true, params: { id: game.id }.merge(new_attributes)
-      }.to change { game.reload.attributes }
-      expect(game.progress).to eq 0.75
+    context "with invalid params" do
+      it "returns error" do
+        patch :update, xhr: true, params: { id: game.id, game: { progress: nil } }
+        res = JSON.parse response.body
+        expect(res["error_message"]).to be_present
+      end
     end
   end
 

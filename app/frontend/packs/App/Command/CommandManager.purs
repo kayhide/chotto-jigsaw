@@ -6,14 +6,14 @@ import App.Command.Command (Command)
 import App.Command.Command as Command
 import App.Command.CommandGroup (CommandGroup)
 import App.Command.CommandGroup as CommandGroup
-import App.Game (Game)
+import App.GameManager (GameManager)
 import Data.Array as Array
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 
 type CommandManager =
-  { game :: Maybe Game
+  { game :: Maybe GameManager
   , current :: CommandGroup
   , postHandlers :: Array (Command -> Effect Unit)
   , commitHandlers :: Array (CommandGroup -> Effect Unit)
@@ -29,7 +29,7 @@ self = unsafePerformEffect do
     , commitHandlers: []
     }
 
-register :: Game -> Effect Unit
+register :: GameManager -> Effect Unit
 register game =
   self # Ref.modify_ _{ game = pure game }
 
@@ -51,7 +51,7 @@ commit = do
 
 post :: Command -> Effect Unit
 post cmd = do
-  game <- _.game <$> Ref.read self >>= throwOnNothing "Game is not registered"
+  game <- _.game <$> Ref.read self >>= throwOnNothing "GameManager is not registered"
   b <- Command.isValid game cmd
   when b do
     Command.execute game cmd
@@ -62,7 +62,7 @@ post cmd = do
 receive :: Array Command -> Effect Unit
 receive cmds = do
   obj <- Ref.read self
-  game <- _.game <$> Ref.read self >>= throwOnNothing "Game is not registered"
+  game <- _.game <$> Ref.read self >>= throwOnNothing "GameManager is not registered"
   traverse_ (Command.execute game) cmds
   group <- CommandGroup.createExtrinsic
   traverse_ (\cmd -> CommandGroup.squash cmd group) cmds

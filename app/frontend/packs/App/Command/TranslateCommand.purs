@@ -5,8 +5,8 @@ import AppPrelude
 import App.Drawer.PieceActor as PieceActor
 import App.EaselJS.Point (Point)
 import App.EaselJS.Point as Point
-import App.Game (Game)
-import App.Game as Game
+import App.GameManager (GameManager)
+import App.GameManager as GameManager
 import Effect.Ref as Ref
 
 
@@ -22,18 +22,18 @@ create :: Int -> Point -> TranslateCommand
 create piece_id vector = { piece_id, position: Point.create 0.0 0.0, rotation: 0.0, vector }
 
 
-execute :: Game -> TranslateCommand -> Effect Unit
+execute :: GameManager -> TranslateCommand -> Effect Unit
 execute game cmd = do
-  actor <- Game.findPieceActor game cmd.piece_id
+  actor <- GameManager.findPieceActor game cmd.piece_id
   actor.transform # Ref.modify_ \{ position, rotation } ->
     { position: Point.add position cmd.vector
     , rotation
     }
 
 
-isValid :: Game -> TranslateCommand -> Effect Boolean
+isValid :: GameManager -> TranslateCommand -> Effect Boolean
 isValid game cmd = do
-  Game.findPieceActor game cmd.piece_id
+  GameManager.findPieceActor game cmd.piece_id
     >>= PieceActor.isAlive
 
 

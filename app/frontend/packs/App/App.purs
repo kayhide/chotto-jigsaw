@@ -2,17 +2,17 @@ module App.App where
 
 import AppPrelude
 
+import App.Api.Client as Api
 import App.Channel.GameChannel as GameChannel
 import App.Command.Command as Command
-import App.Command.CommandGroup as CommandGroup
 import App.Command.CommandManager as CommandManager
 import App.Drawer.PieceActor as PieceActor
 import App.EaselJS.Rectangle as Rectangle
 import App.EaselJS.Stage as Stage
 import App.EaselJS.Ticker as Ticker
 import App.Firestore as Firestore
-import App.Game (Game)
-import App.Game as Game
+import App.GameManager (GameManager)
+import App.GameManager as GameManager
 import App.Interactor.BrowserInteractor as BrowserInteractor
 import App.Interactor.GameInteractor (GameInteractor)
 import App.Interactor.GameInteractor as GameInteractor
@@ -20,6 +20,7 @@ import App.Interactor.GuideInteractor as GuideInteractor
 import App.Interactor.MouseInteractor as MouseInteractor
 import App.Interactor.TouchInteractor as TouchInteractor
 import App.Logger as Logger
+import App.Model.Game (GameId(..))
 import App.Model.Puzzle (Puzzle)
 import App.Model.Puzzle as Puzzle
 import App.Utils as Utils
@@ -93,7 +94,7 @@ play app = do
       <*> parallel (setupPuzzle gameId app)
     gi <- liftEffect do
       Logger.info "game ready"
-      game <- Game.create gameId puzzle image
+      game <- GameManager.create gameId puzzle image
       CommandManager.register game
       setupUi game app
 
@@ -157,7 +158,7 @@ updateOnlineGame gi sub = do
   liftEffect $ do
     firestore <- Firestore.connect
     firestore # Firestore.onCommandAdd \cmd -> do
-      actor <- Game.findPieceActor gi.game (Command.pieceId cmd)
+      actor <- GameManager.findPieceActor gi.game (Command.pieceId cmd)
       alive <- PieceActor.isAlive actor
       when alive do
         Command.execute gi.game cmd
@@ -169,6 +170,11 @@ updateOnlineGame gi sub = do
         cmds <- Ref.read group.commands
         cmds # traverse_ \cmd ->
           Firestore.postCommand cmd firestore
+
+        when (Array.any Command.isMerge cmds) do
+          progress <- GameManager.progress gi.game
+          launchAff_ do
+            Api.updateGame (GameId gi.game.id) { progress }
 
   Utils.retryOnFailAfter (Milliseconds 5000.0) do
     GameChannel.requestUpdate sub
@@ -183,7 +189,7 @@ setupLogger app = do
     void $ Node.appendChild (Element.toNode p) (Element.toNode app.log)
 
 
-setupUi :: Game -> App -> Effect Unit
+setupUi :: GameManager -> App -> Effect Unit
 setupUi game app = do
   Ticker.onTick do
     fps <- Ticker.getMeasuredFPS
@@ -223,10 +229,10 @@ setupUi game app = do
 
       addEventListener (EventType "click") listener false (Element.toEventTarget btn)
 
-  CommandManager.onCommit \cmds -> do
-    f <- CommandGroup.any Command.isMerge cmds
-    when f do
-      progress <- Game.progress game
+  CommandManager.onCommit \group -> do
+    cmds <- Ref.read group.commands
+    when (Array.any Command.isMerge cmds) do
+      progress <- GameManager.progress game
       query "#progressbar"
         >>= Element.setAttribute "style" ("width:" <> show (progress * 100.0) <> "%")
 

@@ -6,8 +6,8 @@ import App.Drawer.PieceActor as PieceActor
 import App.EaselJS.Matrix2D as Matrix2D
 import App.EaselJS.Point (Point)
 import App.EaselJS.Point as Point
-import App.Game (Game)
-import App.Game as Game
+import App.GameManager (GameManager)
+import App.GameManager as GameManager
 import Effect.Ref as Ref
 
 
@@ -30,23 +30,23 @@ create piece_id center degree =
   }
 
 
-execute :: Game -> RotateCommand -> Effect Unit
+execute :: GameManager -> RotateCommand -> Effect Unit
 execute game cmd = do
   let mtx =
         Matrix2D.create
         # Matrix2D.translate cmd.center.x cmd.center.y
         # Matrix2D.rotate cmd.degree
         # Matrix2D.translate (-cmd.center.x) (-cmd.center.y)
-  actor <- Game.findPieceActor game cmd.piece_id
+  actor <- GameManager.findPieceActor game cmd.piece_id
   actor.transform # Ref.modify_ \{ position, rotation } ->
     { position: Matrix2D.apply position mtx
     , rotation: rotation + cmd.degree
     }
 
 
-isValid :: Game -> RotateCommand -> Effect Boolean
+isValid :: GameManager -> RotateCommand -> Effect Boolean
 isValid game cmd = do
-  Game.findPieceActor game cmd.piece_id
+  GameManager.findPieceActor game cmd.piece_id
     >>= PieceActor.isAlive
 
 

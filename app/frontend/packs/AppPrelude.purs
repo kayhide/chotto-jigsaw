@@ -7,6 +7,7 @@ module AppPrelude
        , module Data.Traversable
        , module Data.Tuple.Nested
        , module Effect
+       , module Effect.Class
        , bool
        , throwOnLeft
        , throwOnNothing
@@ -21,6 +22,7 @@ import Data.Maybe (Maybe(..), maybe, isNothing, isJust, fromMaybe)
 import Data.Traversable (for, for_, traverse_, traverse)
 import Data.Tuple.Nested (type (/\), (/\))
 import Effect (Effect)
+import Effect.Class (liftEffect)
 import Effect.Exception (throw)
 
 

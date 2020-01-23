@@ -11,7 +11,7 @@ import App.Command.TranslateCommand as TranslateCommand
 import App.Drawer.Transform (Transform)
 import App.EaselJS.Point (Point)
 import App.EaselJS.Point as Point
-import App.Game (Game)
+import App.GameManager (GameManager)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, (.:))
 
 data Command
@@ -34,13 +34,13 @@ pieceId = case _ of
   Translate cmd -> cmd.piece_id
   Rotate cmd -> cmd.piece_id
 
-isValid :: Game -> Command -> Effect Boolean
+isValid :: GameManager -> Command -> Effect Boolean
 isValid game = case _ of
   Merge cmd -> MergeCommand.isValid game cmd
   Translate cmd -> TranslateCommand.isValid game cmd
   Rotate cmd -> RotateCommand.isValid game cmd
 
-execute :: Game -> Command -> Effect Unit
+execute :: GameManager -> Command -> Effect Unit
 execute game cmd = do
   b <- isValid game cmd
   when b case cmd of

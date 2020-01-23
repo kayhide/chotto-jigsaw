@@ -16,6 +16,6 @@ class Api::GamesController < ApiController
   end
 
   def game_params
-    params.permit(:progress)
+    params.require(:game).permit(:progress)
   end
 end

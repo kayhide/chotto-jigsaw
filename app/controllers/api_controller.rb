@@ -1,26 +1,29 @@
 class ApiController < ApplicationController
-  rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
-  rescue_from ActiveRecord::RecordInvalid, with: :handle_record_invalid
-  rescue_from ActiveRecord::InvalidForeignKey, with: :handle_record_invalid_foreign_key
-  rescue_from ActionController::ParameterMissing, with: :handle_parametter_missing
+  rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :handle_unprocessable_entity
+  rescue_from ActiveRecord::InvalidForeignKey, with: :handle_invalid_foreign_key
+  rescue_from ActionController::ParameterMissing, with: :handle_unprocessable_entity
+  rescue_from ActionController::InvalidAuthenticityToken, with: :handle_invalid_authenticity_token
 
   def handle_error e
     render json: { error_message: e.message }, status: e.status
   end
 
-  def handle_record_not_found e
+  def handle_not_found e
     render json: { error_message: e.message }, status: :not_found
   end
 
-  def handle_record_invalid e
+  def handle_unprocessable_entity e
     render json: { error_message: e.message }, status: :unprocessable_entity
   end
 
-  def handle_record_invalid_foreign_key e
-    render json: { error_message: "Cannot update or delete because some other resources are refering to it" }, status: :unprocessable_entity
+  def handle_invalid_foreign_key e
+    msg = "Cannot update or delete because some other resources are refering to it"
+    render json: { error_message: msg }, status: :unprocessable_entity
   end
 
-  def handle_parametter_missing e
-    render json: { error_message: e.message }, status: :unprocessable_entity
+  def handle_invalid_authenticity_token e
+    msg = "Authenticity token is missing or invalid"
+    render json: { error_message: msg }, status: :unprocessable_entity
   end
 end

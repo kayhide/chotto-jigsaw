@@ -19,7 +19,8 @@
     "popper.js": "^1.16.0",
     "purescript": "^0.13.5",
     "purs-loader": "^3.7.1",
-    "spago": "^0.13.0"
+    "spago": "^0.13.0",
+    "xhr2": "^0.2.0"
   },
   "version": "0.1.0",
   "devDependencies": {
