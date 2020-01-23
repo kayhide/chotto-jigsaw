@@ -32,10 +32,11 @@ module ChottoJigsaw
       g.test_framework  :rspec,
                         fixtures: true,
                         fixture_replacement: :factory_bot,
-                        view_specs:      false,
-                        routing_specs:   false,
-                        helper_specs:    false,
-                        requests_specs:  false
+                        controller_specs: true,
+                        request_specs: false,
+                        view_specs: false,
+                        routing_specs: false,
+                        helper_specs: false
 
       g.assets          false
       g.helper          false
