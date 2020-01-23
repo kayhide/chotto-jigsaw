@@ -14,6 +14,8 @@ class Api::PuzzlesController < ApiController
   end
 
   def verify_puzzle
-    raise ApiError.new("Puzzle is not ready", :unprocessable_entity) if !@puzzle.ready?
+    return if @puzzle.ready?
+
+    raise ApiError.new("Puzzle is not ready", :unprocessable_entity)
   end
 end

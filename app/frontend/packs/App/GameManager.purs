@@ -7,30 +7,32 @@ import App.Drawer.PieceActor as PieceActor
 import App.Drawer.PuzzleActor (PuzzleActor)
 import App.Drawer.PuzzleActor as PuzzleActor
 import App.Drawer.PuzzleDrawer as PuzzleDrawer
+import App.Model.Game (GameId)
 import App.Model.Puzzle (Puzzle)
 import Data.Array ((!!))
 import Data.Array as Array
 import Data.Int as Int
+import Data.Newtype (unwrap)
 import Effect.Ref as Ref
 import Web.DOM (Element)
 
 type GameManager =
-  { id :: Int
+  { id :: Maybe GameId
   , isStandalone :: Boolean
   , picture :: Element
   , puzzleActor :: PuzzleActor
   , pieceActors :: Array PieceActor
   }
 
-create :: Int -> Puzzle -> Element -> Effect GameManager
+create :: Maybe GameId -> Puzzle -> Element -> Effect GameManager
 create id puzzle picture = do
   puzzleActor <- PuzzleActor.create puzzle
-  pieceActors <- traverse PieceActor.create puzzle.pieces
+  pieceActors <- traverse PieceActor.create (unwrap puzzle).pieces
   PuzzleDrawer.draw puzzleActor { drawsGuide: false }
 
   pure
     { id
-    , isStandalone: 0 == id
+    , isStandalone: isNothing id
     , picture
     , puzzleActor
     , pieceActors

@@ -3,7 +3,6 @@ module App.App where
 import AppPrelude
 
 import App.Api.Client as Api
-import App.Channel.GameChannel as GameChannel
 import App.Command.Command as Command
 import App.Command.CommandManager as CommandManager
 import App.Drawer.PieceActor as PieceActor
@@ -20,18 +19,18 @@ import App.Interactor.GuideInteractor as GuideInteractor
 import App.Interactor.MouseInteractor as MouseInteractor
 import App.Interactor.TouchInteractor as TouchInteractor
 import App.Logger as Logger
-import App.Model.Game (GameId(..))
-import App.Model.Puzzle (Puzzle)
-import App.Model.Puzzle as Puzzle
+import App.Model.Game (Game(..), GameId(..))
+import App.Model.Puzzle (Puzzle, PuzzleId(..))
 import App.Utils as Utils
 import Data.Argonaut (jsonParser)
 import Data.Array as Array
 import Data.Int as Int
+import Data.Newtype (unwrap)
 import Data.String (Pattern(..))
 import Data.String as String
 import Data.Time.Duration (Milliseconds(..))
 import Debug.Trace (traceM)
-import Effect.Aff (Aff, launchAff_, parallel, sequential)
+import Effect.Aff (Aff, error, launchAff_, parallel, sequential, throwError)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Ref as Ref
@@ -71,12 +70,10 @@ init = do
   play { playboard, baseCanvas, activeCanvas, picture, sounds, log }
 
 
-getGameId :: Element -> Effect Int
+getGameId :: Element -> Effect (Maybe GameId)
 getGameId elm = do
   x <- dataset "game-id" elm
-  case Int.fromString =<< x of
-    Nothing -> pure 0
-    Just x' -> pure x'
+  pure $ map GameId <<< Int.fromString =<< x
 
 
 play :: App -> Effect Unit
@@ -84,16 +81,13 @@ play app = do
   setupLogger app
 
   gameId <- getGameId app.playboard
-  Logger.info $ "game id: " <> show gameId
-
   pictureUrl <- dataset' "picture" app.playboard
   launchAff_ do
-    { image, content: puzzle /\ subscription } <- sequential $
-      { image: _, content: _ }
+    { image, puzzle } <- sequential $
+      { image: _, puzzle: _ }
       <$> parallel (Utils.loadImage pictureUrl)
-      <*> parallel (setupPuzzle gameId app)
+      <*> parallel (loadPuzzle app)
     gi <- liftEffect do
-      Logger.info "game ready"
       game <- GameManager.create gameId puzzle image
       CommandManager.register game
       setupUi game app
@@ -112,58 +106,42 @@ play app = do
       Utils.fadeOutSlow app.picture
       pure gi
 
-    subscription # maybe
-      (liftEffect $ GameInteractor.shuffle gi)
-      (updateOnlineGame gi)
+
+    maybe updateStandaloneGame updateOnlineGame gameId gi
 
     liftEffect do
-      Logger.info "game updated"
-      query "#game-progress .loading"
-        >>= Utils.fadeOutSlow
+      Utils.fadeOutSlow =<< query "#game-progress .loading"
       GameInteractor.fit gi
       setupSound app
 
     pure unit
 
 
-setupPuzzle
-  :: Int -> App -> Aff (Puzzle /\ Maybe GameChannel.Subscription)
-setupPuzzle gameId app = do
-  bool (setupStandalonePuzzle app) (setupOnlinePuzzle gameId) (0 < gameId)
+loadPuzzle :: App -> Aff Puzzle
+loadPuzzle app = do
+  id <- liftEffect $ do
+    id' <- dataset' "puzzle-id" app.playboard
+    Int.fromString id' # throwOnNothing "Bad puzzle id"
+  Logger.info $ "puzzle id: " <> show id
+  Utils.retryOnFailAfter (Milliseconds 5000.0) do
+    Api.getPuzzle (PuzzleId id)
 
 
-setupStandalonePuzzle
-  :: App -> Aff (Puzzle /\ Maybe GameChannel.Subscription)
-setupStandalonePuzzle app = liftEffect do
+updateStandaloneGame :: GameInteractor -> Aff Unit
+updateStandaloneGame gi = liftEffect do
   Logger.info $ "standalone: " <> show true
-  puzzle <- dataset' "puzzle-content" app.playboard
-    >>= query
-    >>= Element.toNode >>> Node.textContent
-    >>= Puzzle.parse
-  pure $ puzzle /\ Nothing
+  GameInteractor.shuffle gi
 
-
-setupOnlinePuzzle
-  :: Int -> Aff (Puzzle /\ Maybe GameChannel.Subscription)
-setupOnlinePuzzle gameId = do
-  sub <- GameChannel.subscribe gameId
-  Logger.info $ "subscribing: GameChannel-" <> show gameId
-  json <- GameChannel.requestContent sub
-  puzzle <- liftEffect $ Puzzle.decode json # throwOnLeft
-  pure $ puzzle /\ pure sub
-
-
-updateOnlineGame :: GameInteractor -> GameChannel.Subscription -> Aff Unit
-updateOnlineGame gi sub = do
+updateOnlineGame :: GameId -> GameInteractor -> Aff Unit
+updateOnlineGame gameId gi = do
+  Logger.info $ "game id: " <> show (unwrap gameId)
   liftEffect $ do
     firestore <- Firestore.connect
     firestore # Firestore.onCommandAdd \cmd -> do
-      actor <- GameManager.findPieceActor gi.game (Command.pieceId cmd)
+      actor <- GameManager.findPieceActor gi.manager (Command.pieceId cmd)
       alive <- PieceActor.isAlive actor
       when alive do
-        Command.execute gi.game cmd
-        PieceActor.updateFace actor
-        Stage.invalidate gi.baseStage
+        CommandManager.execute cmd
 
     CommandManager.onCommit \group -> do
       when (not group.extrinsic) do
@@ -172,12 +150,14 @@ updateOnlineGame gi sub = do
           Firestore.postCommand cmd firestore
 
         when (Array.any Command.isMerge cmds) do
-          progress <- GameManager.progress gi.game
+          progress <- GameManager.progress gi.manager
           launchAff_ do
-            Api.updateGame (GameId gi.game.id) { progress }
+            Api.updateGame gameId { progress }
 
   Utils.retryOnFailAfter (Milliseconds 5000.0) do
-    GameChannel.requestUpdate sub
+    Game game <- Api.getGame gameId
+    when (not game.is_ready) do
+      throwError (error "Game is not ready")
 
 
 setupLogger :: App -> Effect Unit
@@ -190,7 +170,7 @@ setupLogger app = do
 
 
 setupUi :: GameManager -> App -> Effect Unit
-setupUi game app = do
+setupUi manager app = do
   Ticker.onTick do
     fps <- Ticker.getMeasuredFPS
     query "#info .fps"
@@ -229,10 +209,9 @@ setupUi game app = do
 
       addEventListener (EventType "click") listener false (Element.toEventTarget btn)
 
-  CommandManager.onCommit \group -> do
-    cmds <- Ref.read group.commands
-    when (Array.any Command.isMerge cmds) do
-      progress <- GameManager.progress game
+  CommandManager.onExecute \cmd -> do
+    when (Command.isMerge cmd) do
+      progress <- GameManager.progress manager
       query "#progressbar"
         >>= Element.setAttribute "style" ("width:" <> show (progress * 100.0) <> "%")
 

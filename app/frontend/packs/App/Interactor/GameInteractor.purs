@@ -22,6 +22,7 @@ import App.EaselJS.Type (Stage, DisplayObject)
 import App.GameManager (GameManager)
 import App.GameManager as GameManager
 import App.Logger as Logger
+import App.Model.Puzzle (Puzzle(..))
 import Data.Array as Array
 import Data.Int as Int
 import Debug.Trace (traceM)
@@ -36,7 +37,7 @@ import Web.HTML as HTML
 import Web.HTML.Window as Window
 
 type GameInteractor =
-  { game :: GameManager
+  { manager :: GameManager
   , translationTolerance :: Number
   , rotationTolerance :: Number
   , baseStage :: Stage
@@ -46,23 +47,24 @@ type GameInteractor =
   }
 
 create :: GameManager -> Element -> Element -> Effect GameInteractor
-create game baseCanvas activeCanvas = do
+create manager baseCanvas activeCanvas = do
   baseStage <- Stage.create baseCanvas
   activeStage <- Stage.create activeCanvas
+  let Puzzle puzzle = manager.puzzleActor.body
   Stage.toDisplayObject activeStage
     # DisplayObject.setShadow { color: "#333", offsetX: 0.0, offsetY: 0.0, blur: 4.0 }
-  let translationTolerance = game.puzzleActor.body.linearMeasure / 4.0
+  let translationTolerance = puzzle.linearMeasure / 4.0
   let rotationTolerance = 24.0
   dragger <- Ref.new emptyDragger
   shapeToPiece <-
     Ref.new
     $ Object.fromFoldable
-    $ (\actor -> show actor.shape.id /\ actor) <$> game.pieceActors
+    $ (\actor -> show actor.shape.id /\ actor) <$> manager.pieceActors
 
-  Container.addContainer game.puzzleActor.container $ Stage.toContainer baseStage
-  game.pieceActors # traverse_ \actor -> do
-    Container.addShape actor.shape game.puzzleActor.container
-    PieceDrawer.draw actor $ PieceDrawer.withImage game.picture
+  Container.addContainer manager.puzzleActor.container $ Stage.toContainer baseStage
+  manager.pieceActors # traverse_ \actor -> do
+    Container.addShape actor.shape manager.puzzleActor.container
+    PieceDrawer.draw actor $ PieceDrawer.withImage manager.picture
     boundary <- Rectangle.inflate 8.0 <$> Ref.read actor.localBoundary
     DisplayObject.cache boundary 2.0 $ Shape.toDisplayObject actor.shape
 
@@ -71,22 +73,24 @@ create game baseCanvas activeCanvas = do
     Stage.update activeStage
     Stage.update baseStage
 
-  CommandManager.onPost \cmd -> do
-    actor <- GameManager.findPieceActor game $ Command.pieceId cmd
+  CommandManager.onExecute \cmd -> do
+    actor <- GameManager.findPieceActor manager $ Command.pieceId cmd
     PieceActor.updateFace actor
+    Stage.invalidate baseStage
 
-  pure { game, translationTolerance, rotationTolerance, baseStage, activeStage, dragger, shapeToPiece }
+  pure { manager, translationTolerance, rotationTolerance, baseStage, activeStage, dragger, shapeToPiece }
 
 
 contain :: Rectangle -> GameInteractor -> Effect Unit
 contain rect gi = do
-  let margin = gi.game.puzzleActor.body.linearMeasure
+  let Puzzle puzzle = gi.manager.puzzleActor.body
+  let margin = puzzle.linearMeasure
   let rect' = Rectangle.inflate margin rect
 
   window <- HTML.window
   width <- Int.toNumber <$> Window.innerWidth window
   height <- Int.toNumber <$> Window.innerHeight window
-  let obj = Container.toDisplayObject gi.game.puzzleActor.container
+  let obj = Container.toDisplayObject gi.manager.puzzleActor.container
   let scale = Math.min (width / rect'.width) (height / rect'.height)
   let x = width / 2.0 - scale * (rect'.x + rect'.width / 2.0)
   let y = height / 2.0 - scale * (rect'.y + rect'.height / 2.0)
@@ -100,17 +104,17 @@ fit :: GameInteractor -> Effect Unit
 fit gi = do
   rect <-
     Array.foldr Rectangle.addRectangle Rectangle.empty
-    <$> traverse PieceActor.getBoundary gi.game.pieceActors
+    <$> traverse PieceActor.getBoundary gi.manager.pieceActors
   contain rect gi
 
 
 shuffle :: GameInteractor -> Effect Unit
 shuffle gi = do
-  let game = gi.game
-  let width = game.puzzleActor.body.boundary.width
-  let height = game.puzzleActor.body.boundary.height
+  let Puzzle puzzle = gi.manager.puzzleActor.body
+  let width = puzzle.boundary.width
+  let height = puzzle.boundary.height
   let s = Math.max width height * 2.0
-  actors <- Array.filterA PieceActor.isAlive game.pieceActors
+  actors <- Array.filterA PieceActor.isAlive gi.manager.pieceActors
   actors # traverse_ \actor -> do
     center <- Rectangle.center <$> PieceActor.getBoundary actor
     degree <- randomRange (-180.0) 180.0
@@ -133,7 +137,7 @@ putToActiveLayer actor gi = do
 lookupPieceActor :: GameInteractor -> DisplayObject -> Effect (Maybe PieceActor)
 lookupPieceActor gi obj =
   Object.lookup (show obj.id) <$> Ref.read gi.shapeToPiece
-  >>= traverse (GameManager.entity gi.game)
+  >>= traverse (GameManager.entity gi.manager)
 
 
 
@@ -171,11 +175,11 @@ movePointerTo pt gi = do
       Nothing -> do
         let pt0 = dragger.pointer
         let vec = Point.subtract pt pt0
-        let obj = Container.toDisplayObject $ gi.game.puzzleActor.container
+        let obj = Container.toDisplayObject gi.manager.puzzleActor.container
         obj # DisplayObject.update { x: obj.x + vec.x, y: obj.y + vec.y }
         Stage.invalidate gi.baseStage
       Just actor -> do
-        let obj = Container.toDisplayObject gi.game.puzzleActor.container
+        let obj = Container.toDisplayObject gi.manager.puzzleActor.container
         pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
         pt1 <- DisplayObject.fromGlobalTo obj pt
         let vec = Point.subtract pt1 pt0
@@ -195,7 +199,7 @@ spinPointer angle gi = do
     case dragger.piece of
       Nothing -> pure unit
       Just actor -> do
-        let obj = Container.toDisplayObject gi.game.puzzleActor.container
+        let obj = Container.toDisplayObject gi.manager.puzzleActor.container
         pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
         CommandManager.post $ Command.rotate actor.body.id pt0 (angle - dragger.spinner)
         Stage.invalidate gi.activeStage
@@ -208,7 +212,7 @@ zoomPointer :: Number -> GameInteractor -> Effect Unit
 zoomPointer scale gi = do
   dragger <- Ref.read gi.dragger
   when (dragger.active && isNothing dragger.piece) do
-    let obj = Container.toDisplayObject gi.game.puzzleActor.container
+    let obj = Container.toDisplayObject gi.manager.puzzleActor.container
     let pt0 = dragger.pointer
     let t =
           Matrix2D.create
@@ -247,7 +251,7 @@ attempt :: GameInteractor -> Effect Unit
 attempt gi = do
   dragger <- Ref.read gi.dragger
   dragger.piece # traverse_ \mergee -> do
-    let obj = Container.toDisplayObject gi.game.puzzleActor.container
+    let obj = Container.toDisplayObject gi.manager.puzzleActor.container
     pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
     findMeargeableOn gi pt0 mergee
       >>= traverse_ \merger -> do
@@ -270,7 +274,7 @@ capture gi actor = do
     obj <- PieceActor.getFace actor
     Container.addChild obj $ Stage.toContainer gi.activeStage
     DisplayObject.copyTransform
-      (Container.toDisplayObject gi.game.puzzleActor.container)
+      (Container.toDisplayObject gi.manager.puzzleActor.container)
       (Stage.toDisplayObject gi.activeStage)
     Stage.invalidate gi.activeStage
     Stage.invalidate gi.baseStage
@@ -282,7 +286,7 @@ release gi = do
   dragger.piece # traverse_ \actor -> do
     Logger.info $ "release: " <> show actor.body.id
     obj <- PieceActor.getFace actor
-    Container.addChild obj $ gi.game.puzzleActor.container
+    Container.addChild obj $ gi.manager.puzzleActor.container
     Stage.invalidate gi.activeStage
     Stage.invalidate gi.baseStage
     CommandManager.commit
@@ -294,7 +298,7 @@ findMeargeableOn gi pt sbj = do
   ids <- Array.fromFoldable <$> Ref.read sbj.neighborIds
   actors <-
     Array.filter (\obj -> obj.body.id /=  sbj.body.id) <<< Array.nubBy (compare `on` _.body.id)
-    <$> traverse (GameManager.entity gi.game <=< GameManager.findPieceActor gi.game) ids
+    <$> traverse (GameManager.entity gi.manager <=< GameManager.findPieceActor gi.manager) ids
   Array.head <$> Array.filterA (\obj -> isWithinTolerance gi sbj obj pt) actors
 
 isWithinTolerance :: GameInteractor -> PieceActor -> PieceActor -> Point -> Effect Boolean

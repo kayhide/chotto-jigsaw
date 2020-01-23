@@ -3,21 +3,20 @@ class Game < ApplicationRecord
 
   belongs_to :puzzle
   has_many_docs :commands
-  # has_many :commands, dependent: :destroy
-  # has_many :merge_commands
-  # has_many :transform_commands
-  # has_many :translate_commands
-  # has_many :rotate_commands
 
-  scope :not_started, -> () { where(progress: 0.0) }
-  scope :started, -> () { where.not(progress: 0.0) }
-  scope :not_finished, -> () { where.not(progress: 1.0) }
-  scope :finished, -> () { where(progress: 1.0) }
-  scope :active, -> () { started.not_finished }
+  scope :not_started, -> { where(progress: 0.0) }
+  scope :started, -> { where.not(progress: 0.0) }
+  scope :not_finished, -> { where.not(progress: 1.0) }
+  scope :finished, -> { where(progress: 1.0) }
+  scope :active, -> { started.not_finished }
 
   validates :progress, presence: true
 
   def ready?
     shuffled_at?
+  end
+
+  def attributes
+    super.merge("is_ready" => ready?)
   end
 end

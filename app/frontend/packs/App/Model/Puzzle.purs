@@ -6,25 +6,41 @@ import App.EaselJS.Rectangle (Rectangle)
 import App.EaselJS.Rectangle as Rectangle
 import App.Model.Piece (Piece)
 import App.Model.Piece as Piece
-import Data.Argonaut (Json, decodeJson, jsonParser, (.:))
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, (.:))
 import Data.Array as Array
+import Data.Newtype (class Newtype)
 
-type Puzzle =
-  { pieces :: Array Piece
+
+newtype PuzzleId = PuzzleId Int
+
+derive instance newtypePuzzleId :: Newtype PuzzleId _
+derive newtype instance eqPuzzleId :: Eq PuzzleId
+derive newtype instance showPuzzleId :: Show PuzzleId
+derive newtype instance encodeJsonPuzzleId :: EncodeJson PuzzleId
+derive newtype instance decodeJsonPuzzleId :: DecodeJson PuzzleId
+
+
+newtype Puzzle =
+  Puzzle
+  { id :: PuzzleId
+  , pieces :: Array Piece
+  , piecesCount :: Number
   , linearMeasure :: Number
+  , difficulty :: String
   , boundary :: Rectangle
   }
 
-parse :: String -> Effect Puzzle
-parse str =
-  jsonParser str >>= decode # throwOnLeft
+derive instance newtypePuzzle :: Newtype Puzzle _
 
-decode :: Json -> Either String Puzzle
-decode json = do
-  obj <- decodeJson json
-  pieces <- traverse Piece.decode =<< obj .: "pieces"
-  linearMeasure <- obj .: "linear_measure"
-  let boundary =
-        Array.foldr Rectangle.addPoint Rectangle.empty
-        <<< Array.catMaybes <<< Array.concat <<< Array.concat $ _.loops <$> pieces
-  pure { pieces, linearMeasure, boundary }
+instance decodeJsonPuzzle :: DecodeJson Puzzle where
+  decodeJson json = do
+    obj <- decodeJson json
+    id <- decodeJson =<< obj .: "id"
+    pieces <- traverse Piece.decode =<< obj .: "pieces"
+    piecesCount <- decodeJson =<< obj .: "pieces_count"
+    linearMeasure <- obj .: "linear_measure"
+    difficulty <- decodeJson =<< obj .: "difficulty"
+    let boundary =
+          Array.foldr Rectangle.addPoint Rectangle.empty
+          <<< Array.catMaybes <<< Array.concat <<< Array.concat $ _.loops <$> pieces
+    pure $ Puzzle { id, pieces, piecesCount, linearMeasure, difficulty, boundary }

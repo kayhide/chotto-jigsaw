@@ -25,7 +25,7 @@ setActive b gi = do
   let canvas = gi.activeStage.canvas
   bool Utils.removeClass Utils.addClass b "shadow" canvas
 
-  let actor = gi.game.puzzleActor
+  let actor = gi.manager.puzzleActor
   PuzzleDrawer.draw actor { drawsGuide: b }
 
   Stage.invalidate gi.baseStage

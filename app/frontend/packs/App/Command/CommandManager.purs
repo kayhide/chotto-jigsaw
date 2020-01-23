@@ -13,9 +13,10 @@ import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 
 type CommandManager =
-  { game :: Maybe GameManager
+  { manager :: Maybe GameManager
   , current :: CommandGroup
   , postHandlers :: Array (Command -> Effect Unit)
+  , executeHandlers :: Array (Command -> Effect Unit)
   , commitHandlers :: Array (CommandGroup -> Effect Unit)
   }
 
@@ -23,19 +24,24 @@ self :: Ref CommandManager
 self = unsafePerformEffect do
   current <- CommandGroup.create
   Ref.new
-    { game: Nothing
+    { manager: Nothing
     , current
     , postHandlers: []
+    , executeHandlers: []
     , commitHandlers: []
     }
 
 register :: GameManager -> Effect Unit
-register game =
-  self # Ref.modify_ _{ game = pure game }
+register manager =
+  self # Ref.modify_ _{ manager = pure manager }
 
 onPost :: (Command -> Effect Unit) -> Effect Unit
 onPost f = self # Ref.modify_ \obj ->
   obj { postHandlers = Array.snoc obj.postHandlers f }
+
+onExecute :: (Command -> Effect Unit) -> Effect Unit
+onExecute f = self # Ref.modify_ \obj ->
+  obj { executeHandlers = Array.snoc obj.executeHandlers f }
 
 onCommit :: (CommandGroup -> Effect Unit) -> Effect Unit
 onCommit f = self # Ref.modify_ \obj ->
@@ -51,20 +57,25 @@ commit = do
 
 post :: Command -> Effect Unit
 post cmd = do
-  game <- _.game <$> Ref.read self >>= throwOnNothing "GameManager is not registered"
-  b <- Command.isValid game cmd
+  manager <- verifyGameManager
+  b <- Command.isValid manager cmd
   when b do
-    Command.execute game cmd
+    Command.execute manager cmd
     obj <- Ref.read self
     CommandGroup.squash cmd obj.current
+    traverse_ (_ $ cmd) obj.executeHandlers
     traverse_ (_ $ cmd) obj.postHandlers
 
-receive :: Array Command -> Effect Unit
-receive cmds = do
-  obj <- Ref.read self
-  game <- _.game <$> Ref.read self >>= throwOnNothing "GameManager is not registered"
-  traverse_ (Command.execute game) cmds
-  group <- CommandGroup.createExtrinsic
-  traverse_ (\cmd -> CommandGroup.squash cmd group) cmds
-  traverse_ (_ $ group) obj.commitHandlers
+execute :: Command -> Effect Unit
+execute cmd = do
+  manager <- verifyGameManager
+  b <- Command.isValid manager cmd
+  when b do
+    Command.execute manager cmd
+    obj <- Ref.read self
+    traverse_ (_ $ cmd) obj.executeHandlers
 
+verifyGameManager :: Effect GameManager
+verifyGameManager = do
+  obj <- Ref.read self
+  _.manager <$> Ref.read self >>= throwOnNothing "GameManager is not registered"

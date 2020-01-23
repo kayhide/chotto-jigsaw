@@ -22,16 +22,16 @@ import Data.Maybe (Maybe(..), maybe, isNothing, isJust, fromMaybe)
 import Data.Traversable (for, for_, traverse_, traverse)
 import Data.Tuple.Nested (type (/\), (/\))
 import Effect (Effect)
-import Effect.Class (liftEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (throw)
 
 
 bool :: forall a. a -> a -> Boolean -> a
 bool x y b = if b then y else x
 
-throwOnNothing :: forall a. String -> Maybe a -> Effect a
+throwOnNothing :: forall a m. MonadEffect m => String -> Maybe a -> m a
 throwOnNothing msg = throwOnLeft <<< note msg
 
-throwOnLeft :: forall a. Either String a -> Effect a
-throwOnLeft = either throw pure
+throwOnLeft :: forall a m. MonadEffect m => Either String a -> m a
+throwOnLeft = either (liftEffect <<< throw) pure
 
