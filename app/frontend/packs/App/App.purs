@@ -6,9 +6,10 @@ import App.Api.Client as Api
 import App.Command.Command as Command
 import App.Command.CommandManager as CommandManager
 import App.Drawer.PieceActor as PieceActor
+import App.EaselJS.Rectangle (Rectangle)
 import App.EaselJS.Rectangle as Rectangle
-import App.EaselJS.Stage as Stage
 import App.EaselJS.Ticker as Ticker
+import App.Firestore (FirebaseToken(..))
 import App.Firestore as Firestore
 import App.GameManager (GameManager)
 import App.GameManager as GameManager
@@ -25,7 +26,6 @@ import App.Utils as Utils
 import Data.Argonaut (jsonParser)
 import Data.Array as Array
 import Data.Int as Int
-import Data.Newtype (unwrap)
 import Data.String (Pattern(..))
 import Data.String as String
 import Data.Time.Duration (Milliseconds(..))
@@ -54,6 +54,11 @@ type App =
   , picture :: Element
   , sounds :: Element
   , log :: Element
+  , gameId :: Maybe GameId
+  , puzzleId :: PuzzleId
+  , pictureUrl :: String
+  , initialView :: Maybe Rectangle
+  , firebaseToken :: Maybe FirebaseToken
   }
 
 init :: Effect Unit
@@ -62,12 +67,37 @@ init = do
 
   doc <- Window.document =<< HTML.window
   playboard <- query "#playboard"
-  baseCanvas <- query "#field"
+  baseCanvas <- query "#base-canvas"
   activeCanvas <- query "#active-canvas"
   picture <- query "#picture"
   sounds <- query "#sounds"
   log <- query "#log"
-  play { playboard, baseCanvas, activeCanvas, picture, sounds, log }
+
+  gameId <- do
+    dataset "game-id" playboard >>= traverse \x -> do
+      GameId <$> Int.fromString x # throwOnNothing "Bad game id"
+  puzzleId <- do
+    x <- dataset' "puzzle-id" playboard
+    PuzzleId <$> Int.fromString x # throwOnNothing "Bad puzzle id"
+  pictureUrl <- dataset' "picture" playboard
+  initialView <- do
+    dataset "initial-view" playboard >>= traverse \x -> do
+      jsonParser x >>= Rectangle.decode # throwOnLeft
+
+  firebaseToken <- map FirebaseToken <$> dataset "firebase-token" playboard
+
+  play { playboard
+       , baseCanvas
+       , activeCanvas
+       , picture
+       , sounds
+       , log
+       , gameId
+       , puzzleId
+       , pictureUrl
+       , initialView
+       , firebaseToken
+       }
 
 
 getGameId :: Element -> Effect (Maybe GameId)
@@ -80,15 +110,13 @@ play :: App -> Effect Unit
 play app = do
   setupLogger app
 
-  gameId <- getGameId app.playboard
-  pictureUrl <- dataset' "picture" app.playboard
   launchAff_ do
     { image, puzzle } <- sequential $
       { image: _, puzzle: _ }
-      <$> parallel (Utils.loadImage pictureUrl)
+      <$> parallel (Utils.loadImage app.pictureUrl)
       <*> parallel (loadPuzzle app)
     gi <- liftEffect do
-      game <- GameManager.create gameId puzzle image
+      game <- GameManager.create app.gameId puzzle image
       CommandManager.register game
       setupUi game app
 
@@ -98,16 +126,13 @@ play app = do
       isTouchScreen <- Utils.isTouchScreen
       bool MouseInteractor.attach TouchInteractor.attach isTouchScreen gi
 
-      dataset "initial-view" app.playboard
-        >>= traverse_ \str -> do
-          rect <- jsonParser str >>= Rectangle.decode # throwOnLeft
-          GameInteractor.contain rect gi
+      app.initialView # traverse_ \rect -> do
+        GameInteractor.contain rect gi
 
       Utils.fadeOutSlow app.picture
       pure gi
 
-
-    maybe updateStandaloneGame updateOnlineGame gameId gi
+    maybe updateStandaloneGame (updateOnlineGame app.firebaseToken) app.gameId gi
 
     liftEffect do
       Utils.fadeOutSlow =<< query "#game-progress .loading"
@@ -119,12 +144,9 @@ play app = do
 
 loadPuzzle :: App -> Aff Puzzle
 loadPuzzle app = do
-  id <- liftEffect $ do
-    id' <- dataset' "puzzle-id" app.playboard
-    Int.fromString id' # throwOnNothing "Bad puzzle id"
-  Logger.info $ "puzzle id: " <> show id
+  Logger.info $ "puzzle id: " <> show app.puzzleId
   Utils.retryOnFailAfter (Milliseconds 5000.0) do
-    Api.getPuzzle (PuzzleId id)
+    Api.getPuzzle app.puzzleId
 
 
 updateStandaloneGame :: GameInteractor -> Aff Unit
@@ -132,11 +154,12 @@ updateStandaloneGame gi = liftEffect do
   Logger.info $ "standalone: " <> show true
   GameInteractor.shuffle gi
 
-updateOnlineGame :: GameId -> GameInteractor -> Aff Unit
-updateOnlineGame gameId gi = do
-  Logger.info $ "game id: " <> show (unwrap gameId)
+updateOnlineGame :: Maybe FirebaseToken -> GameId -> GameInteractor -> Aff Unit
+updateOnlineGame token gameId gi = do
+  Logger.info $ "game id: " <> show gameId
   liftEffect $ do
-    firestore <- Firestore.connect
+    token' <- token # throwOnNothing "firebase token is missing"
+    firestore <- Firestore.connect token' gameId
     firestore # Firestore.onCommandAdd \cmd -> do
       actor <- GameManager.findPieceActor gi.manager (Command.pieceId cmd)
       alive <- PieceActor.isAlive actor

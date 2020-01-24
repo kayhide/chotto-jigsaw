@@ -8,13 +8,11 @@ const firestoreSettings = process.env.FIRESTORE_EMULATOR_HOST ?
         ssl: false
       } : {};
 
-exports.connect = () => {
-  const { firebaseToken, gameId } = document.querySelector("#playboard").dataset;
-
+exports.connect = token => gameId => () => {
   firebase.initializeApp(firebaseConfig);
   firebase
     .auth()
-    .signInWithCustomToken(firebaseToken)
+    .signInWithCustomToken(token)
     .catch(error => {
       const { code, message } = error;
       if (code === 'auth/invalid-custom-token') {
@@ -29,7 +27,7 @@ exports.connect = () => {
 
   window.firebase = firebase;
 
-  return { db, gameId };
+  return { db, gameId: gameId.toString() };
 };
 
 exports.addCommand = obj => ({ db, gameId }) => () => {

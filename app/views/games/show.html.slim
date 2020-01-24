@@ -1,7 +1,7 @@
 - longer = [@puzzle.width, @puzzle.height].max
 - view = { x: @puzzle.width * 0.5 - longer, y: @puzzle.height * 0.5 - longer, width: longer * 2, height: longer * 2 }
 #playboard.bg-lawrencium data-game-id=@game&.id data-picture=url_for(@puzzle.picture) data-initial-view=view.to_json data-puzzle-id=@puzzle.id data-firebase-token=@firebase_token
-  canvas#field.hidden
+  canvas#base-canvas.hidden
   canvas#active-canvas.hidden
 
   #game-progress.progress class=([@puzzle.difficulty] + (@standalone ? %w(standalone) : []))
