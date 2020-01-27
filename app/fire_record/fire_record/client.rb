@@ -36,6 +36,7 @@ module FireRecord
     end
 
     def self.connect
+      credentials
       Google::Cloud::Firestore.new(**config.symbolize_keys)
     end
 
