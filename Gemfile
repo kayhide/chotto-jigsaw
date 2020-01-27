@@ -22,6 +22,10 @@ gem 'sidekiq-limit_fetch'
 gem 'slim-rails'
 gem 'webpacker', '~> 4.0'
 
+# rack-2.1.1 has problem with sidekiq web
+# https://github.com/rack/rack/pull/1428
+gem 'rack', '~> 2.0.0'
+
 # gem 'bcrypt', '~> 3.1.7'
 
 group :development, :test do
