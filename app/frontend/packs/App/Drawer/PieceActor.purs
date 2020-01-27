@@ -3,16 +3,16 @@ module App.Drawer.PieceActor where
 import AppPrelude
 
 import App.Drawer.Transform (Transform)
-import App.EaselJS.Container as Container
-import App.EaselJS.DisplayObject as DisplayObject
-import App.EaselJS.Matrix2D as Matrix2D
-import App.EaselJS.Point as Point
-import App.EaselJS.Rectangle (Rectangle)
-import App.EaselJS.Rectangle as Rectangle
-import App.EaselJS.Shape as Shape
-import App.EaselJS.Type (Container, Shape, DisplayObject)
 import App.Model.Piece (Piece)
 import App.Model.Piece as Piece
+import App.Pixi.Container as Container
+import App.Pixi.DisplayObject as DisplayObject
+import App.Pixi.Graphics as Graphics
+import App.Pixi.Matrix as Matrix
+import App.Pixi.Point as Point
+import App.Pixi.Rectangle (Rectangle)
+import App.Pixi.Rectangle as Rectangle
+import App.Pixi.Type (Container, DisplayObject, Graphics)
 import Data.Array as Array
 import Data.Set (Set)
 import Data.Set as Set
@@ -22,7 +22,7 @@ import Effect.Ref as Ref
 
 type PieceActor =
   { body :: Piece
-  , shape :: Shape
+  , shape :: Graphics
   , container :: Ref (Maybe Container)
   , transform :: Ref Transform
   , loops :: Ref (Array Piece.Loop)
@@ -33,7 +33,9 @@ type PieceActor =
 
 create :: Piece -> Effect PieceActor
 create body = do
-  shape <- Shape.create
+  shape <- Graphics.create
+  Graphics.toDisplayObject shape # DisplayObject.setName ("piece-" <> show body.id)
+
   container <- Ref.new Nothing
   transform <- Ref.new { position: Point.zero, rotation: 0.0 }
   loops <- Ref.new body.loops
@@ -51,9 +53,9 @@ isAlive actor = isNothing <$> Ref.read actor.merger
 getFace :: PieceActor -> Effect DisplayObject
 getFace actor =
   Ref.read actor.container
-  <#> maybe (Shape.toDisplayObject actor.shape) Container.toDisplayObject
+  <#> maybe (Graphics.toDisplayObject actor.shape) Container.toDisplayObject
 
-getShapes :: PieceActor -> Effect (Array Shape)
+getShapes :: PieceActor -> Effect (Array Graphics)
 getShapes actor =
   Ref.read actor.container
   >>= maybe (pure $ pure actor.shape) Container.getShapes
@@ -63,18 +65,18 @@ getBoundary actor = do
   boundary <- Ref.read actor.localBoundary
   { position, rotation } <- Ref.read actor.transform
   let mtx =
-        Matrix2D.create
-        # Matrix2D.translate position.x position.y
-        # Matrix2D.rotate rotation
+        Matrix.create
+        # Matrix.rotate rotation
+        # Matrix.translate position.x position.y
   pure
     $ Array.foldr Rectangle.addPoint Rectangle.empty
-    $ (\pt -> Matrix2D.apply pt mtx) <$> Rectangle.cornerPoints boundary
+    $ (\pt -> Matrix.apply pt mtx) <$> Rectangle.cornerPoints boundary
 
 
 updateFace :: PieceActor -> Effect Unit
 updateFace actor = do
   t <- Ref.read actor.transform
-  DisplayObject.update t =<< getFace actor
+  DisplayObject.update { position: t.position, rotation: t.rotation } =<< getFace actor
 
 
 merge :: PieceActor -> PieceActor -> Effect Unit
@@ -95,7 +97,7 @@ merge mergee merger = do
 
   c <- Ref.read merger.container >>= case _ of
     Nothing -> do
-      let obj = Shape.toDisplayObject merger.shape
+      let obj = Graphics.toDisplayObject merger.shape
       parent <- DisplayObject.getParent obj # throwOnNothing "No parent"
       c <- Container.create
       Ref.write (pure c) merger.container
@@ -108,5 +110,5 @@ merge mergee merger = do
 
   getShapes mergee
     >>= traverse_ \s -> do
-      DisplayObject.clearTransform $ Shape.toDisplayObject s
+      DisplayObject.clearTransform $ Graphics.toDisplayObject s
       Container.addShape s c

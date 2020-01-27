@@ -9,10 +9,10 @@ import App.Command.RotateCommand as RotateCommand
 import App.Command.TranslateCommand (TranslateCommand)
 import App.Command.TranslateCommand as TranslateCommand
 import App.Drawer.Transform (Transform)
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
 import App.GameManager (GameManager)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, (.:))
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, (.:))
 
 data Command
   = Merge MergeCommand

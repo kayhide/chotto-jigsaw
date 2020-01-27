@@ -2,16 +2,16 @@ module App.Interactor.MouseInteractor where
 
 import AppPrelude
 
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
 import App.Interactor.GameInteractor (GameInteractor)
 import App.Interactor.GameInteractor as GameInteractor
 import App.Logger as Logger
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
 import Data.Int as Int
-import Web.DOM.Element as Element
 import Web.Event.Event (EventType(..))
 import Web.Event.Event as Event
 import Web.Event.EventTarget (EventTarget, addEventListener, eventListener)
+import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
 import Web.UIEvent.MouseEvent (MouseEvent)
 import Web.UIEvent.MouseEvent as MouseEvent
 import Web.UIEvent.WheelEvent (WheelEvent)
@@ -21,7 +21,7 @@ attach :: GameInteractor -> Effect Unit
 attach gi = do
   Logger.info "attached: MouseInteractor"
 
-  let target = Element.toEventTarget gi.baseStage.canvas
+  let target = HTMLCanvasElement.toEventTarget gi.baseStage.view
 
   addMouseEventListener "mousedown" target $ onMouseDown gi
   addMouseEventListener "mousemove" target $ onMouseMove gi

@@ -6,9 +6,6 @@ import App.Api.Client as Api
 import App.Command.Command as Command
 import App.Command.CommandManager as CommandManager
 import App.Drawer.PieceActor as PieceActor
-import App.EaselJS.Rectangle (Rectangle)
-import App.EaselJS.Rectangle as Rectangle
-import App.EaselJS.Ticker as Ticker
 import App.Firestore (FirebaseToken(..))
 import App.Firestore as Firestore
 import App.GameManager (GameManager)
@@ -22,6 +19,9 @@ import App.Interactor.TouchInteractor as TouchInteractor
 import App.Logger as Logger
 import App.Model.Game (Game(..), GameId(..))
 import App.Model.Puzzle (Puzzle, PuzzleId(..))
+import App.Pixi.Rectangle (Rectangle)
+import App.Pixi.Rectangle as Rectangle
+import App.Pixi.Ticker as Ticker
 import App.Utils as Utils
 import Data.Argonaut (jsonParser)
 import Data.Array as Array
@@ -42,15 +42,17 @@ import Web.DOM.NodeList as NodeList
 import Web.DOM.ParentNode (QuerySelector(..), querySelector, querySelectorAll)
 import Web.Event.Event (EventType(..))
 import Web.Event.EventTarget (addEventListener, eventListener)
+import Web.HTML (HTMLCanvasElement)
 import Web.HTML as HTML
+import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
 import Web.HTML.HTMLDocument (toDocument, toParentNode)
 import Web.HTML.HTMLMediaElement as HTMLMediaElement
 import Web.HTML.Window as Window
 
 type App =
   { playboard :: Element
-  , baseCanvas :: Element
-  , activeCanvas :: Element
+  , baseCanvas :: HTMLCanvasElement
+  , activeCanvas :: HTMLCanvasElement
   , picture :: Element
   , sounds :: Element
   , log :: Element
@@ -67,8 +69,14 @@ init = do
 
   doc <- Window.document =<< HTML.window
   playboard <- query "#playboard"
-  baseCanvas <- query "#base-canvas"
-  activeCanvas <- query "#active-canvas"
+  baseCanvas <-
+    query "#base-canvas"
+    >>= HTMLCanvasElement.fromElement
+    >>> throwOnNothing "Not Canvas element"
+  activeCanvas <-
+    query "#active-canvas"
+    >>= HTMLCanvasElement.fromElement
+    >>> throwOnNothing "Not Canvas element"
   picture <- query "#picture"
   sounds <- query "#sounds"
   log <- query "#log"
@@ -194,8 +202,8 @@ setupLogger app = do
 
 setupUi :: GameManager -> App -> Effect Unit
 setupUi manager app = do
-  Ticker.onTick do
-    fps <- Ticker.getMeasuredFPS
+  Ticker.onTick \delta -> do
+    fps <- Ticker.getFPS
     query "#info .fps"
       >>= Element.toNode
       >>> Node.setTextContent (show $ Int.round fps)

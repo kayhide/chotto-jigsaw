@@ -71,6 +71,6 @@ withClassList action name elm = do
 
 foreign import trigger :: forall elm. String -> elm -> Effect Unit
 
-foreign import fadeInSlow :: Element -> Effect Unit
-foreign import fadeOutSlow :: Element -> Effect Unit
-foreign import fadeToggle :: Element -> Effect Unit
+foreign import fadeInSlow :: forall elm. elm -> Effect Unit
+foreign import fadeOutSlow :: forall elm. elm -> Effect Unit
+foreign import fadeToggle :: forall elm. elm -> Effect Unit

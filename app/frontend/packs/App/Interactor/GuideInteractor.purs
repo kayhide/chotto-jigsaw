@@ -3,7 +3,6 @@ module App.Interactor.GuideInteractor where
 import AppPrelude
 
 import App.Drawer.PuzzleDrawer as PuzzleDrawer
-import App.EaselJS.Stage as Stage
 import App.Interactor.GameInteractor (GameInteractor)
 import App.Utils as Utils
 import Effect.Ref (Ref)
@@ -12,8 +11,10 @@ import Effect.Unsafe (unsafePerformEffect)
 import Web.Event.Event (EventType(..))
 import Web.Event.EventTarget (addEventListener, eventListener)
 import Web.HTML as HTML
+import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KeyboardEvent
+
 
 isActive :: Ref Boolean
 isActive = unsafePerformEffect $ Ref.new false
@@ -22,13 +23,11 @@ setActive :: Boolean -> GameInteractor -> Effect Unit
 setActive b gi = do
   Ref.write b isActive
 
-  let canvas = gi.activeStage.canvas
-  bool Utils.removeClass Utils.addClass b "shadow" canvas
+  let canvas = gi.activeStage.view
+  bool Utils.removeClass Utils.addClass b "shadow" $ HTMLCanvasElement.toElement canvas
 
   let actor = gi.manager.puzzleActor
   PuzzleDrawer.draw actor { drawsGuide: b }
-
-  Stage.invalidate gi.baseStage
 
 toggle :: GameInteractor -> Effect Unit
 toggle gi = do
@@ -44,4 +43,3 @@ attach gi = do
 
   window <- HTML.window
   addEventListener (EventType "keydown") listener false (Window.toEventTarget window)
-

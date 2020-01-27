@@ -1,4 +1,4 @@
-module App.EaselJS.Point where
+module App.Pixi.Point where
 
 import AppPrelude
 

@@ -8,21 +8,21 @@ import App.Drawer.PieceActor (PieceActor)
 import App.Drawer.PieceActor as PieceActor
 import App.Drawer.PieceDrawer as PieceDrawer
 import App.Drawer.Transform as Transform
-import App.EaselJS.Container as Container
-import App.EaselJS.DisplayObject as DisplayObject
-import App.EaselJS.Matrix2D as Matrix2D
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
-import App.EaselJS.Rectangle (Rectangle)
-import App.EaselJS.Rectangle as Rectangle
-import App.EaselJS.Shape as Shape
-import App.EaselJS.Stage as Stage
-import App.EaselJS.Ticker as Ticker
-import App.EaselJS.Type (Stage, DisplayObject)
 import App.GameManager (GameManager)
 import App.GameManager as GameManager
 import App.Logger as Logger
 import App.Model.Puzzle (Puzzle(..))
+import App.Pixi.Application as Application
+import App.Pixi.Container as Container
+import App.Pixi.DisplayObject as DisplayObject
+import App.Pixi.Graphics as Graphics
+import App.Pixi.Matrix as Matrix
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
+import App.Pixi.Rectangle (Rectangle)
+import App.Pixi.Rectangle as Rectangle
+import App.Pixi.Texture as Texture
+import App.Pixi.Type (Application, Container, DisplayObject)
 import Data.Array as Array
 import Data.Int as Int
 import Debug.Trace (traceM)
@@ -32,7 +32,7 @@ import Effect.Ref as Ref
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Math as Math
-import Web.DOM (Element)
+import Web.HTML (HTMLCanvasElement)
 import Web.HTML as HTML
 import Web.HTML.Window as Window
 
@@ -40,45 +40,40 @@ type GameInteractor =
   { manager :: GameManager
   , translationTolerance :: Number
   , rotationTolerance :: Number
-  , baseStage :: Stage
-  , activeStage :: Stage
+  , baseStage :: Application
+  , activeStage :: Application
+  , activeLayer :: Container
   , dragger :: Ref Dragger
   , shapeToPiece :: Ref (Object PieceActor)
   }
 
-create :: GameManager -> Element -> Element -> Effect GameInteractor
+create :: GameManager -> HTMLCanvasElement -> HTMLCanvasElement -> Effect GameInteractor
 create manager baseCanvas activeCanvas = do
-  baseStage <- Stage.create baseCanvas
-  activeStage <- Stage.create activeCanvas
+  baseStage <- Application.create baseCanvas
+  activeStage <- Application.create activeCanvas
+  activeLayer <- Container.create
   let Puzzle puzzle = manager.puzzleActor.body
-  Stage.toDisplayObject activeStage
-    # DisplayObject.setShadow { color: "#333", offsetX: 0.0, offsetY: 0.0, blur: 4.0 }
   let translationTolerance = puzzle.linearMeasure / 4.0
-  let rotationTolerance = 24.0
+  let rotationTolerance = Math.pi / 8.0
   dragger <- Ref.new emptyDragger
   shapeToPiece <-
-    Ref.new
-    $ Object.fromFoldable
-    $ (\actor -> show actor.shape.id /\ actor) <$> manager.pieceActors
+    traverse (\actor -> (_ /\ actor) <$> DisplayObject.getName (Graphics.toDisplayObject actor.shape)) manager.pieceActors
+    >>= Object.fromFoldable >>> Ref.new
 
-  Container.addContainer manager.puzzleActor.container $ Stage.toContainer baseStage
+  Container.addContainer manager.puzzleActor.container baseStage.stage
+  Container.addContainer activeLayer baseStage.stage
+  -- Container.addContainer activeLayer activeStage.stage
+  texture <- Texture.fromElement manager.picture
   manager.pieceActors # traverse_ \actor -> do
     Container.addShape actor.shape manager.puzzleActor.container
-    PieceDrawer.draw actor $ PieceDrawer.withImage manager.picture
-    boundary <- Rectangle.inflate 8.0 <$> Ref.read actor.localBoundary
-    DisplayObject.cache boundary 2.0 $ Shape.toDisplayObject actor.shape
-
-  Ticker.setFramerate 60
-  Ticker.onTick $ do
-    Stage.update activeStage
-    Stage.update baseStage
+    PieceDrawer.draw actor $ PieceDrawer.withTexture texture
+    DisplayObject.cache $ Graphics.toDisplayObject actor.shape
 
   CommandManager.onExecute \cmd -> do
     actor <- GameManager.findPieceActor manager $ Command.pieceId cmd
     PieceActor.updateFace actor
-    Stage.invalidate baseStage
 
-  pure { manager, translationTolerance, rotationTolerance, baseStage, activeStage, dragger, shapeToPiece }
+  pure { manager, translationTolerance, rotationTolerance, baseStage, activeStage, activeLayer, dragger, shapeToPiece }
 
 
 contain :: Rectangle -> GameInteractor -> Effect Unit
@@ -92,12 +87,16 @@ contain rect gi = do
   height <- Int.toNumber <$> Window.innerHeight window
   let obj = Container.toDisplayObject gi.manager.puzzleActor.container
   let scale = Math.min (width / rect'.width) (height / rect'.height)
-  let x = width / 2.0 - scale * (rect'.x + rect'.width / 2.0)
-  let y = height / 2.0 - scale * (rect'.y + rect'.height / 2.0)
-  DisplayObject.update { x, y, scaleX: scale, scaleY: scale } obj
-  DisplayObject.copyTransform obj $ Stage.toDisplayObject gi.activeStage
-  Stage.invalidate gi.baseStage
-  Stage.invalidate gi.activeStage
+  let x = (rect'.x + rect'.width / 2.0)
+  let y = (rect'.y + rect'.height / 2.0)
+  let position = Point.create x y
+  let t =
+        Matrix.create
+        # Matrix.translate (-x) (-y)
+        # Matrix.scale scale
+        # Matrix.decompose
+  obj # DisplayObject.update t
+  DisplayObject.copyTransform obj $ Container.toDisplayObject gi.activeLayer
 
 
 fit :: GameInteractor -> Effect Unit
@@ -113,7 +112,12 @@ shuffle gi = do
   let Puzzle puzzle = gi.manager.puzzleActor.body
   let width = puzzle.boundary.width
   let height = puzzle.boundary.height
-  let s = Math.max width height * 2.0
+  let l = Math.max width height
+  let x0 = width / 2.0 - l
+  let x1 = x0 + l * 2.0
+  let y0 = height / 2.0 - l
+  let y1 = y0 + l * 2.0
+
   actors <- Array.filterA PieceActor.isAlive gi.manager.pieceActors
   actors # traverse_ \actor -> do
     center <- Rectangle.center <$> PieceActor.getBoundary actor
@@ -122,8 +126,8 @@ shuffle gi = do
 
     vec <-
       Point.create
-      <$> ((_ - center.x) <$> randomRange 0.0 s)
-      <*> ((_ - center.y) <$> randomRange 0.0 s)
+      <$> ((_ - center.x) <$> randomRange x0 x1)
+      <*> ((_ - center.y) <$> randomRange y0 y1)
     CommandManager.post $ Command.translate actor.body.id vec
 
   CommandManager.commit
@@ -132,11 +136,11 @@ shuffle gi = do
 putToActiveLayer :: PieceActor -> GameInteractor -> Effect Unit
 putToActiveLayer actor gi = do
   obj <- PieceActor.getFace actor
-  Container.addChild obj $ Stage.toContainer gi.activeStage
+  Container.addChild obj $ gi.activeStage.stage
 
 lookupPieceActor :: GameInteractor -> DisplayObject -> Effect (Maybe PieceActor)
-lookupPieceActor gi obj =
-  Object.lookup (show obj.id) <$> Ref.read gi.shapeToPiece
+lookupPieceActor gi obj = do
+  Object.lookup <$> DisplayObject.getName obj <*> Ref.read gi.shapeToPiece
   >>= traverse (GameManager.entity gi.manager)
 
 
@@ -164,7 +168,7 @@ emptyDragger =
 
 
 setPointer :: Point -> GameInteractor -> Effect Unit
-setPointer pt gi =
+setPointer pt gi = do
   Ref.modify_ (_{ pointer = pt }) gi.dragger
 
 movePointerTo :: Point -> GameInteractor -> Effect Unit
@@ -173,18 +177,19 @@ movePointerTo pt gi = do
   when dragger.active do
     case dragger.piece of
       Nothing -> do
-        let pt0 = dragger.pointer
-        let vec = Point.subtract pt pt0
+        let project = DisplayObject.fromGlobalTo $ Container.toDisplayObject gi.baseStage.stage
+        pt0 <- project dragger.pointer
+        pt1 <- project pt
+        let vec = Point.subtract pt1 pt0
         let obj = Container.toDisplayObject gi.manager.puzzleActor.container
-        obj # DisplayObject.update { x: obj.x + vec.x, y: obj.y + vec.y }
-        Stage.invalidate gi.baseStage
+        obj # DisplayObject.update { position: Point.add obj.position vec }
       Just actor -> do
         let obj = Container.toDisplayObject gi.manager.puzzleActor.container
-        pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
-        pt1 <- DisplayObject.fromGlobalTo obj pt
+        let project = DisplayObject.fromGlobalTo obj
+        pt0 <- project dragger.pointer
+        pt1 <- project pt
         let vec = Point.subtract pt1 pt0
         CommandManager.post $ Command.translate actor.body.id vec
-        Stage.invalidate gi.activeStage
     Ref.modify_ (_{ pointer = pt }) gi.dragger
 
 
@@ -202,7 +207,6 @@ spinPointer angle gi = do
         let obj = Container.toDisplayObject gi.manager.puzzleActor.container
         pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
         CommandManager.post $ Command.rotate actor.body.id pt0 (angle - dragger.spinner)
-        Stage.invalidate gi.activeStage
 
 pegZoomer :: Number -> GameInteractor -> Effect Unit
 pegZoomer scale gi =
@@ -213,29 +217,30 @@ zoomPointer scale gi = do
   dragger <- Ref.read gi.dragger
   when (dragger.active && isNothing dragger.piece) do
     let obj = Container.toDisplayObject gi.manager.puzzleActor.container
-    let pt0 = dragger.pointer
+    let project = DisplayObject.fromGlobalTo $ Container.toDisplayObject gi.baseStage.stage
+    pt0 <- project dragger.pointer
     let t =
-          Matrix2D.create
-          # Matrix2D.translate pt0.x pt0.y
-          # Matrix2D.scale (scale / dragger.zoomer)
-          # Matrix2D.translate (-pt0.x) (-pt0.y)
-          # Matrix2D.appendMatrix (DisplayObject.getMatrix obj)
-          # Matrix2D.decompose
+          Matrix.create
+          # Matrix.translate (-pt0.x) (-pt0.y)
+          # Matrix.scale (scale / dragger.zoomer)
+          # Matrix.translate pt0.x pt0.y
+          # Matrix.appendMatrix (DisplayObject.getMatrix obj)
+          # Matrix.decompose
     DisplayObject.update t obj
-    Stage.invalidate gi.baseStage
 
 
 resume :: Point -> GameInteractor -> Effect Unit
 resume pt gi = do
   dragger <- Ref.read gi.dragger
+  pt' <- pt # DisplayObject.fromGlobalTo (Container.toDisplayObject gi.baseStage.stage)
   piece <- do
     p <- join <$> for dragger.piece \p' -> do
       obj <- PieceActor.getFace p'
-      pt' <- DisplayObject.fromGlobalTo obj pt
-      bool Nothing (Just p') <$> DisplayObject.hitTest pt' obj
+      obj' <- Application.hitTest pt gi.activeStage
+      pure $ bool Nothing (Just p') $ obj' == Just obj
     case p of
       Nothing -> do
-        obj <- Stage.getObjectUnderPoint pt gi.baseStage
+        obj <- Application.hitTest pt gi.baseStage
         join <$> traverse (lookupPieceActor gi) obj
       Just _ -> pure p
   when ((_.body.id <$> dragger.piece) /= (_.body.id <$> piece)) do
@@ -259,7 +264,6 @@ attempt gi = do
         CommandManager.post $ Command.merge merger.body.id mergee.body.id
         CommandManager.commit
         Ref.modify_ (_{ active = false, piece = Nothing }) gi.dragger
-        Stage.invalidate gi.baseStage
 
 finish :: GameInteractor -> Effect Unit
 finish gi = do
@@ -271,13 +275,11 @@ capture gi actor = do
   dragger <- Ref.read gi.dragger
   when (isNothing dragger.piece) do
     Logger.info $ "capture: " <> show actor.body.id
-    obj <- PieceActor.getFace actor
-    Container.addChild obj $ Stage.toContainer gi.activeStage
     DisplayObject.copyTransform
       (Container.toDisplayObject gi.manager.puzzleActor.container)
-      (Stage.toDisplayObject gi.activeStage)
-    Stage.invalidate gi.activeStage
-    Stage.invalidate gi.baseStage
+      (Container.toDisplayObject gi.activeLayer)
+    obj <- PieceActor.getFace actor
+    Container.addChild obj gi.activeLayer
     Ref.write dragger{ piece = pure actor } gi.dragger
 
 release :: GameInteractor -> Effect Unit
@@ -287,8 +289,6 @@ release gi = do
     Logger.info $ "release: " <> show actor.body.id
     obj <- PieceActor.getFace actor
     Container.addChild obj $ gi.manager.puzzleActor.container
-    Stage.invalidate gi.activeStage
-    Stage.invalidate gi.baseStage
     CommandManager.commit
     Ref.write dragger{ piece = Nothing } gi.dragger
 
@@ -307,12 +307,13 @@ isWithinTolerance gi sbj obj pt = do
   o <- Ref.read obj.transform
   pure $ fromMaybe false do
     guard $ getAngle s.rotation o.rotation < gi.rotationTolerance
-    let pt0 = Transform.toMatrix s # Matrix2D.invert # Matrix2D.apply pt
-    let pt1 = Transform.toMatrix o # Matrix2D.invert # Matrix2D.apply pt
+    let pt0 = Transform.toMatrix s # Matrix.invert # Matrix.apply pt
+    let pt1 = Transform.toMatrix o # Matrix.invert # Matrix.apply pt
     pure $ Point.distance pt1 pt0 < gi.translationTolerance
 
 getAngle :: Number -> Number -> Number
 getAngle s o =
-  Int.toNumber
+  (_ * (Math.pi / 180.0))
+  $ Int.toNumber
   $ bool identity (360 - _) =<< (180 <= _)
-  $ Int.round (s - o) `mod` 360
+  $ Int.round (s * 180.0 / Math.pi - o * 180.0 / Math.pi) `mod` 360

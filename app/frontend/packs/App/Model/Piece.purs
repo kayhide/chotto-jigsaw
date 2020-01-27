@@ -2,8 +2,8 @@ module App.Model.Piece where
 
 import AppPrelude
 
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
 import Data.Argonaut (Json, decodeJson, (.:))
 import Data.Set (Set)
 

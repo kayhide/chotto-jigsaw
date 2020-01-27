@@ -2,9 +2,9 @@ module App.Drawer.Transform where
 
 import AppPrelude
 
-import App.EaselJS.Matrix2D (Matrix2D)
-import App.EaselJS.Matrix2D as Matrix2D
-import App.EaselJS.Point (Point)
+import App.Pixi.Matrix (Matrix)
+import App.Pixi.Matrix as Matrix
+import App.Pixi.Point (Point)
 
 
 type Transform =
@@ -12,9 +12,8 @@ type Transform =
   , rotation :: Number
   }
 
-toMatrix :: Transform -> Matrix2D
+toMatrix :: Transform -> Matrix
 toMatrix t =
-  Matrix2D.create
-  # Matrix2D.translate t.position.x t.position.y
-  # Matrix2D.rotate t.rotation
-
+  Matrix.create
+  # Matrix.rotate t.rotation
+  # Matrix.translate t.position.x t.position.y

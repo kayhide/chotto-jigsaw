@@ -16,6 +16,7 @@
     "jquery": "^3.4.1",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
+    "pixi.js": "^5.2.0",
     "popper.js": "^1.16.0",
     "purescript": "^0.13.5",
     "purs-loader": "^3.7.1",

@@ -16,7 +16,14 @@ body {
       @extend .bg-#{$bg};
     }
   }
+
+  .focus {
+    filter:
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.8))
+      drop-shadow(0 6px 6px rgba(0, 0, 0, 0.4));
+  }
 }
+
 
 #base-canvas {
   position: absolute;
@@ -28,9 +35,6 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  /* filter: */
-  /*   drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)) */
-  /*   drop-shadow(0 6px 6px rgba(0, 0, 0, 0.4)); */
 
   @extend .no-interaction;
 }

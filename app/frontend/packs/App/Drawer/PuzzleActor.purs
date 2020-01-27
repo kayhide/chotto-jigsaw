@@ -2,21 +2,21 @@ module App.Drawer.PuzzleActor where
 
 import AppPrelude
 
-import App.EaselJS.Container as Container
-import App.EaselJS.Shape as Shape
-import App.EaselJS.Type (Container, Shape)
 import App.Model.Puzzle (Puzzle)
+import App.Pixi.Container as Container
+import App.Pixi.Graphics as Graphics
+import App.Pixi.Type (Container, Graphics)
 
 
 type PuzzleActor =
   { body :: Puzzle
-  , shape :: Shape
+  , shape :: Graphics
   , container :: Container
   }
 
 create :: Puzzle -> Effect PuzzleActor
 create body = do
-  shape <- Shape.create
+  shape <- Graphics.create
   container <- Container.create
   Container.addShape shape container
   pure { body, shape, container }

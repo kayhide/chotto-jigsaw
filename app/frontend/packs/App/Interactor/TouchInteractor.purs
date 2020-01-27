@@ -2,23 +2,24 @@ module App.Interactor.TouchInteractor where
 
 import AppPrelude
 
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
 import App.Hammer (HammerEvent)
 import App.Hammer as Hammer
 import App.Interactor.GameInteractor (GameInteractor)
 import App.Interactor.GameInteractor as GameInteractor
 import App.Logger as Logger
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
 import Effect.Ref as Ref
-import Web.DOM.Element as Element
 import Web.Event.EventTarget (EventTarget)
+import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
 
 
 attach :: GameInteractor -> Effect Unit
 attach gi = do
   Logger.info "attached: TouchInteractor"
 
-  let target = Element.toEventTarget gi.baseStage.canvas
+  let target = HTMLCanvasElement.toEventTarget gi.baseStage.view
+
   hammer <- setupHammer target
   updateListener gi hammer
 
@@ -26,6 +27,9 @@ attach gi = do
     GameInteractor.resume (clientPoint e) gi
     GameInteractor.attempt gi
     updateListener gi hammer
+
+  Hammer.addHammerEventListener "doubletap" hammer \e -> do
+    GameInteractor.fit gi
 
   Hammer.addHammerEventListener "pinchstart" hammer \e -> do
     Logger.info e.type

@@ -1,6 +1,6 @@
-const EaselJS = require("@createjs/easeljs");
+const Pixi = require("pixi.js");
 
-exports.create = () => new EaselJS.Container();
+exports.create = () => new Pixi.Container();
 
 exports.addChild = e => c => () => c.addChild(e);
 exports.addShape = e => c => () => c.addChild(e);

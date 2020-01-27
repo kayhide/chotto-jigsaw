@@ -2,8 +2,8 @@ module App.Model.Puzzle where
 
 import AppPrelude
 
-import App.EaselJS.Rectangle (Rectangle)
-import App.EaselJS.Rectangle as Rectangle
+import App.Pixi.Rectangle (Rectangle)
+import App.Pixi.Rectangle as Rectangle
 import App.Model.Piece (Piece)
 import App.Model.Piece as Piece
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, (.:))

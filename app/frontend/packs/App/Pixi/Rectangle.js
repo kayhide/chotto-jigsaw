@@ -1,14 +1,14 @@
-const EaselJS = require("@createjs/easeljs");
+const Pixi = require("pixi.js");
 
 exports.create = x => y => width => height =>
   Object.assign(
-    new EaselJS.Rectangle(x, y, width, height),
+    new Pixi.Rectangle(x, y, width, height),
     { empty: false }
   );
 
 exports.empty =
   Object.assign(
-    new EaselJS.Rectangle(0.0, 0.0, 0.0, 0.0),
+    new Pixi.Rectangle(0.0, 0.0, 0.0, 0.0),
     { empty: true }
   );
 

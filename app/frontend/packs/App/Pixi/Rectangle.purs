@@ -1,9 +1,9 @@
-module App.EaselJS.Rectangle where
+module App.Pixi.Rectangle where
 
 import AppPrelude
 
-import App.EaselJS.Point (Point)
-import App.EaselJS.Point as Point
+import App.Pixi.Point (Point)
+import App.Pixi.Point as Point
 import Data.Argonaut (Json, decodeJson, (.:))
 import Data.Array as Array
 

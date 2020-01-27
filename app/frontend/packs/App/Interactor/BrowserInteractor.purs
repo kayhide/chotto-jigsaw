@@ -2,16 +2,14 @@ module App.Interactor.BrowserInteractor where
 
 import AppPrelude
 
-import App.EaselJS.Stage as Stage
 import App.Interactor.GameInteractor (GameInteractor)
 import App.Logger as Logger
-import App.Utils as Utils
-import Data.Int as Int
+import App.Pixi.Application as Application
 import Web.Event.Event (EventType(..))
 import Web.Event.EventTarget (addEventListener, eventListener)
 import Web.HTML as HTML
-import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
 import Web.HTML.Window as Window
+
 
 onWindowResize :: GameInteractor -> Effect Unit
 onWindowResize gi = do
@@ -22,15 +20,7 @@ onWindowResize gi = do
     $ "window resized: width: " <> show width <> ", height: " <> show height
 
   [gi.activeStage, gi.baseStage] # traverse_ \stage -> do
-    canvas <- HTMLCanvasElement.fromElement stage.canvas
-              # throwOnNothing "Not Canvas element"
-
-    Utils.setWidth (Int.toNumber width) canvas
-    Utils.setHeight (Int.toNumber height) canvas
-    HTMLCanvasElement.setWidth width canvas
-    HTMLCanvasElement.setHeight height canvas
-
-    Stage.invalidate stage
+    Application.adjustPlacement stage
 
 attach :: GameInteractor -> Effect Unit
 attach gi = do
