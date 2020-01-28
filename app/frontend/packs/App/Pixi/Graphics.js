@@ -7,8 +7,6 @@ exports.create = () => {
   return g;
 };
 
-exports.toDisplayObject = e => e;
-
 exports.clear = g => () => g.clear();
 exports.setLineStyle = style => g => () => g.lineStyle(style);
 exports.closePath = g => () =>  g.closePath();

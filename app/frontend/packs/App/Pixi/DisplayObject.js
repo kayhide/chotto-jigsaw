@@ -1,6 +1,6 @@
 const Pixi = require("pixi.js");
 
-exports.update = attrs => obj => () => {
+exports.update = _ => attrs => obj => () => {
   if (attrs.position) {
     obj.position = attrs.position;
   } else {
@@ -15,36 +15,23 @@ exports.update = attrs => obj => () => {
   }
 };
 
-exports.clearTransform = obj => () =>
-  obj.setTransform();
-
-exports.getMatrix = obj => obj.localTransform;
-
-exports._getParent = obj => obj.parent;
+exports.clearTransform = _ => obj => () => obj.setTransform();
+exports.getMatrix = _ => obj => obj.localTransform;
+exports._getParent = _ => obj => obj.parent;
 
 
-exports.setName = name => obj => () =>
-  obj.name = name;
-
-exports.getName = obj => () => obj.name;
+exports.setName = _ => name => obj => () => obj.name = name;
+exports.getName = _ => obj => () => obj.name;
 
 
-exports.setHitArea = area => obj => () =>
-  obj.hitArea = area;
-
-exports.hitTest = pt => obj => () =>
-  obj.hitTest(pt.x, pt.y);
+exports.setHitArea = _ => area => obj => () => obj.hitArea = area;
+exports.hitTest = _ => pt => obj => () => obj.hitTest(pt.x, pt.y);
 
 
-exports.cache = obj => () => {
-  obj.cacheAsBitmap = true;
-}
+exports.cache = _ => obj => () => obj.cacheAsBitmap = true;
 
-exports.toGlobal = pt => obj => () =>
-  obj.toGlobal(pt);
 
-exports.toLocal = pt => obj => () =>
-  obj.toLocal(pt);
+exports.toGlobal = _ => pt => obj => () => obj.toGlobal(pt);
+exports.toLocal = _ => pt => obj => () => obj.toLocal(pt);
 
-exports.getCanvas = obj => () =>
-  obj.canvas;
+exports.getCanvas = _ => obj => () => obj.canvas;

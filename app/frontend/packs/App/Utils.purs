@@ -5,7 +5,7 @@ import AppPrelude
 import Control.Monad.Error.Class (try)
 import Control.Monad.Loops (untilJust)
 import Data.Array as Array
-import Data.Time.Duration (Milliseconds(..))
+import Data.Time.Duration (Milliseconds)
 import Effect.Aff (Aff, delay)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
 import Web.DOM (DOMTokenList)

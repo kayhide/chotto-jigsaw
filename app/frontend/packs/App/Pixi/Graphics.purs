@@ -5,11 +5,10 @@ import AppPrelude
 import App.Pixi.Point (Point)
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Texture (Texture)
-import App.Pixi.Type (DisplayObject, Graphics)
+import App.Pixi.Type (Graphics)
 
 
 foreign import create :: Effect Graphics
-foreign import toDisplayObject :: Graphics -> DisplayObject
 
 foreign import clear :: Graphics -> Effect Unit
 foreign import setLineStyle :: forall style. style -> Graphics -> Effect Unit

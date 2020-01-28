@@ -12,7 +12,6 @@ import App.Model.Puzzle (Puzzle)
 import Data.Array ((!!))
 import Data.Array as Array
 import Data.Int as Int
-import Data.Newtype (unwrap)
 import Effect.Ref as Ref
 import Web.DOM (Element)
 

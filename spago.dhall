@@ -17,6 +17,7 @@ You can edit this file as you like.
     , "psci-support"
     , "random"
     , "tuples"
+    , "unsafe-coerce"
     , "web-dom"
     , "web-html"
     , "web-uievents"

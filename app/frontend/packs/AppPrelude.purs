@@ -4,6 +4,7 @@ module AppPrelude
        , module Data.Either
        , module Data.Function
        , module Data.Maybe
+       , module Data.Newtype
        , module Data.Traversable
        , module Data.Tuple.Nested
        , module Effect
@@ -19,6 +20,7 @@ import Control.MonadZero (class Plus, empty, guard)
 import Data.Either (Either(..), either, hush, isLeft, isRight, note)
 import Data.Function (on)
 import Data.Maybe (Maybe(..), maybe, isNothing, isJust, fromMaybe)
+import Data.Newtype (unwrap)
 import Data.Traversable (for, for_, traverse_, traverse)
 import Data.Tuple.Nested (type (/\), (/\))
 import Effect (Effect)

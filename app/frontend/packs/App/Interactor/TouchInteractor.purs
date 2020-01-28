@@ -18,7 +18,7 @@ attach :: GameInteractor -> Effect Unit
 attach gi = do
   Logger.info "attached: TouchInteractor"
 
-  let target = HTMLCanvasElement.toEventTarget gi.baseStage.view
+  let target = HTMLCanvasElement.toEventTarget (unwrap gi.baseStage).view
 
   hammer <- setupHammer target
   updateListener gi hammer

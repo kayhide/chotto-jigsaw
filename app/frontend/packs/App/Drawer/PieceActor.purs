@@ -12,7 +12,7 @@ import App.Pixi.Matrix as Matrix
 import App.Pixi.Point as Point
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
-import App.Pixi.Type (Container, DisplayObject, Graphics)
+import App.Pixi.Type (Container, Graphics, SomeDisplayObject, toSomeDisplayObject)
 import Data.Array as Array
 import Data.Set (Set)
 import Data.Set as Set
@@ -34,7 +34,7 @@ type PieceActor =
 create :: Piece -> Effect PieceActor
 create body = do
   shape <- Graphics.create
-  Graphics.toDisplayObject shape # DisplayObject.setName ("piece-" <> show body.id)
+  shape # DisplayObject.setName ("piece-" <> show body.id)
 
   container <- Ref.new Nothing
   transform <- Ref.new { position: Point.zero, rotation: 0.0 }
@@ -50,10 +50,8 @@ create body = do
 isAlive :: PieceActor -> Effect Boolean
 isAlive actor = isNothing <$> Ref.read actor.merger
 
-getFace :: PieceActor -> Effect DisplayObject
-getFace actor =
-  Ref.read actor.container
-  <#> maybe (Graphics.toDisplayObject actor.shape) Container.toDisplayObject
+getFace :: PieceActor -> Effect SomeDisplayObject
+getFace actor = maybe (toSomeDisplayObject actor.shape) toSomeDisplayObject <$> Ref.read actor.container
 
 getShapes :: PieceActor -> Effect (Array Graphics)
 getShapes actor =
@@ -97,11 +95,11 @@ merge mergee merger = do
 
   c <- Ref.read merger.container >>= case _ of
     Nothing -> do
-      let obj = Graphics.toDisplayObject merger.shape
+      let obj = merger.shape
       parent <- DisplayObject.getParent obj # throwOnNothing "No parent"
       c <- Container.create
       Ref.write (pure c) merger.container
-      DisplayObject.copyTransform obj $ Container.toDisplayObject c
+      DisplayObject.copyTransform obj c
       DisplayObject.clearTransform obj
       Container.addShape merger.shape c
       Container.addContainer c parent
@@ -110,5 +108,5 @@ merge mergee merger = do
 
   getShapes mergee
     >>= traverse_ \s -> do
-      DisplayObject.clearTransform $ Graphics.toDisplayObject s
+      DisplayObject.clearTransform s
       Container.addShape s c

@@ -72,8 +72,7 @@ draw actor drawer = do
 
   when drawer.createsHitArea do
     rect <- Ref.read actor.localBoundary
-    DisplayObject.setHitArea rect
-      $ G.toDisplayObject actor.shape
+    DisplayObject.setHitArea rect actor.shape
 
 
 drawCurve :: Loop -> Graphics -> Effect Unit

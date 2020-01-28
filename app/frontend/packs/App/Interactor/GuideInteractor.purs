@@ -23,7 +23,7 @@ setActive :: Boolean -> GameInteractor -> Effect Unit
 setActive b gi = do
   Ref.write b isActive
 
-  let canvas = gi.activeStage.view
+  let canvas = (unwrap gi.activeStage).view
   bool Utils.removeClass Utils.addClass b "shadow" $ HTMLCanvasElement.toElement canvas
 
   let actor = gi.manager.puzzleActor

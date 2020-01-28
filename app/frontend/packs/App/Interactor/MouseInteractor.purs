@@ -21,7 +21,7 @@ attach :: GameInteractor -> Effect Unit
 attach gi = do
   Logger.info "attached: MouseInteractor"
 
-  let target = HTMLCanvasElement.toEventTarget gi.baseStage.view
+  let target = HTMLCanvasElement.toEventTarget (unwrap gi.baseStage).view
 
   addMouseEventListener "mousedown" target $ onMouseDown gi
   addMouseEventListener "mousemove" target $ onMouseMove gi

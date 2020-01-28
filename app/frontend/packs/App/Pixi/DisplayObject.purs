@@ -4,39 +4,39 @@ import AppPrelude
 
 import App.Pixi.Matrix (Matrix)
 import App.Pixi.Point (Point)
-import App.Pixi.Type (Container, DisplayObject)
+import App.Pixi.Type (class DisplayObject, Container)
 import Data.Nullable (Nullable)
 import Data.Nullable as Nullable
 import Web.DOM (Element)
 
 
-foreign import update :: forall attrs. attrs -> DisplayObject -> Effect Unit
-foreign import getMatrix :: DisplayObject -> Matrix
-foreign import _getParent :: DisplayObject -> Nullable Container
+foreign import update :: forall attrs obj. DisplayObject obj => attrs -> obj -> Effect Unit
+foreign import getMatrix :: forall obj. DisplayObject obj => obj -> Matrix
+foreign import _getParent :: forall obj. DisplayObject obj => obj -> Nullable Container
 
-foreign import getName :: DisplayObject -> Effect String
-foreign import setName :: String -> DisplayObject -> Effect Unit
+foreign import getName :: forall obj. DisplayObject obj => obj -> Effect String
+foreign import setName :: forall obj. DisplayObject obj => String -> obj -> Effect Unit
 
-foreign import setHitArea :: forall hitarea. hitarea -> DisplayObject -> Effect Unit
-foreign import hitTest :: Point -> DisplayObject -> Effect Boolean
+foreign import setHitArea :: forall hitarea obj. DisplayObject obj => hitarea -> obj -> Effect Unit
+foreign import hitTest :: forall obj. DisplayObject obj => Point -> obj -> Effect Boolean
 
-foreign import cache :: DisplayObject -> Effect Unit
-foreign import toGlobal :: Point -> DisplayObject -> Effect Point
-foreign import toLocal :: Point -> DisplayObject -> Effect Point
-foreign import getCanvas :: DisplayObject -> Effect Element
+foreign import cache :: forall obj. DisplayObject obj => obj -> Effect Unit
+foreign import toGlobal :: forall obj. DisplayObject obj => Point -> obj -> Effect Point
+foreign import toLocal :: forall obj. DisplayObject obj => Point -> obj -> Effect Point
+foreign import getCanvas :: forall obj. DisplayObject obj => obj -> Effect Element
 
 
-getParent :: DisplayObject -> Maybe Container
+getParent :: forall obj. DisplayObject obj => obj -> Maybe Container
 getParent = Nullable.toMaybe <<< _getParent
 
-copyTransform :: DisplayObject -> DisplayObject -> Effect Unit
+copyTransform :: forall a b. DisplayObject a => DisplayObject b => a -> b -> Effect Unit
 copyTransform src dst = update src dst
 
-foreign import clearTransform :: DisplayObject -> Effect Unit
+foreign import clearTransform :: forall obj. DisplayObject obj => obj -> Effect Unit
 
 
-toGlobalFrom :: DisplayObject -> Point -> Effect Point
+toGlobalFrom :: forall obj. DisplayObject obj => obj -> Point -> Effect Point
 toGlobalFrom obj pt = toGlobal pt obj
 
-fromGlobalTo :: DisplayObject -> Point -> Effect Point
+fromGlobalTo :: forall obj. DisplayObject obj => obj -> Point -> Effect Point
 fromGlobalTo obj pt = toLocal pt obj
