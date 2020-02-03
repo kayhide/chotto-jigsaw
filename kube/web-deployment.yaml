@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chotto-jigsaw-web-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chotto-jigsaw-web
+    spec:
+      containers:
+      - name: chotto-jigsaw-web
+        image: chotto-jigsaw-web:latest
+        ports:
+        - containerPort: 5000

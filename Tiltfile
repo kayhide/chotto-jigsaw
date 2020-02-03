@@ -1,0 +1,10 @@
+k8s_yaml("./kube/db-deployment.yaml")
+k8s_yaml("./kube/db-service.yaml")
+k8s_yaml("./kube/firestore-deployment.yaml")
+k8s_yaml("./kube/firestore-service.yaml")
+k8s_yaml("./kube/redis-deployment.yaml")
+k8s_yaml("./kube/redis-service.yaml")
+k8s_yaml("./kube/web-deployment.yaml")
+k8s_yaml("./kube/web-service.yaml")
+
+docker_build("chotto-jigsaw-web", ".", dockerfile="Dockerfile.web")
