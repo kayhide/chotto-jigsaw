@@ -1,16 +1,109 @@
 version: '3.2'
 services:
+  app: &app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+      args:
+        RUBY_VERSION: "2.6.5"
+        PG_MAJOR: "11"
+        NODE_MAJOR: "13"
+        YARN_VERSION: "1.19.2"
+        BUNDLER_VERSION: "2.0.2"
+    image: chotto-jigsaw-app
+
+  backend: &backend
+    <<: *app
+    stdin_open: true
+    tty: true
+    volumes:
+      - app:/app
+      - bundle:/bundle
+    environment:
+      BOOTSNAP_CACHE_DIR: /bundle/bootsnap
+      DB_HOST: db
+      EDITOR: vim
+      HISTFILE: /app/log/.bash_history
+      NODE_ENV: development
+      PSQL_HISTFILE: /app/log/.psql_history
+      RAILS_ENV: ${RAILS_ENV:-development}
+      REDIS_HOST: redis
+      WEBPACKER_DEV_SERVER_HOST: webpacker
+      WEB_CONCURRENCY: 1
+      FIREBASE_CONFIG: ${FIREBASE_CONFIG}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      SEED_USERS: ${SEED_USERS}
+    depends_on:
+      - db
+      - redis
+
+  runner:
+    <<: *backend
+    command: /bin/bash
+    ports:
+      - 3000:3000
+      - 3002:3002
+
+  web:
+    <<: *backend
+    command: rails server -b 0.0.0.0
+    ports:
+      - 3000:3000
+
+  worker:
+    <<: *backend
+    command: sidekiq -C config/sidekiq.yml
+
+  livereload:
+    <<: *backend
+    command: guard --no-interactions --plugin LiveReload
+    ports:
+      - 35729:35729
+
   db:
-    image: postgres:10.5-alpine
+    image: postgres:11.6-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      PSQL_HISTFILE: /root/log/.psql_history
     ports:
       - 5432
 
   redis:
     image: redis:5.0-alpine
+    volumes:
+      - redis:/data
     ports:
       - 6379
 
-  firestore:
-    image: firestore-emulator:latest
+  # firestore:
+  #   image: firestore-emulator:latest
+  #   ports:
+  #     - 8080
+
+  webpacker:
+    <<: *app
+    command: webpack-dev-server
     ports:
-      - 8080
+      - 3035:3035
+    volumes:
+      - app:/app
+      - bundle:/bundle
+    environment:
+      FIREBASE_CONFIG: ${FIREBASE_CONFIG}
+      NODE_ENV: ${NODE_ENV:-development}
+      RAILS_ENV: ${RAILS_ENV:-development}
+      WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
+
+  mutagen:
+    image: alpine:latest
+    container_name: chotto-jigsaw-mutagen
+    command: "tail -f /dev/null"
+    volumes:
+      - app:/app
+
+volumes:
+  app:
+  bundle:
+  postgres:
+  redis:
