@@ -1,0 +1,47 @@
+beforeCreate:
+  - docker-compose up -d mutagen
+
+# afterCreate:
+#   - docker-compose up -d web
+
+afterTerminate:
+  - docker-compose rm --stop --force mutagen
+
+commands:
+  clean: docker-compose down --rmi=all --volumes
+#   database: docker-compose exec database psql -U postgres -d messagesdb
+#   logs: docker-compose logs --follow
+
+# forward:
+#   api:
+#     source: "tcp:localhost:8081"
+#     destination: "docker://web-go-mutagen:tcp:api:8081"
+#   web:
+#     source: "tcp:localhost:8080"
+#     destination: "docker://web-go-mutagen:tcp:web:8080"
+
+sync:
+  defaults:
+    flushOnCreate: true
+    ignore:
+      vcs: true
+  code:
+    alpha: "."
+    beta: "docker://chotto-jigsaw-mutagen/app"
+    mode: "two-way-resolved"
+    ignore:
+      paths:
+        - "/*"
+        - "!/{README.md}"
+        - "!/{Gemfile,Gemfile.lock,Guardfile,Rakefile,config.ru}"
+        - "!/{.firebaserc,firebase.json}"
+        - "!/{.browserslistrc,.stylelintrc,babel.config.js,postcss.config.js}"
+        - "!/app/"
+        - "!/bin/"
+        - "!/config/"
+        - "!/db/"
+        - "!/lib/"
+        - "!/public/"
+        - "!/spec/"
+        - "!/test/"
+        - "!/vendor/"

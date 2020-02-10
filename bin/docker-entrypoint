@@ -1,0 +1,7 @@
+#! /bin/bash
+
+cp /etc/hosts /etc/hosts_
+sed -i 's/::1\tlocalhost/::1 /' /etc/hosts_
+cp -f /etc/hosts_ /etc/hosts
+
+exec "$@"

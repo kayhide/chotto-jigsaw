@@ -49,5 +49,10 @@ module ChottoJigsaw
 
     config.i18n.available_locales = [:en, :ja]
     config.i18n.default_locale = :en
+
+
+    unless Rails.env.production?
+      config.web_console.whitelisted_ips = "172.31.0.1"
+    end
   end
 end

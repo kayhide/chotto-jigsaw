@@ -1,13 +1,6 @@
-# Spago
-.spago
+# Mutagen
+mutagen.yml.lock
 
-
-# ReasonML
-
-*.bs.js
-.merlin
-.bsb.lock
-/lib/bs/
 
 # See https://help.github.com/articles/ignoring-files for more about ignoring files.
 #
@@ -40,6 +33,8 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+
 ### https://raw.github.com/github/gitignore/c0c1a480a906df0e023f3250cf2ad82f1612be67/Global/macOS.gitignore
 
 *.DS_Store
@@ -69,10 +64,11 @@ Temporary Items
 .apdisk
 
 
-### https://raw.github.com/github/gitignore/c0c1a480a906df0e023f3250cf2ad82f1612be67/PureScript.gitignore
+### https://raw.github.com/github/gitignore/7ab549fcae8269fdd4004065470176f829d88200/PureScript.gitignore
 
 # Dependencies
 .psci_modules
+.spago
 bower_components
 node_modules
 
