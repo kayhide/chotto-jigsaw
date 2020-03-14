@@ -15,7 +15,7 @@ module FireRecord
 
     def self.credentials
       @credentials ||=
-        if ENV.key?("GOOGLE_APPLICATION_CREDENTIALS")
+        if ENV.key?("GOOGLE_APPLICATION_CREDENTIALS") && ENV["GOOGLE_APPLICATION_CREDENTIALS"].present?
           creds = ENV["GOOGLE_APPLICATION_CREDENTIALS"]
           if File.exist?(creds)
             open(creds, &JSON.method(:load))

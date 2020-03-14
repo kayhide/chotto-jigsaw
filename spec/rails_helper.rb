@@ -45,4 +45,12 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
   # config.filter_rails_from_backtrace!
+
+
+  require 'timeout'
+  config.around :each do |example|
+    Timeout.timeout(10) do
+      example.run
+    end
+  end
 end

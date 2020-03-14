@@ -31,6 +31,7 @@ services:
       WEBPACKER_DEV_SERVER_HOST: webpacker
       WEB_CONCURRENCY: 1
       FIREBASE_CONFIG: ${FIREBASE_CONFIG}
+      FIRESTORE_HOST: firestore
       GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
       SEED_USERS: ${SEED_USERS}
     depends_on:
@@ -76,10 +77,10 @@ services:
     ports:
       - 6379
 
-  # firestore:
-  #   image: firestore-emulator:latest
-  #   ports:
-  #     - 8080
+  firestore:
+    image: kayhide/firestore-emulator:latest
+    ports:
+      - 8080
 
   webpacker:
     <<: *app

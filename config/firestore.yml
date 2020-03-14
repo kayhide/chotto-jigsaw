@@ -1,6 +1,6 @@
 emulator: &emulator
-  emulator_host: localhost
-  emulator_port: <%= ENV['FIRESTORE_PORT'] %>
+  emulator_host: <%= ENV.fetch('FIRESTORE_HOST') { "localhost" } %>
+  emulator_port: <%= ENV.fetch('FIRESTORE_PORT') { "8080" } %>
 
 development:
   # <<: *emulator

@@ -52,7 +52,9 @@ module ChottoJigsaw
 
 
     unless Rails.env.production?
-      config.web_console.whitelisted_ips = "172.31.0.1"
+      if config.respond_to? :web_console
+        config.web_console.whitelisted_ips = "172.31.0.0/16"
+      end
     end
   end
 end
