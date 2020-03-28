@@ -17,7 +17,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - app:/app
+      - .:/app:cached
       - bundle:/bundle
     environment:
       BOOTSNAP_CACHE_DIR: /bundle/bootsnap
@@ -88,7 +88,7 @@ services:
     ports:
       - 3035:3035
     volumes:
-      - app:/app
+      - .:/app:cached
       - bundle:/bundle
     environment:
       FIREBASE_CONFIG: ${FIREBASE_CONFIG}
@@ -96,15 +96,7 @@ services:
       RAILS_ENV: ${RAILS_ENV:-development}
       WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
 
-  mutagen:
-    image: alpine:latest
-    container_name: chotto-jigsaw-mutagen
-    command: "tail -f /dev/null"
-    volumes:
-      - app:/app
-
 volumes:
-  app:
   bundle:
   postgres:
   redis:

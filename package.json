@@ -18,9 +18,7 @@
     "lodash": "^4.17.15",
     "pixi.js": "^5.2.0",
     "popper.js": "^1.16.0",
-    "purescript": "^0.13.5",
     "purs-loader": "^3.7.1",
-    "spago": "^0.13.0",
     "xhr2": "^0.2.0"
   },
   "version": "0.1.0",
@@ -34,8 +32,8 @@
     "webpack-dev-server": "^3.8.2"
   },
   "scripts": {
-    "postinstall": "$(yarn bin)/spago install",
-    "lint": "$(yarn bin)/stylelint 'app/frontend/**/*.scss'",
-    "deps": "$(yarn bin)/madge app/frontend/packs/playboard/App.bs.js --basedir app/frontend/packs/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg"
+    "postinstall": "spago install",
+    "lint": "stylelint 'app/frontend/**/*.scss'",
+    "deps": "madge app/frontend/packs/playboard/App.bs.js --basedir app/frontend/packs/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg"
   }
 }

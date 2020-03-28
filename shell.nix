@@ -2,10 +2,14 @@ with import <nixpkgs> {};
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    docker
-    gnumake
     hivemind
-    nodejs-13_x
+    libiconv
+    nodejs
+    postgresql_12
+    purescript
+    ruby_2_6
+    spago
     yarn
+    zlib
   ];
 }

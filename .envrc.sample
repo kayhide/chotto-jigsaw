@@ -1,0 +1,18 @@
+use nix
+layout node
+layout ruby
+PATH_add bin
+
+
+while read -r f; do
+  watch_file "$f"
+  source_env "$f"
+done < <(find .env -type f)
+
+
+export BINDING=0.0.0.0
+export SEED_USERS="username:password<username@chotto-jigsaw.com>"
+
+export GOOGLE_APPLICATION_CREDENTIALS="$(cat path/to/gcp/firebase-adminsdk-xxxxx-xxxxxxxxxx.json)"
+export FIREBASE_CONFIG="$(cat path/to/gcp/firebase-config.json)"
+

@@ -32,6 +32,8 @@ RUN apt-get update -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
+RUN yarn global add purescript spago
+
 ENV LANG=C.UTF-8 \
   GEM_HOME=/bundle \
   BUNDLE_JOBS=4 \
