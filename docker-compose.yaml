@@ -82,9 +82,9 @@ services:
     ports:
       - 8080
 
-  webpacker:
+  frontend-dev:
     <<: *app
-    command: webpack-dev-server
+    command: "yarn dev"
     ports:
       - 3035:3035
     volumes:

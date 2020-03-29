@@ -20,7 +20,6 @@ gem 'sidekiq'
 gem 'sidekiq-history'
 gem 'sidekiq-limit_fetch'
 gem 'slim-rails'
-gem 'webpacker', '~> 4.0'
 
 # rack-2.1.1 has problem with sidekiq web
 # https://github.com/rack/rack/pull/1428
