@@ -49,7 +49,7 @@ RSpec.configure do |config|
 
   require 'timeout'
   config.around :each do |example|
-    Timeout.timeout(10) do
+    Timeout.timeout(60) do
       example.run
     end
   end
