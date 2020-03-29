@@ -2,18 +2,22 @@ module FireRecord
   module Scope
     extend ActiveSupport::Concern
 
-    def save!
+    def save! batch = nil
       presave
       doc = id.present? ? scope.doc(id) : scope.doc
-      doc.set attributes.except(self.class.primary_key)
+      if batch
+        batch.set doc, attributes.except(self.class.primary_key)
+      else
+        doc.set attributes.except(self.class.primary_key)
+      end
       self.id = doc.document_id
       self.instance_variable_set "@doc", doc
       self
     end
 
-    def update! attrs
+    def update! attrs, batch = nil
       self.attributes = attrs
-      save!
+      save! batch
     end
 
     def new_record?
@@ -41,6 +45,12 @@ module FireRecord
     end
 
     module ClassMethods
+      def batch
+        ::FireRecord.client.batch do |b|
+          yield b
+        end
+      end
+
       def scope
         klass = ancestors
                   .take_while { |m| m != FireRecord::Document }
@@ -53,8 +63,8 @@ module FireRecord
         new(attrs)
       end
 
-      def create! attrs = {}
-        build(attrs).save!
+      def create! attrs = {}, batch = nil
+        build(attrs).save! batch
       end
 
       def find id
@@ -63,14 +73,20 @@ module FireRecord
         decode doc
       end
 
+      def count
+        scope.get.count
+      end
+
       def all
         scope.get.map(&method(:decode))
       end
 
       def delete_all
-        ::FireRecord.client.batch do |b|
-          scope.get do |doc|
-            b.delete(doc.document_path)
+        while scope.limit(1).get.count == 1
+          ::FireRecord.client.batch do |b|
+            scope.limit(200).get do |doc|
+              b.delete(doc.document_path)
+            end
           end
         end
       end

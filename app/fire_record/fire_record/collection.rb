@@ -10,7 +10,6 @@ module FireRecord
       def has_many_docs name
         define_method name do
           klass = name.to_s.classify.constantize
-          doc_path = [klass.model_name.plural, send(klass.primary_key)].join('/')
           ::FireRecord::CollectionProxy.new(klass, name, self)
         end
       end
