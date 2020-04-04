@@ -4,7 +4,7 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	docker-compose up -d web worker livereload webpacker
+	docker-compose up -d web worker livereload frontend-dev
 .PHONY: dev
 
 guard:
