@@ -2,7 +2,7 @@
 Welcome to a Spago project!
 You can edit this file as you like.
 -}
-{ name = "my-project"
+{ name = "chotto-jigsaw"
 , dependencies =
     [ "aff"
     , "affjax"
@@ -23,5 +23,5 @@ You can edit this file as you like.
     , "web-uievents"
     ]
 , packages = ./packages.dhall
-, sources = [ "app/frontend/packs/**/*.purs", "test/frontend/**/*.purs" ]
+, sources = [ "frontend/src/**/*.purs", "test/frontend/**/*.purs" ]
 }

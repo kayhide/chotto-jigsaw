@@ -7,8 +7,8 @@ const path = require('path');
 const isDevServer = process.argv.some(a => path.basename(a) === "webpack-dev-server");
 const isWatch = process.argv.some(a => a === "--watch");
 
-const context = path.resolve(__dirname, "app/frontend/packs");
-const targets = glob.sync("app/frontend/packs/*.js");
+const context = path.resolve(__dirname, "frontend/src");
+const targets = glob.sync("frontend/src/*.js");
 const entry = targets.reduce((entry, target) => {
   const bundle = path.relative(context, target);
   const ext = path.extname(target);
@@ -17,7 +17,7 @@ const entry = targets.reduce((entry, target) => {
   });
 }, {});
 
-const publicPath = "/packs/";
+const publicPath = "/dist/";
 
 
 const config = require("./config/webpack/config");
@@ -27,10 +27,10 @@ module.exports = {
   context,
   entry,
   output: {
-    filename: `js/[name]-${isDevServer ? "dev" : "[hash]"}.js`,
-    chunkFilename: `js/[name]-${isDevServer ? "dev" : "[hash]"}.chunk.js`,
-    hotUpdateChunkFilename: `js/[id]-${isDevServer ? "dev" : "[hash]"}.hot-update.js`,
-    path: path.resolve(__dirname, "public/packs"),
+    filename: `js/[name]${isDevServer ? "" : "-[hash]"}.js`,
+    chunkFilename: `js/[name]${isDevServer ? "" : "-[hash]"}.chunk.js`,
+    hotUpdateChunkFilename: `js/[id]${isDevServer ? "" : "-[hash]"}.hot-update.js`,
+    path: path.resolve(__dirname, "public/dist"),
     publicPath
   },
   resolve: {
@@ -60,8 +60,9 @@ module.exports = {
       JSON.parse(JSON.stringify(process.env)),
     ),
     new MiniCssExtractPlugin({
-      filename: `css/[name]-${isDevServer ? "dev" : "[contenthash:8]"}.css`,
-      chunkFilename: `css/[name]-${isDevServer ? "dev" : "[contenthash:8]"}.chunk.css`,
+      filename: `css/[name]${isDevServer ? "" : "-[contenthash:8]"}.css`,
+      chunkFilename: `css/[name]${isDevServer ? "" : "-[contenthash:8]"}.chunk.css`,
+      publicPath,
       ignoreOrder: false
     }),
     new ManifestPlugin({

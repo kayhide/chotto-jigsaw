@@ -17,15 +17,19 @@
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
     "mini-css-extract-plugin": "^0.9.0",
-    "node-sass": "^4.13.1",
+    "node-sass": "^4.14.0",
     "pixi.js": "^5.2.0",
     "popper.js": "^1.16.0",
+    "postcss": "^7.0.27",
     "postcss-flexbugs-fixes": "^4.2.0",
     "postcss-import": "^12.0.1",
     "postcss-loader": "^3.0.0",
+    "postcss-partial-import": "^4.1.0",
     "postcss-preset-env": "^6.7.0",
+    "precss": "^4.0.0",
     "purs-loader": "^3.7.1",
     "sass-loader": "^8.0.2",
+    "style-loader": "^1.2.1",
     "url-loader": "^4.0.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
@@ -45,9 +49,10 @@
   "scripts": {
     "postinstall": "spago install",
     "build": "webpack --progress",
+    "clean": "rm -rf node_modules output .spago public/dist/*",
     "dev": "webpack-dev-server",
-    "lint": "stylelint 'app/frontend/**/*.scss'",
-    "deps": "madge app/frontend/packs/playboard/App.bs.js --basedir app/frontend/packs/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg",
+    "lint": "stylelint 'frontend/**/*.css'",
+    "deps": "madge frontend/src/playboard/App.bs.js --basedir frontend/src/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg",
     "heroku-prebuild": "bin/install-purescript /app/.yarn/bin"
   }
 }
