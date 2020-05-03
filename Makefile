@@ -9,7 +9,8 @@ dev:
 .PHONY: dev
 
 guard:
-	docker-compose run --rm runner guard --plugin RSpec
+	docker-compose up -d firestore
+	docker-compose run --rm runner bash -c "cd rails; guard --plugin RSpec"
 .PHONY: guard
 
 setup:

@@ -1,10 +1,15 @@
-class ApiController < ApplicationController
+class ApiController < ActionController::API
+  include Authenticator
+
   rescue_from ApiError, with: :handle_api_error
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :handle_unprocessable_entity
   rescue_from ActiveRecord::InvalidForeignKey, with: :handle_invalid_foreign_key
   rescue_from ActionController::ParameterMissing, with: :handle_unprocessable_entity
   rescue_from ActionController::InvalidAuthenticityToken, with: :handle_invalid_authenticity_token
+  rescue_from Api::WrongEmailPassword, with: :handle_api_error
+  rescue_from Api::BadToken, with: :handle_api_error
+  rescue_from Api::NoToken, with: :handle_api_error
 
   def handle_api_error e
     render json: { error_message: e.message }, status: e.status

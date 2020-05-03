@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resource :login, only: [:show, :create, :destroy]
 
   namespace :api do
+    resource :auth, only: [:show, :create], controller: :auth
     resources :games, only: [:show, :update]
     resources :puzzles, only: [:show]
   end
