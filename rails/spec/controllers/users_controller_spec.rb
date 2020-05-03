@@ -6,7 +6,8 @@ RSpec.describe UsersController, type: :controller do
   let(:valid_attributes) {
     {
       username: "User 1",
-      email: "user-1@chotto-zigsaw.test"
+      email: "user-1@chotto-jigsaw.test",
+      password: "password-1"
     }
   }
 
@@ -18,7 +19,7 @@ RSpec.describe UsersController, type: :controller do
 
   describe "GET #index" do
     it "returns a success response" do
-      User.create! valid_attributes
+      create_list :user, 2
       get :index, params: {}
       expect(response).to be_successful
     end
@@ -26,7 +27,7 @@ RSpec.describe UsersController, type: :controller do
 
   describe "GET #show" do
     it "returns a success response" do
-      user = User.create! valid_attributes
+      user = create :user
       get :show, params: { id: user.id }
     end
   end
@@ -40,7 +41,7 @@ RSpec.describe UsersController, type: :controller do
 
   describe "GET #edit" do
     it "returns a success response" do
-      user = User.create! valid_attributes
+      user = create :user
       get :edit, params: { id: user.id }
       expect(response).to be_successful
     end

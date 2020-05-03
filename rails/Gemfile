@@ -5,6 +5,7 @@ ruby '2.6.5'
 
 gem 'rails', '~> 6.0.0'
 
+gem 'bcrypt', '~> 3.1.7'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'google-cloud-firestore'
 gem 'image_processing', '~> 1.2'
@@ -25,7 +26,6 @@ gem 'slim-rails'
 # https://github.com/rack/rack/pull/1428
 gem 'rack', '~> 2.1.4'
 
-# gem 'bcrypt', '~> 3.1.7'
 
 group :development, :test do
   gem 'factory_bot_rails'
