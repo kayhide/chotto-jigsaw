@@ -1,8 +1,13 @@
 class User < ApplicationRecord
+  has_secure_password
   has_many :puzzles
   validates :username, presence: true
   validates :email, presence: true
   has_many_attached :pictures
+
+  def attributes
+    super.except("password_digest")
+  end
 
   def guest?
     false

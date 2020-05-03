@@ -18,7 +18,7 @@ class SetupJob < ApplicationJob
     cutter.nx = Math.sqrt(count * aspect_ratio).floor
     cutter.ny = Math.sqrt(count / aspect_ratio).floor
 
-    Tempfile.open("chotto-zigsaw-") do |f|
+    Tempfile.open("chotto-jigsaw-") do |f|
       Marshal.dump(cutter.cut, f)
       f.close
       puzzle.content.attach(
