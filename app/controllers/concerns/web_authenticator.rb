@@ -1,4 +1,4 @@
-module Authenticator
+module WebAuthenticator
   extend ActiveSupport::Concern
 
   def authenticate!
