@@ -15,6 +15,9 @@ setup:
 	docker-compose run --rm -e "SEED_USERS=${SEED_USERS}" runner setup
 .PHONY: setup
 
+down:
+	docker-compose down
+.PHONY: down
 
 provision:
 	${COMPOSE_COMMAND} up -d db redis
