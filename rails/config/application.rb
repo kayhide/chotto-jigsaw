@@ -50,6 +50,9 @@ module ChottoJigsaw
     config.i18n.available_locales = [:en, :ja]
     config.i18n.default_locale = :en
 
+    if (frontend_host = ENV["RAILS_HOST"])
+      config.hosts << frontend_host
+    end
 
     unless Rails.env.production?
       if config.respond_to? :web_console

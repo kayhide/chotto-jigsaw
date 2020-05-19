@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eu
+
+cd /app/rails
+
+bundle install
+
+export DISABLE_SPRING=1
+
+if ! bundle exec rails runner "ActiveRecord::Base.connection"; then
+    bundle exec rails db:reset
+fi
+
+bundle exec rails db:migrate
+
+exec bundle exec rails server --binding 0.0.0.0

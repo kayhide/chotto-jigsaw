@@ -27,6 +27,7 @@ services:
       NODE_ENV: development
       PSQL_HISTFILE: /app/log/.psql_history
       RAILS_ENV: ${RAILS_ENV:-development}
+      RAILS_HOST: rails
       REDIS_HOST: redis
       WEBPACKER_DEV_SERVER_HOST: webpacker
       WEB_CONCURRENCY: 1
@@ -41,25 +42,34 @@ services:
   runner:
     <<: *backend
     command: /bin/bash
-    ports:
-      - 3000:3000
-      - 3002:3002
 
-  web:
+  rails:
     <<: *backend
-    command: rails server -b 0.0.0.0
+    command: start-rails
     ports:
-      - 3000:3000
+      - 3000
 
   worker:
     <<: *backend
     command: sidekiq -C config/sidekiq.yml
+    working_dir: /app/rails
 
   livereload:
     <<: *backend
     command: guard --no-interactions --plugin LiveReload
+    working_dir: /app/rails
     ports:
       - 35729:35729
+
+  entrance-dev:
+    image: nginx:stable-alpine
+    volumes:
+      - ./entrance/proxy-dev.conf:/etc/nginx/conf.d/proxy.conf:ro
+    ports:
+      - "${APP_HTTP_PORT:-3000}:3000"
+    depends_on:
+      - rails
+      - frontend-dev
 
   db:
     image: postgres:12.1-alpine
@@ -84,9 +94,10 @@ services:
 
   frontend-dev:
     <<: *app
-    command: "yarn dev"
+    command: "yarn dev --public localhost:${APP_HTTP_PORT:-3000}"
+    working_dir: /app/frontend
     ports:
-      - 3035:3035
+      - 8080
     volumes:
       - .:/app:cached
       - bundle:/bundle
