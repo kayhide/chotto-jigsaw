@@ -23,5 +23,5 @@ You can edit this file as you like.
     , "web-uievents"
     ]
 , packages = ./packages.dhall
-, sources = [ "frontend/src/**/*.purs" ]
+, sources = [ "src/**/*.purs", "test/**/*.purs" ]
 }

@@ -7,8 +7,8 @@ const path = require('path');
 const isDevServer = process.argv.some(a => path.basename(a) === "webpack-dev-server");
 const isWatch = process.argv.some(a => a === "--watch");
 
-const context = path.resolve(__dirname, "frontend/src");
-const targets = glob.sync("frontend/src/*.js");
+const context = path.resolve(__dirname, "src");
+const targets = glob.sync("src/*.js");
 const entry = targets.reduce((entry, target) => {
   const bundle = path.relative(context, target);
   const ext = path.extname(target);
@@ -20,9 +20,6 @@ const entry = targets.reduce((entry, target) => {
 const publicPath = "/dist/";
 
 
-const config = require("./config/webpack/config");
-config.injectEnv("firestore");
-
 module.exports = {
   context,
   entry,
@@ -30,7 +27,7 @@ module.exports = {
     filename: `js/[name]${isDevServer ? "" : "-[hash]"}.js`,
     chunkFilename: `js/[name]${isDevServer ? "" : "-[hash]"}.chunk.js`,
     hotUpdateChunkFilename: `js/[id]${isDevServer ? "" : "-[hash]"}.hot-update.js`,
-    path: path.resolve(__dirname, "public/dist"),
+    path: path.resolve(__dirname, "dist"),
     publicPath
   },
   resolve: {
@@ -139,10 +136,7 @@ module.exports = {
 
   devServer: {
     host: "0.0.0.0",
-    port: "3035",
-    proxy: {
-      "/": "http://web:3000",
-    },
+    port: "8080",
     disableHostCheck: true,
     hot: true,
     headers: {

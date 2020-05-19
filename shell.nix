@@ -2,14 +2,18 @@ with import ./. {};
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    hivemind
-    libiconv
+    docker-compose
+    gnumake
+
     nodejs
-    postgresql_12
-    purescript
-    ruby_2_6
-    spago
     yarn
+    purescript
+    spago
+
+    libiconv
     zlib
+    ruby_2_6
+
+    postgresql_12
   ];
 }

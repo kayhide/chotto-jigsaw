@@ -4,7 +4,8 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	docker-compose up -d web worker livereload frontend-dev
+	docker-compose up -d entrance-dev worker livereload
+	@$$($(MAKE) --no-print-directory envs)
 .PHONY: dev
 
 guard:
