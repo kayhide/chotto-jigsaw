@@ -44,7 +44,7 @@ onMouseUp gi e = do
 onWheel :: GameInteractor -> WheelEvent -> Effect Unit
 onWheel gi e = do
   GameInteractor.resume (clientPoint $ WheelEvent.toMouseEvent e) gi
-  GameInteractor.spinPointer (negate $ WheelEvent.deltaY e) gi
+  GameInteractor.spinPointer (negate $ WheelEvent.deltaY e * 0.3) gi
   GameInteractor.zoomPointer (bool identity recip (0.0 < WheelEvent.deltaY e) 1.02) gi
   GameInteractor.pause gi
 
