@@ -1,0 +1,3 @@
+frontend=https://github.com/heroku/heroku-buildpack-nodejs.git#v171
+rails=https://github.com/heroku/heroku-buildpack-ruby#v215
+https://github.com/heroku/heroku-buildpack-ruby#v215

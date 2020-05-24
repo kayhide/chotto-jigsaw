@@ -53,6 +53,6 @@
     "dev": "webpack-dev-server",
     "lint": "stylelint 'frontend/**/*.css'",
     "deps": "madge frontend/src/playboard/App.bs.js --basedir frontend/src/playboard --layout neato --image tmp/deps.svg && open tmp/deps.svg",
-    "heroku-prebuild": "bin/install-purescript /app/.yarn/bin"
+    "heroku-prebuild": "../bin/install-purescript /app/.yarn/bin"
   }
 }
