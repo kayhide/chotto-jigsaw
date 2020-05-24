@@ -7,7 +7,7 @@ module WebpackBundleHelper
   end
 
   def javascript_bundle_tag(entry, **options)
-    path = asset_bundle_path("#{entry}.js")
+    path = asset_bundle_path("#{entry}")
 
     options = {
       src: path,
@@ -24,7 +24,7 @@ module WebpackBundleHelper
   end
 
   def stylesheet_bundle_tag(entry, **options)
-    path = asset_bundle_path("#{entry}.css")
+    path = asset_bundle_path("#{entry}")
 
     options = {
       href: path
@@ -41,9 +41,12 @@ module WebpackBundleHelper
 
   private
 
-  MANIFEST_PATH = 'public/dist/manifest.json'.freeze
+  MANIFEST_PATH = Rails.root.join('public/dist/manifest.json')
 
   def manifest
+    p JSON.parse(File.read(MANIFEST_PATH))
     @manifest ||= JSON.parse(File.read(MANIFEST_PATH))
+    puts @manifest
+    @manifest
   end
 end
