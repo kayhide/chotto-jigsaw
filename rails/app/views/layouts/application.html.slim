@@ -5,6 +5,7 @@ html
     = csrf_meta_tags
     = csp_meta_tag
     meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    meta name="BASE_URL" content="http://localhost:3000"
 
     = stylesheet_link_tag 'https://fonts.googleapis.com/icon?family=Material+Icons'
     = stylesheet_bundle_tag 'application.css', media: 'all'
@@ -12,16 +13,4 @@ html
 
   body
     == render 'layouts/background_picture', picture: @picture
-    nav.navbar.navbar-expand-md.fixed-top
-      a.navbar-brand href="/" Chotto Jigsaw
-      button.navbar-toggler.collapsed type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
-        span.navbar-toggler-icon
-      div.navbar-collapse.collapse id="navbarCollapse" style=""
-        - if current_user.guest?
-          == render 'layouts/public_menu'
-        - else
-          == render 'layouts/menu'
-    .container.rounded
-      == yield
-    .fixed-bottom
-      == render 'layouts/messages'
+    #app

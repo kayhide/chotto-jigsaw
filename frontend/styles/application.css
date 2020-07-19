@@ -1,0 +1,185 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+button {
+  @apply outline-none;
+
+  &:focus {
+    @apply outline-none shadow-outline;
+  }
+}
+
+.primary-button {
+  @apply transition duration-200;
+  @apply bg-blue-500 border border-blue-700 rounded outline-none px-4 py-2;
+  @apply text-white;
+
+  &:hover, &:focus {
+    @apply bg-blue-700;
+  }
+  &:focus {
+    @apply outline-none shadow-outline;
+  }
+  &.disabled, &[disabled] {
+    @apply opacity-50 pointer-events-none;
+  }
+}
+
+.secondary-button {
+  @apply transition duration-200;
+  @apply bg-gray-700 border border-gray-700 rounded outline-none px-4 py-2;
+  @apply text-gray-700 bg-opacity-0;
+
+  &:hover, &:active, &:focus {
+    @apply text-white bg-opacity-100;
+  }
+  &:focus {
+    @apply outline-none shadow-outline;
+  }
+  &.disabled, &[disabled] {
+    @apply opacity-50 pointer-events-none;
+  }
+}
+
+.list-group {
+  .list-group-item {
+    @apply border-b p-3;
+    &:first {
+      @apply border-t;
+    }
+  }
+}
+
+.dropdown {
+  .dropdown-children {
+    @apply invisible opacity-0 transition-visibility duration-200;
+
+    &.active {
+      @apply visible opacity-100;
+    }
+  }
+}
+
+
+body {
+  @apply min-h-screen;
+}
+
+#app {
+  nav {
+    @apply bg-white bg-opacity-25;
+    backdrop-filter: blur(5px);
+    @apply fixed w-full flex items-center justify-between flex-wrap px-6 py-3;
+
+    a, button {
+      @apply relative inline-block px-2 transition duration-200;
+      @apply text-gray-600;
+
+      &::before {
+        content: "";
+        @apply absolute inset-x-0 bottom-0 border-b mx-auto;
+        @apply w-0 transition-width duration-200;
+        @apply border-gray-600;
+      }
+
+      &:hover {
+        @apply text-gray-900;
+
+        &::before {
+          @apply w-full;
+        }
+      }
+
+      &.active {
+        @apply text-gray-900;
+      }
+    }
+  }
+
+  form {
+    & > h2 {
+      @apply mb-2;
+    }
+
+    label {
+      @apply block text-gray-700 text-sm font-bold mb-2;
+    }
+
+    input, textarea, button {
+      @apply transition duration-200;
+    }
+
+    input, textarea {
+      @apply shadow appearance-none border rounded w-full px-3 py-2 text-gray-700 leading-tight;
+    }
+
+    &.submitting {
+      input, textarea, button {
+        @apply opacity-50;
+      }
+    }
+  }
+
+  .hall {
+    @apply grid gap-5 h-full p-5;
+  }
+  .pillar {
+    @apply bg-gray-200 h-full rounded p-5 overflow-y-scroll;
+  }
+
+  .absent .attribute-value {
+    @apply text-gray-500;
+  }
+
+  .loadable-button {
+    span, i {
+      @apply transition duration-200;
+    }
+
+    i {
+      @apply opacity-0;
+    }
+
+    &.loading {
+      span {
+        @apply opacity-0;
+      }
+
+      i {
+        @apply opacity-100;
+      }
+    }
+  }
+
+
+}
+
+.background-picture {
+  @apply fixed pointer-events-none select-none;
+  @apply inset-0;
+  height: 110vh;
+  width: 110%;
+  z-index: -1;
+
+  .bg-image {
+    @apply absolute w-full h-full;
+    @apply pointer-events-none select-none;
+    @apply bg-scroll bg-bottom bg-no-repeat bg-cover;
+    background-image: url(/images/private-holiday-beach.jpg);
+
+    & + .bg-image {
+      @apply transition duration-1000;
+      @apply opacity-0;
+
+      &.loaded {
+        @apply opacity-100;
+      }
+    }
+  }
+}
+
+.glassy {
+  @apply bg-transparent shadow;
+  backdrop-filter: blur(5px);
+}
