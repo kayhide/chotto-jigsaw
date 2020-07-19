@@ -3,7 +3,7 @@ module App.Drawer.PuzzleDrawer where
 import AppPrelude
 
 import App.Drawer.PuzzleActor (PuzzleActor)
-import App.Model.Puzzle (Puzzle(..))
+import App.Data.Puzzle (Puzzle(..))
 import App.Pixi.Graphics as G
 import App.Pixi.Point as Point
 import App.Pixi.Rectangle as Rectangle

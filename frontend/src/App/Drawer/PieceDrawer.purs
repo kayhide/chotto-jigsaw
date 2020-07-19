@@ -3,7 +3,7 @@ module App.Drawer.PieceDrawer where
 import AppPrelude
 
 import App.Drawer.PieceActor (PieceActor)
-import App.Model.Piece (Loop)
+import App.Data.Piece (Loop)
 import App.Pixi.DisplayObject as DisplayObject
 import App.Pixi.Graphics as G
 import App.Pixi.Point (Point)

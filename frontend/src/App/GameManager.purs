@@ -7,8 +7,8 @@ import App.Drawer.PieceActor as PieceActor
 import App.Drawer.PuzzleActor (PuzzleActor)
 import App.Drawer.PuzzleActor as PuzzleActor
 import App.Drawer.PuzzleDrawer as PuzzleDrawer
-import App.Model.Game (GameId)
-import App.Model.Puzzle (Puzzle)
+import App.Data.Game (GameId)
+import App.Data.Puzzle (Puzzle)
 import Data.Array ((!!))
 import Data.Array as Array
 import Data.Int as Int

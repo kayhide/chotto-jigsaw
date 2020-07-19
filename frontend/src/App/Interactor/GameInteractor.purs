@@ -11,7 +11,7 @@ import App.Drawer.Transform as Transform
 import App.GameManager (GameManager)
 import App.GameManager as GameManager
 import App.Logger as Logger
-import App.Model.Puzzle (Puzzle(..))
+import App.Data.Puzzle (Puzzle(..))
 import App.Pixi.Application as Application
 import App.Pixi.Container as Container
 import App.Pixi.DisplayObject as DisplayObject

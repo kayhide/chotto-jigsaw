@@ -5,8 +5,8 @@ import AppPrelude
 import Affjax as AX
 import Affjax.RequestBody as RequestBody
 import Affjax.ResponseFormat as ResponseFormat
-import App.Model.Game (Game, GameId(..))
-import App.Model.Puzzle (Puzzle, PuzzleId(..))
+import App.Data.Game (Game, GameId(..))
+import App.Data.Puzzle (Puzzle, PuzzleId(..))
 import Data.Argonaut (class EncodeJson, decodeJson, encodeJson, (:=), (~>))
 import Data.Bifunctor (lmap)
 import Data.Nullable (Nullable)

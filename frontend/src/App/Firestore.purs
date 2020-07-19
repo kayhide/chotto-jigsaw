@@ -3,7 +3,7 @@ module App.Firestore where
 import AppPrelude
 
 import App.Command.Command (Command)
-import App.Model.Game (GameId)
+import App.Data.Game (GameId)
 import Data.Argonaut (Json, decodeJson, encodeJson)
 import Data.Newtype (class Newtype)
 
