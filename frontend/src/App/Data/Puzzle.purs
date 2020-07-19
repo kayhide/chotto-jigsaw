@@ -1,11 +1,11 @@
-module App.Model.Puzzle where
+module App.Data.Puzzle where
 
 import AppPrelude
 
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
-import App.Model.Piece (Piece)
-import App.Model.Piece as Piece
+import App.Data.Piece (Piece)
+import App.Data.Piece as Piece
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, (.:))
 import Data.Array as Array
 import Data.Newtype (class Newtype)

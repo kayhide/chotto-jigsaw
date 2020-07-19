@@ -1,4 +1,4 @@
-module App.Model.Piece where
+module App.Data.Piece where
 
 import AppPrelude
 

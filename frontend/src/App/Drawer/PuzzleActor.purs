@@ -2,7 +2,7 @@ module App.Drawer.PuzzleActor where
 
 import AppPrelude
 
-import App.Model.Puzzle (Puzzle)
+import App.Data.Puzzle (Puzzle)
 import App.Pixi.Container as Container
 import App.Pixi.Graphics as Graphics
 import App.Pixi.Type (Container, Graphics)

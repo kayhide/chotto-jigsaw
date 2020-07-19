@@ -17,8 +17,8 @@ import App.Interactor.GuideInteractor as GuideInteractor
 import App.Interactor.MouseInteractor as MouseInteractor
 import App.Interactor.TouchInteractor as TouchInteractor
 import App.Logger as Logger
-import App.Model.Game (Game(..), GameId(..))
-import App.Model.Puzzle (Puzzle, PuzzleId(..))
+import App.Data.Game (Game(..), GameId(..))
+import App.Data.Puzzle (Puzzle, PuzzleId(..))
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
 import App.Pixi.Ticker as Ticker

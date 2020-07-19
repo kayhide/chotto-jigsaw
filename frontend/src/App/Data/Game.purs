@@ -1,4 +1,4 @@
-module App.Model.Game where
+module App.Data.Game where
 
 import AppPrelude
 

@@ -3,8 +3,8 @@ module App.Drawer.PieceActor where
 import AppPrelude
 
 import App.Drawer.Transform (Transform)
-import App.Model.Piece (Piece)
-import App.Model.Piece as Piece
+import App.Data.Piece (Piece)
+import App.Data.Piece as Piece
 import App.Pixi.Container as Container
 import App.Pixi.DisplayObject as DisplayObject
 import App.Pixi.Graphics as Graphics
