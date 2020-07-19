@@ -21,6 +21,7 @@ services:
       - bundle:/bundle
     environment:
       BOOTSNAP_CACHE_DIR: /bundle/bootsnap
+      BASE_URL: ${BASE_URL}
       DB_HOST: db
       EDITOR: vim
       HISTFILE: /app/log/.bash_history
@@ -102,6 +103,7 @@ services:
       - .:/app:cached
       - bundle:/bundle
     environment:
+      BASE_URL: ${BASE_URL}
       FIREBASE_CONFIG: ${FIREBASE_CONFIG}
       NODE_ENV: ${NODE_ENV:-development}
       RAILS_ENV: ${RAILS_ENV:-development}
