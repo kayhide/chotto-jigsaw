@@ -1,6 +1,7 @@
 module.exports = {
   plugins: [
     require('postcss-import'),
+    require('precss'),
     require('postcss-flexbugs-fixes'),
     require('postcss-preset-env')({
       autoprefixer: {
@@ -8,6 +9,7 @@ module.exports = {
       },
       stage: 3
     }),
+    require('tailwindcss'),
     require('autoprefixer'),
   ]
 }
