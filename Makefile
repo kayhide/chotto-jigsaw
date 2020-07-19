@@ -4,7 +4,7 @@ COMPOSE_COMMAND := docker-compose
 
 
 dev:
-	docker-compose up -d entrance-dev worker livereload
+	docker-compose up -d entrance-dev worker livereload firestore
 	@$$($(MAKE) --no-print-directory envs)
 .PHONY: dev
 
@@ -34,9 +34,11 @@ unprovision:
 
 envs: DB_PORT := $(shell docker-compose port db 5432 | cut -d ':' -f 2)
 envs: REDIS_PORT := $(shell docker-compose port redis 6379 | cut -d ':' -f 2)
+envs: FIRESTORE_PORT := $(shell docker-compose port firestore 8080 | cut -d ':' -f 2)
 envs:
 	@mkdir -p .env
 	@rm -f .env/ports
 	@echo "export DB_PORT=${DB_PORT}" >> .env/ports
 	@echo "export REDIS_PORT=${REDIS_PORT}" >> .env/ports
+	@echo "export FIRESTORE_PORT=${FIRESTORE_PORT}" >> .env/ports
 .PHONY: envs

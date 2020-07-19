@@ -1,6 +1,7 @@
 class Puzzle < ApplicationRecord
   belongs_to :user
   has_many :games, dependent: :destroy
+  has_one :puzzle_picture_attachment, foreign_key: :record_id
   has_one_attached :picture, dependent: false
   has_one_attached :content
 
