@@ -1,4 +1,5 @@
 const EnvironmentPlugin = require("webpack").EnvironmentPlugin;
+const HtmlPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const glob = require('glob');
@@ -17,7 +18,7 @@ const entry = targets.reduce((entry, target) => {
   });
 }, {});
 
-const publicPath = "/dist/";
+const publicPath = "/";
 
 
 module.exports = {
@@ -60,6 +61,15 @@ module.exports = {
       chunkFilename: `css/[name]${isDevServer ? "" : "-[contenthash:8]"}.chunk.css`,
       publicPath,
       ignoreOrder: false
+    }),
+    new HtmlPlugin({
+      filename: 'index.html',
+      template: `./index.html`,
+      // favicon: './static/favicon.ico',
+      meta: {
+        BASE_URL: process.env.BASE_URL,
+      },
+      chunks: ["application"],
     }),
     new ManifestPlugin({
       fileName: "manifest.json",
