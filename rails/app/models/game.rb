@@ -17,6 +17,9 @@ class Game < ApplicationRecord
   end
 
   def attributes
-    super.merge("is_ready" => ready?)
+    super.merge(
+      "picture_id" => puzzle.puzzle_picture_attachment.blob_id,
+      "is_ready" => ready?
+    )
   end
 end
