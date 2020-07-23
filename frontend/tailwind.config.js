@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "trivial": colors.cyan,
+        "trivial": colors.blue,
         "easy": colors.green,
         "normal": colors.yellow,
         "hard": colors.red,
@@ -15,6 +15,9 @@ module.exports = {
       transitionProperty: {
         width: "width",
         visibility: "visibility, opacity",
+      },
+      spacing: {
+        full: "100%",
       },
     },
   },
