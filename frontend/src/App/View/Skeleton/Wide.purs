@@ -34,7 +34,7 @@ render props = do
     , children:
       [ header
       , R.div
-        { className: "flex-grow w-full overflow-y-hidden"
+        { className: "flex-grow w-full"
         , children:
           [ R.div
             { className: "w-4/5 mx-auto"

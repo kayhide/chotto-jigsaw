@@ -70,7 +70,7 @@ body {
   nav {
     @apply bg-white bg-opacity-25;
     backdrop-filter: blur(5px);
-    @apply fixed w-full flex items-center justify-between flex-wrap px-6 py-3;
+    @apply fixed w-full flex items-center justify-between flex-wrap px-6 py-3 z-20;
 
     a, button {
       @apply relative inline-block px-2 transition duration-200;
