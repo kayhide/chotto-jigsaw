@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     resource :auth, only: [:show, :create], controller: :auth
+    resources :pictures, only: [:index, :show, :create, :update, :destroy]
     resources :games, only: [:index, :show, :create, :update, :destroy]
     resources :puzzles, only: [:show]
   end
