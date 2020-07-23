@@ -166,7 +166,7 @@ body {
     @apply absolute w-full h-full;
     @apply pointer-events-none select-none;
     @apply bg-scroll bg-bottom bg-no-repeat bg-cover;
-    background-image: url(/images/private-holiday-beach.jpg);
+    background-image: url(../images/private-holiday-beach.jpg);
 
     & + .bg-image {
       @apply transition duration-1000;
