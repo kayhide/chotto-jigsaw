@@ -2,7 +2,7 @@ class Api::PicturesController < ApiController
   before_action :set_picture_attachment, only: [:destroy]
 
   def index
-    @pictures = current_user.pictures_blobs.order(id: :desc)
+    @pictures = Picture.includes(user_attachment: :user).order(id: :desc)
     render json: @pictures.each_with_object(Picture).map(&:becomes).map(&method(:index_attributes))
   end
 
