@@ -22,7 +22,9 @@ derive newtype instance decodeJsonPictureId :: DecodeJson PictureId
 newtype Picture =
   Picture
   { id :: PictureId
-  , name :: String
+  , filename :: String
+  , url :: String
+  , thumbnail_url :: String
   , created_at :: DateTime
   }
 
@@ -43,3 +45,15 @@ instance decodeJsonPicture :: DecodeJson Picture where
     pure $ wrap
       <<< Record.modify (SProxy :: _ "created_at") (const createdAt)
       $ obj
+
+
+newtype CreatingPicture =
+  CreatingPicture
+  {
+  }
+
+derive instance newtypeCreatingPicture :: Newtype CreatingPicture _
+derive newtype instance eqCreatingPicture :: Eq CreatingPicture
+derive newtype instance showCreatingPicture :: Show CreatingPicture
+derive newtype instance encodeJsonCreatingPicture :: EncodeJson CreatingPicture
+derive newtype instance decodeJsonCreatingPicture :: DecodeJson CreatingPicture
