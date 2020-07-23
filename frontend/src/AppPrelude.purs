@@ -4,6 +4,7 @@ module AppPrelude
        , module Control.Monad.Reader
        , module Control.MonadZero
        , module Data.Bifunctor
+       , module Data.Const
        , module Data.Either
        , module Data.Function
        , module Data.Lens
@@ -30,22 +31,22 @@ import Control.Alt ((<|>))
 import Control.Monad.Reader (class MonadAsk)
 import Control.MonadZero (class Plus, empty, guard)
 import Data.Bifunctor (bimap, lmap, rmap)
+import Data.Const (Const(..))
 import Data.Either (Either(..), either, hush, isLeft, isRight, note)
 import Data.Function (on)
 import Data.Lens ((%~), (.~), (^.), (^..), (^?))
 import Data.Maybe (Maybe(..), maybe, isNothing, isJust, fromMaybe)
-import Data.Newtype (wrap, unwrap)
+import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Symbol (SProxy(..))
 import Data.Traversable (for, for_, traverse_, traverse)
 import Data.Tuple (curry, uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
 import Debug.Trace (traceM)
 import Effect (Effect)
-import Effect.Aff (Milliseconds(..), delay)
+import Effect.Aff (Aff, Milliseconds(..), attempt, delay)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (throw)
-
 
 bool :: forall a. a -> a -> Boolean -> a
 bool x y b = if b then y else x
