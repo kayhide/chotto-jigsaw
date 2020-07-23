@@ -2,15 +2,17 @@ module App.Data.Puzzle where
 
 import AppPrelude
 
+import App.Data.DateTime (decodeDateTime, encodeDateTime)
 import App.Data.Piece (Piece)
-import App.Data.Piece as Piece
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
-import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, (.:))
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
 import Data.Array as Array
+import Data.DateTime (DateTime)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Newtype (class Newtype)
+import Record as Record
 
 
 newtype PuzzleId = PuzzleId Int
@@ -26,26 +28,43 @@ newtype Puzzle =
   Puzzle
   { id :: PuzzleId
   , pieces :: Array Piece
-  , piecesCount :: Number
-  , linearMeasure :: Number
+  , pieces_count :: Number
+  , linear_measure :: Number
   , difficulty :: Difficulty
   , boundary :: Rectangle
+  , picture_url :: String
+  , picture_thumbnail_url :: String
+  , created_at :: DateTime
+  , updated_at :: DateTime
   }
 
 derive instance newtypePuzzle :: Newtype Puzzle _
+derive newtype instance eqPuzzle :: Eq Puzzle
+derive newtype instance showPuzzle :: Show Puzzle
 
+instance encodeJsonPuzzle :: EncodeJson Puzzle where
+  encodeJson x =
+    encodeJson
+    <<< Record.modify (SProxy :: _ "created_at") encodeDateTime
+    <<< Record.modify (SProxy :: _ "updated_at") encodeDateTime
+    $ unwrap x
+
+-- TODO Load pieces into a separate data type
 instance decodeJsonPuzzle :: DecodeJson Puzzle where
   decodeJson json = do
     obj <- decodeJson json
-    id <- decodeJson =<< obj .: "id"
-    pieces <- traverse Piece.decode =<< obj .: "pieces"
-    piecesCount <- decodeJson =<< obj .: "pieces_count"
-    linearMeasure <- obj .: "linear_measure"
-    difficulty <- decodeJson =<< obj .: "difficulty"
+    let pieces = []
     let boundary =
           Array.foldr Rectangle.addPoint Rectangle.empty
           <<< Array.catMaybes <<< Array.concat <<< Array.concat $ _.loops <$> pieces
-    pure $ Puzzle { id, pieces, piecesCount, linearMeasure, difficulty, boundary }
+    createdAt <- decodeDateTime obj.created_at
+    updatedAt <- decodeDateTime obj.updated_at
+    pure $ wrap
+      <<< Record.modify (SProxy :: _ "created_at") (const createdAt)
+      <<< Record.modify (SProxy :: _ "updated_at") (const updatedAt)
+      <<< Record.insert (SProxy :: _ "pieces") pieces
+      <<< Record.insert (SProxy :: _ "boundary") boundary
+      $ obj
 
 
 

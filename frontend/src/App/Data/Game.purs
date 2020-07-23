@@ -2,9 +2,11 @@ module App.Data.Game where
 
 import AppPrelude
 
-import App.Data (class Creating, class Updating)
+import App.Data (class Updating)
 import App.Data.DateTime (decodeDateTime, encodeDateTime)
-import App.Data.Picture (PictureId(..))
+import App.Data.Picture (PictureId)
+import App.Data.Puzzle (Puzzle, PuzzleId)
+import App.Data.Puzzle as Puzzle
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
 import Data.DateTime (DateTime)
 import Data.Lens (lens)
@@ -26,6 +28,8 @@ newtype Game =
   Game
   { id :: GameId
   , picture_id :: PictureId
+  , puzzle_id :: PuzzleId
+  , puzzle :: Puzzle
   , is_ready :: Boolean
   , progress :: Number
   , created_at :: DateTime
@@ -56,7 +60,7 @@ instance decodeJsonGame :: DecodeJson Game where
 
 newtype CreatingGame =
   CreatingGame
-  { picture_id :: PictureId
+  { difficulty :: Puzzle.Difficulty
   }
 
 derive instance newtypeCreatingGame :: Newtype CreatingGame _
@@ -64,18 +68,6 @@ derive newtype instance eqCreatingGame :: Eq CreatingGame
 derive newtype instance showCreatingGame :: Show CreatingGame
 derive newtype instance encodeJsonCreatingGame :: EncodeJson CreatingGame
 derive newtype instance decodeJsonCreatingGame :: DecodeJson CreatingGame
-
-instance creatingGame :: Creating Game CreatingGame where
-  _Creating = lens get set
-    where
-      get :: Game -> CreatingGame
-      get (Game { picture_id }) =
-        CreatingGame { picture_id }
-
-      set :: Game -> CreatingGame -> Game
-      set (Game game) (CreatingGame { picture_id }) =
-        Game $ game { picture_id = picture_id }
-
 
 
 newtype UpdatingGame =

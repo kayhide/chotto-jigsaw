@@ -24,7 +24,6 @@ import App.Pixi.Texture as Texture
 import App.Pixi.Type (class DisplayObject, Application, Container)
 import Data.Array as Array
 import Data.Int as Int
-import Debug.Trace (traceM)
 import Effect.Random (randomRange)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
@@ -52,7 +51,7 @@ create manager baseCanvas activeCanvas = do
   activeStage <- Application.create activeCanvas
   activeLayer <- Container.create
   let Puzzle puzzle = manager.puzzleActor.body
-  let translationTolerance = puzzle.linearMeasure / 4.0
+  let translationTolerance = puzzle.linear_measure / 4.0
   let rotationTolerance = Math.pi / 8.0
   dragger <- Ref.new emptyDragger
   shapeToPiece <-
@@ -78,7 +77,7 @@ create manager baseCanvas activeCanvas = do
 contain :: Rectangle -> GameInteractor -> Effect Unit
 contain rect gi = do
   let Puzzle puzzle = gi.manager.puzzleActor.body
-  let margin = puzzle.linearMeasure
+  let margin = puzzle.linear_measure
   let rect' = Rectangle.inflate margin rect
 
   window <- HTML.window
