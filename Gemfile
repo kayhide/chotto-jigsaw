@@ -23,7 +23,7 @@ gem 'slim-rails'
 
 # rack-2.1.1 has problem with sidekiq web
 # https://github.com/rack/rack/pull/1428
-gem 'rack', '~> 2.0.0'
+gem 'rack', '~> 2.1.4'
 
 # gem 'bcrypt', '~> 3.1.7'
 
