@@ -3,6 +3,8 @@ class User < ApplicationRecord
   has_many :puzzles
   validates :username, presence: true
   validates :email, presence: true
+
+  has_many :user_pictures_attachments, foreign_key: :record_id
   has_many_attached :pictures
 
   def attributes
