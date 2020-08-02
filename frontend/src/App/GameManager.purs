@@ -16,22 +16,20 @@ import Effect.Ref as Ref
 import Web.DOM (Element)
 
 type GameManager =
-  { id :: Maybe GameId
-  , isStandalone :: Boolean
+  { gameId :: GameId
   , picture :: Element
   , puzzleActor :: PuzzleActor
   , pieceActors :: Array PieceActor
   }
 
-create :: Maybe GameId -> Puzzle -> Element -> Effect GameManager
-create id puzzle picture = do
+create :: GameId -> Puzzle -> Element -> Effect GameManager
+create gameId puzzle picture = do
   puzzleActor <- PuzzleActor.create puzzle
   pieceActors <- traverse PieceActor.create (unwrap puzzle).pieces
   PuzzleDrawer.draw puzzleActor { drawsGuide: false }
 
   pure
-    { id
-    , isStandalone: isNothing id
+    { gameId
     , picture
     , puzzleActor
     , pieceActors

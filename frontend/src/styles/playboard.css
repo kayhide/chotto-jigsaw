@@ -1,0 +1,73 @@
+@import "./playboard-backgrounds";
+
+#playboard {
+  @apply absolute inset-0;
+
+  /* .focus { */
+  /*   filter: */
+  /*     drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)) */
+  /*     drop-shadow(0 6px 6px rgba(0, 0, 0, 0.4)); */
+  /* } */
+
+  #base-canvas {
+    @apply absolute left-0 top-0;
+  }
+
+  #active-canvas {
+    @apply absolute left-0 top-0;
+    @apply pointer-events-none select-none;
+  }
+
+  #game-progress {
+    @apply absolute inset-x-0 bottom-0;
+    @apply mx-4 mb-4;
+    @apply h-2 rounded;
+    @apply opacity-75;
+    @apply pointer-events-none select-none;
+
+    .progress-bar.loading {
+      @apply w-full;
+      /* @extend .progress-bar-striped; */
+      /* @extend .progress-bar-animated; */
+    }
+  }
+
+  #info {
+    @apply absolute bottom-0;
+    @apply ml-4 mb-6;
+    @apply pointer-events-none select-none;
+
+    p {
+      @apply m-0;
+    }
+  }
+
+  #log {
+    @apply absolute bottom-0;
+    @apply max-w-full overflow-y-auto;
+    @apply ml-4 mb-24 p-4;
+    @apply bg-black bg-opacity-25;
+    @apply border border-gray-300;
+    @apply text-white font-mono text-sm;
+    @apply pointer-events-none select-none;
+    @apply transform transition duration-200;
+
+    p {
+      @apply m-0;
+      @apply hidden;
+
+      &:nth-last-child(-n + 20) {
+        @apply block;
+      }
+    }
+  }
+
+  #log-button {
+    @apply absolute bottom-0;
+    @apply ml-4 mb-20;
+    @apply w-4;
+    @apply transform transition duration-200;
+    @apply text-white;
+    @apply appearance-none outline-none shadow-none;
+  }
+}

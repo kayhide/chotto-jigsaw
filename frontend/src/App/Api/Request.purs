@@ -8,6 +8,7 @@ module App.Api.Request
   , writeToken
   , removeToken
   , makeAuthRequest
+  , makeAuthRequest'
   ) where
 
 import AppPrelude
@@ -217,7 +218,18 @@ makeAuthRequest ::
   Row.Nub opts' RequestOptionsRow =>
   { | opts } -> m (Maybe Json)
 makeAuthRequest opts = do
+  res <- makeAuthRequest' opts
+  pure $ _.body <$> res
+
+makeAuthRequest' ::
+  forall m opts opts' r.
+  MonadAff m =>
+  MonadAsk { baseUrl :: BaseUrl | r } m =>
+  Row.Union opts RequestOptionsRowOptional opts' =>
+  Row.Nub opts' RequestOptionsRow =>
+  { | opts } -> m (Maybe (Response Json))
+makeAuthRequest' opts = do
   { baseUrl } <- ask
   token <- liftEffect readToken
-  response <- liftAff $ request $ defaultRequest baseUrl token opts
-  pure $ _.body <$> hush response
+  res <- liftAff $ request $ defaultRequest baseUrl token opts
+  pure $ hush res

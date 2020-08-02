@@ -6,9 +6,10 @@ import App.Api.Request (readToken, removeToken, verifyToken, writeToken)
 import App.Data.Route (routeCodec)
 import App.Data.Route as Route
 import App.Env (Env)
+import App.View.Page.GamePage as GamePage
 import App.View.Page.GamesPage as GamesPage
-import App.View.Page.PicturesPage as PicturesPage
 import App.View.Page.LoginPage as LoginPage
+import App.View.Page.PicturesPage as PicturesPage
 import App.View.Utils (navigate)
 import React.Basic.Hooks (ReactComponent, component, element, useEffect, useState)
 import React.Basic.Hooks as React
@@ -21,6 +22,7 @@ make :: Env -> Effect (ReactComponent {})
 make env = do
   loginPage <- LoginPage.make env
   gamesPage <- GamesPage.make env
+  gamePage <- GamePage.make env
   picturesPage <- PicturesPage.make env
 
   component "Router" \ _ -> React.do
@@ -64,6 +66,9 @@ make env = do
         mempty # authorize
       Route.Games ->
         element gamesPage { context }
+        # authorize
+      Route.Game gameId ->
+        element gamePage { context, gameId }
         # authorize
       Route.Pictures ->
         element picturesPage { context }
