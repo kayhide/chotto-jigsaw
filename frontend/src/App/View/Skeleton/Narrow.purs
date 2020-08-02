@@ -2,9 +2,10 @@ module App.View.Skeleton.Narrow where
 
 import AppPrelude
 
+import App.View.Atom.BackgroundPicture as BackgroundPicture
 import Prim.Row as Row
 import React.Basic.DOM as R
-import React.Basic.Hooks (JSX)
+import React.Basic.Hooks (JSX, fragment)
 import React.Basic.Hooks as React
 import Record as Record
 
@@ -29,19 +30,22 @@ render ::
 render props = do
   let def = { header: mempty, footer: mempty } :: { | PropsRowOptional }
   let { alpha, header, footer } = Record.merge props def :: Props
-  R.div
-    { className: "flex flex-col w-screen h-screen"
-    , children:
-      [ header
-      , R.div
-        { className: "flex-grow w-full"
-        , children:
-          [ R.div
-            { className: "w-1/3 mx-auto"
-            , children: pure $ alpha
-            }
-          ]
-        }
-      , footer
-      ]
-    }
+  fragment
+    [ BackgroundPicture.render ""
+    , R.div
+      { className: "flex flex-col w-screen h-screen"
+      , children:
+        [ header
+        , R.div
+          { className: "flex-grow w-full"
+          , children:
+            [ R.div
+              { className: "w-full mx-auto max-w-md"
+              , children: pure $ alpha
+              }
+            ]
+          }
+        , footer
+        ]
+      }
+    ]
