@@ -7,6 +7,7 @@ import App.Context (Context)
 import App.Data.Profile (Profile)
 import App.Env (Env)
 import App.View.Atom.LoadableButton as LoadableButton
+import App.View.Skeleton.Narrow as Narrow
 import Data.String as String
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture, preventDefault, stopPropagation, targetValue)
@@ -58,18 +59,15 @@ make env = do
           Right x -> props.onLogin x
 
 
-    pure $ fragment
-      [ R.div
-        { className: ""
-        , children:
+    pure $ Narrow.render
+        { alpha: fragment
           [ maybe mempty renderMessage state.errorMessage
           , R.div
-            { className: "w-full max-w-md mt-24 mx-auto"
+            { className: "mt-24"
             , children: pure $ element form { state, dispatch }
             }
           ]
         }
-      ]
 
   where
     renderMessage :: String -> JSX
