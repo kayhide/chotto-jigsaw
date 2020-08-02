@@ -5,6 +5,8 @@ import AppPrelude
 import App.Api.Client as Api
 import App.Command.Command as Command
 import App.Command.CommandManager as CommandManager
+import App.Data.Game (Game(..), GameId(..))
+import App.Data.Puzzle (Puzzle, PuzzleId(..))
 import App.Drawer.PieceActor as PieceActor
 import App.Firestore (FirebaseToken(..))
 import App.Firestore as Firestore
@@ -17,8 +19,6 @@ import App.Interactor.GuideInteractor as GuideInteractor
 import App.Interactor.MouseInteractor as MouseInteractor
 import App.Interactor.TouchInteractor as TouchInteractor
 import App.Logger as Logger
-import App.Data.Game (Game(..), GameId(..))
-import App.Data.Puzzle (Puzzle, PuzzleId(..))
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
 import App.Pixi.Ticker as Ticker
@@ -26,12 +26,8 @@ import App.Utils as Utils
 import Data.Argonaut (jsonParser)
 import Data.Array as Array
 import Data.Int as Int
-import Data.String (Pattern(..))
-import Data.String as String
 import Data.Time.Duration (Milliseconds(..))
-import Debug.Trace (traceM)
-import Effect.Aff (Aff, error, launchAff_, parallel, sequential, throwError)
-import Effect.Class (liftEffect)
+import Effect.Aff (Aff, error, launchAff_, throwError)
 import Effect.Class.Console (log)
 import Effect.Ref as Ref
 import Web.DOM (Element)
@@ -40,8 +36,6 @@ import Web.DOM.Element as Element
 import Web.DOM.Node as Node
 import Web.DOM.NodeList as NodeList
 import Web.DOM.ParentNode (QuerySelector(..), querySelector, querySelectorAll)
-import Web.Event.Event (EventType(..))
-import Web.Event.EventTarget (addEventListener, eventListener)
 import Web.HTML (HTMLCanvasElement)
 import Web.HTML as HTML
 import Web.HTML.HTMLCanvasElement as HTMLCanvasElement
@@ -56,15 +50,13 @@ type App =
   , picture :: Element
   , sounds :: Element
   , log :: Element
-  , gameId :: Maybe GameId
-  , puzzleId :: PuzzleId
-  , pictureUrl :: String
+  , game :: Game
   , initialView :: Maybe Rectangle
-  , firebaseToken :: Maybe FirebaseToken
+  , firebaseToken :: FirebaseToken
   }
 
-init :: Effect Unit
-init = do
+init :: Game -> FirebaseToken -> Effect Unit
+init game firebaseToken = do
   Logger.append(log)
 
   doc <- Window.document =<< HTML.window
@@ -81,18 +73,9 @@ init = do
   sounds <- query "#sounds"
   log <- query "#log"
 
-  gameId <- do
-    dataset "game-id" playboard >>= traverse \x -> do
-      GameId <$> Int.fromString x # throwOnNothing "Bad game id"
-  puzzleId <- do
-    x <- dataset' "puzzle-id" playboard
-    PuzzleId <$> Int.fromString x # throwOnNothing "Bad puzzle id"
-  pictureUrl <- dataset' "picture" playboard
   initialView <- do
     dataset "initial-view" playboard >>= traverse \x -> do
       jsonParser x >>= Rectangle.decode # throwOnLeft
-
-  firebaseToken <- map FirebaseToken <$> dataset "firebase-token" playboard
 
   play { playboard
        , baseCanvas
@@ -100,9 +83,7 @@ init = do
        , picture
        , sounds
        , log
-       , gameId
-       , puzzleId
-       , pictureUrl
+       , game
        , initialView
        , firebaseToken
        }
@@ -118,13 +99,13 @@ play :: App -> Effect Unit
 play app = do
   setupLogger app
 
+  let puzzle = app.game # unwrap # _.puzzle
+  let pictureUrl = puzzle # unwrap # _.picture_url
+
   launchAff_ do
-    { image, puzzle } <- sequential $
-      { image: _, puzzle: _ }
-      <$> parallel (Utils.loadImage app.pictureUrl)
-      <*> parallel (loadPuzzle app)
+    image <- Utils.loadImage pictureUrl
     gi <- liftEffect do
-      game <- GameManager.create app.gameId puzzle image
+      game <- GameManager.create (app.game # unwrap # _.id) puzzle image
       CommandManager.register game
       setupUi game app
 
@@ -140,21 +121,22 @@ play app = do
       Utils.fadeOutSlow app.picture
       pure gi
 
-    maybe updateStandaloneGame (updateOnlineGame app.firebaseToken) app.gameId gi
+    -- maybe updateStandaloneGame (updateOnlineGame app.firebaseToken) app.gameId gi
+    updateOnlineGame app.firebaseToken (app.game # unwrap # _.id) gi
 
     liftEffect do
-      Utils.fadeOutSlow =<< query "#game-progress .loading"
+      -- Utils.fadeOutSlow =<< query "#game-progress .loading"
       GameInteractor.fit gi
       setupSound app
 
     pure unit
 
 
-loadPuzzle :: App -> Aff Puzzle
-loadPuzzle app = do
-  Logger.info $ "puzzle id: " <> show app.puzzleId
-  Utils.retryOnFailAfter (Milliseconds 5000.0) do
-    Api.getPuzzle app.puzzleId
+-- loadPuzzle :: App -> Aff Puzzle
+-- loadPuzzle app = do
+--   Logger.info $ "puzzle id: " <> show app.puzzleId
+--   Utils.retryOnFailAfter (Milliseconds 5000.0) do
+--     Api.getPuzzle app.puzzleId
 
 
 updateStandaloneGame :: GameInteractor -> Aff Unit
@@ -162,12 +144,11 @@ updateStandaloneGame gi = liftEffect do
   Logger.info $ "standalone: " <> show true
   GameInteractor.shuffle gi
 
-updateOnlineGame :: Maybe FirebaseToken -> GameId -> GameInteractor -> Aff Unit
+updateOnlineGame :: FirebaseToken -> GameId -> GameInteractor -> Aff Unit
 updateOnlineGame token gameId gi = do
   Logger.info $ "game id: " <> show gameId
   liftEffect $ do
-    token' <- token # throwOnNothing "firebase token is missing"
-    firestore <- Firestore.connect token' gameId
+    firestore <- Firestore.connect token gameId
     firestore # Firestore.onCommandAdd \cmd -> do
       actor <- GameManager.findPieceActor gi.manager (Command.pieceId cmd)
       alive <- PieceActor.isAlive actor
@@ -211,34 +192,34 @@ setupUi manager app = do
   Utils.fadeInSlow app.activeCanvas
   Utils.fadeInSlow app.baseCanvas
 
-  query "#log-button" >>= \btn -> do
-    listener <- eventListener \e -> do
-      Utils.fadeToggle app.log
-      Utils.toggleClass "rotate-180" btn
-    addEventListener (EventType "click") listener false (Element.toEventTarget btn)
+  -- query "#log-button" >>= \btn -> do
+  --   listener <- eventListener \e -> do
+  --     Utils.fadeToggle app.log
+  --     Utils.toggleClass "rotate-180" btn
+  --   addEventListener (EventType "click") listener false (Element.toEventTarget btn)
 
-  Utils.isFullscreenAvailable >>= if _
-    then
-    query "[data-action=fullscreen]"
-    >>= \btn -> do
-      listener <- eventListener \_ -> do
-        Utils.toggleFullscreen app.playboard
-      addEventListener (EventType "click") listener false (Element.toEventTarget btn)
-    else
-    query "[data-action=fullscreen]"
-    >>= Utils.addClass "disabled"
+  -- Utils.isFullscreenAvailable >>= if _
+  --   then
+  --   query "[data-action=fullscreen]"
+  --   >>= \btn -> do
+  --     listener <- eventListener \_ -> do
+  --       Utils.toggleFullscreen app.playboard
+  --     addEventListener (EventType "click") listener false (Element.toEventTarget btn)
+  --   else
+  --   query "[data-action=fullscreen]"
+  --   >>= Utils.addClass "disabled"
 
-  queryMany "[data-action=playboard-background]"
-    >>= traverse_ \btn -> do
-      listener <- eventListener \_ -> do
-        xs <- Element.classList app.playboard
-        Array.filter (String.contains (Pattern "bg-")) (Utils.toArray xs)
-          # traverse_ (\x -> Utils.removeClass x app.playboard)
-        ys <- Element.classList btn
-        Array.find (String.contains (Pattern "bg-")) (Utils.toArray ys)
-          # traverse_ (\x -> Utils.addClass x app.playboard)
+  -- queryMany "[data-action=playboard-background]"
+  --   >>= traverse_ \btn -> do
+  --     listener <- eventListener \_ -> do
+  --       xs <- Element.classList app.playboard
+  --       Array.filter (String.contains (Pattern "bg-")) (Utils.toArray xs)
+  --         # traverse_ (\x -> Utils.removeClass x app.playboard)
+  --       ys <- Element.classList btn
+  --       Array.find (String.contains (Pattern "bg-")) (Utils.toArray ys)
+  --         # traverse_ (\x -> Utils.addClass x app.playboard)
 
-      addEventListener (EventType "click") listener false (Element.toEventTarget btn)
+  --     addEventListener (EventType "click") listener false (Element.toEventTarget btn)
 
   CommandManager.onExecute \cmd -> do
     when (Command.isMerge cmd) do

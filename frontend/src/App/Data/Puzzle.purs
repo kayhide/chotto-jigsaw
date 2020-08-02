@@ -28,7 +28,7 @@ newtype Puzzle =
   Puzzle
   { id :: PuzzleId
   , pieces :: Array Piece
-  , pieces_count :: Number
+  , pieces_count :: Int
   , linear_measure :: Number
   , difficulty :: Difficulty
   , boundary :: Rectangle

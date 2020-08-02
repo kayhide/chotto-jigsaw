@@ -13,7 +13,6 @@ import App.View.Utils (navigate)
 import React.Basic (element)
 import React.Basic.DOM as R
 import React.Basic.DOM.Events (capture_)
-import React.Basic.Events (handler_)
 import React.Basic.Hooks (ReactComponent, component, useEffect, useReducer)
 import React.Basic.Hooks as React
 
@@ -67,6 +66,7 @@ makeAlpha env = do
           R.button
           { className: "relative pb-full w-full border border-white rounded overflow-hidden"
             <> " transition-transform duration-200 transform origin-center"
+          , onClick: capture_ $ navigate $ Route.Game game.id
           , children: pure $ R.img
             { className: "absolute w-full h-full object-cover"
             , src: (unwrap game.puzzle).picture_thumbnail_url

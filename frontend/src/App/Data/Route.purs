@@ -2,9 +2,11 @@ module App.Data.Route where
 
 import AppPrelude hiding ((/))
 
+import App.Data.Game (GameId)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Routing.Duplex (RouteDuplex', root)
+import Data.Lens.Iso.Newtype (_Newtype)
+import Routing.Duplex (RouteDuplex', int, root, segment)
 import Routing.Duplex.Generic (noArgs, sum)
 import Routing.Duplex.Generic.Syntax ((/))
 
@@ -14,6 +16,7 @@ data Route
   | Login
   | Logout
   | Games
+  | Game GameId
   | Pictures
 
 derive instance genericRoute :: Generic Route _
@@ -30,5 +33,6 @@ routeCodec =
   , "Login": "login" / noArgs
   , "Logout": "logout" / noArgs
   , "Games": "games" / noArgs
+  , "Game": "games" / (_Newtype (int segment) :: RouteDuplex' GameId)
   , "Pictures": "pictures" / noArgs
   }

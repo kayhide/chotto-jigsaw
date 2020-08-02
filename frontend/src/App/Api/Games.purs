@@ -2,11 +2,14 @@ module App.Api.Games where
 
 import AppPrelude
 
+import Affjax.ResponseHeader as ResponseHeader
 import App.Api.Endpoint as Endpoint
-import App.Api.Request (BaseUrl, RequestMethod(..), makeAuthRequest)
+import App.Api.Request (BaseUrl, RequestMethod(..), makeAuthRequest, makeAuthRequest')
 import App.Data.Game (Game, GameId, CreatingGame, UpdatingGame)
 import App.Data.Picture (PictureId)
+import App.Firestore (FirebaseToken)
 import Data.Argonaut (decodeJson, encodeJson)
+import Data.Array as Array
 
 
 listGames ::
@@ -22,10 +25,16 @@ showGame ::
   forall m r.
   MonadAff m =>
   MonadAsk { baseUrl :: BaseUrl | r } m =>
-  GameId -> m (Maybe Game)
+  GameId -> m (Maybe (Game /\ FirebaseToken))
 showGame id' = do
-  res <- makeAuthRequest { endpoint: Endpoint.Game id', method: Get }
-  pure $ res >>= (decodeJson >>> hush)
+  res <- makeAuthRequest' { endpoint: Endpoint.Game id', method: Get }
+  let
+    game = res >>= (_.body >>> decodeJson >>> hush)
+    token = do
+      h <- res >>= (_.headers >>> Array.find ((_ == "firebase-token") <<< ResponseHeader.name))
+      pure $ wrap $ ResponseHeader.value h
+  pure $ (/\) <$> game <*> token
+
 
 createGame ::
   forall m r.

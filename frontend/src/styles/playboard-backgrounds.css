@@ -1,5 +1,3 @@
-$playboard-backgrounds: dark-green, cool-sky, cinnamint, margo;
-
 .bg-dark-green {
   background: #002400;
   background: linear-gradient(to bottom, #002400 0%, #b4ddb4 100%);

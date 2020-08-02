@@ -8,11 +8,13 @@ import App.Data (atOf)
 import App.Data.Game (CreatingGame, Game, GameId, UpdatingGame)
 import App.Data.Picture (PictureId)
 import App.Env (Env)
+import App.Firestore (FirebaseToken)
 import Control.Monad.Reader (runReaderT)
 import Data.Array as Array
 import Data.Lens (_Just)
 import Data.Set (Set)
 import Data.Set as Set
+import Data.Tuple (fst)
 import React.Basic.Hooks (Render, useState)
 import React.Basic.Hooks as React
 import React.Basic.Hooks.Aff (useAff)
@@ -20,7 +22,7 @@ import React.Basic.Hooks.Aff (useAff)
 
 type GamesAgent =
   { items :: Array Game
-  , item :: Maybe Game
+  , item :: Maybe (Game /\ FirebaseToken)
   , lookup :: GameId -> Maybe Game
   , isLoading :: Boolean
   , isSubmitting :: Boolean
@@ -36,7 +38,7 @@ type Page = Int
 useGamesAgent :: Env -> Context -> Render _ _ GamesAgent
 useGamesAgent env context = React.do
   items /\ setItems <- useState ([] :: Array Game)
-  item /\ setItem <- useState (Nothing :: Maybe Game)
+  item /\ setItem <- useState (Nothing :: Maybe (Game /\ FirebaseToken))
   loadingItems /\ setLoadingItems <- useState (Set.empty :: Set GameId)
   loadingPage /\ setLoadingPage <- useState (Nothing :: Maybe Page)
   creating /\ setCreating <- useState (Nothing :: Maybe (PictureId /\ CreatingGame))
@@ -56,7 +58,7 @@ useGamesAgent env context = React.do
       x <- env # runReaderT do
         showGame id'
       liftEffect $ do
-        setItems $ atOf id' .~ x
+        setItems $ atOf id' .~ (fst <$> x)
         setItem $ const x
     liftEffect $ do
       setLoadingItems $ const Set.empty
