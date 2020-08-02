@@ -10,6 +10,7 @@ class ApiController < ActionController::API
   rescue_from Api::WrongEmailPassword, with: :handle_api_error
   rescue_from Api::BadToken, with: :handle_api_error
   rescue_from Api::NoToken, with: :handle_api_error
+  rescue_from ArgumentError, with: :handle_unprocessable_entity
 
   def handle_api_error e
     render json: { error_message: e.message }, status: e.status

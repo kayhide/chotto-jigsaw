@@ -15,11 +15,4 @@ class Game < ApplicationRecord
   def ready?
     shuffled_at?
   end
-
-  def attributes
-    super.merge(
-      "picture_id" => puzzle.puzzle_picture_attachment.blob_id,
-      "is_ready" => ready?
-    )
-  end
 end

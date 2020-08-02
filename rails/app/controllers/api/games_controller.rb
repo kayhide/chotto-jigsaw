@@ -1,4 +1,5 @@
 class Api::GamesController < ApiController
+  before_action :authenticate!, only: [:create]
   before_action :set_game, only: [:show, :update, :destroy]
   before_action :set_puzzle
   before_action :set_picture
@@ -10,36 +11,31 @@ class Api::GamesController < ApiController
     else
       @games = (@puzzle ? @puzzle.games : Game).order(id: :desc)
     end
-    render json: @games.map(&:attributes)
+    @games = @games.includes(puzzle: :puzzle_picture_attachment)
+    render json: @games.map(&method(:index_attributes))
   end
 
   def show
-    render json: @game.attributes
+    render json: show_attributes(@game)
   end
 
   def create
     unless @puzzle
-      difficulty = params.require(:puzzle).require(:difficulty)
-      @puzzle =
-        @picture.puzzles
-        .order(id: :desc)
-        .find_by(user: current_user, difficulty: difficulty)
-    end
-    unless @puzzle
+      difficulty = params.require(:difficulty)
       @puzzle =
         current_user.puzzles
-        .create!(picture: @picture, difficulty: difficulty)
+        .create!(picture: @picture.blob, difficulty: difficulty)
       SetupJob.perform_later(@puzzle)
     end
 
     @game = Game.create!(puzzle: @puzzle)
     ShuffleJob.perform_later(@game)
-    render json: @game.attributes, status: :created
+    render json: index_attributes(@game), status: :created
   end
 
   def update
     @game.update! game_params
-    render json: @game.attributes
+    render json: index_attributes(@game)
   end
 
   def destroy
@@ -53,14 +49,36 @@ class Api::GamesController < ApiController
   end
 
   def game_params
-    params.require(:game).permit(:progress)
+    params.permit(:progress)
   end
 
   def set_puzzle
-    @puzzle = @game&.puzzle || Puzzle.find_by(id: params[:puzzle_id])
+    @puzzle = @game&.puzzle ||
+      (params.key?(:puzzle_id) && Puzzle.find_by(id: params[:puzzle_id]))
   end
 
   def set_picture
-    @picture = @puzzle&.picture_blob&.becomes(Picture) || Picture.find_by(id: params[:picture_id])
+    @picture =
+      (@puzzle && UserPicturesAttachment.find_by(record_id: @puzzle.user_id, blob_id: @puzzle.picture_attachment&.blob_id)) ||
+      (params.key?(:picture_id) && UserPicturesAttachment.find_by(id: params[:picture_id]))
+  end
+
+  # TODO Improve inefficient picture_id query.
+  def index_attributes game
+    puzzle = game.puzzle
+    game.attributes.merge(
+      "picture_id" => UserPicturesAttachment.find_by(blob_id: puzzle.puzzle_picture_attachment&.blob_id)&.id,
+      "is_ready" => game.ready?,
+      "puzzle" =>
+        puzzle.attributes
+        .merge(
+          picture_url: rails_blob_url(puzzle.picture),
+          picture_thumbnail_url: rails_representation_url(puzzle.picture.variant(resize_to_fill: [300, 300]).processed)
+        )
+    )
+  end
+
+  def show_attributes game
+    index_attributes game
   end
 end
