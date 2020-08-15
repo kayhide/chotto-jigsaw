@@ -37,6 +37,11 @@ RSpec.describe Api::GamesController, type: :controller do
       get :show, params: { id: game.id }
       expect(response).to have_http_status(:success)
     end
+
+    it "adds firebase token to the response header" do
+      get :show, params: { id: game.id }
+      expect(response.header["Firebase-Token"]).to be_present
+    end
   end
 
   describe "POST #create" do

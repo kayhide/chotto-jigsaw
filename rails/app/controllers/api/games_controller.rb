@@ -16,6 +16,7 @@ class Api::GamesController < ApiController
   end
 
   def show
+    add_firebase_token_response_header @game
     render json: show_attributes(@game)
   end
 
