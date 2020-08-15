@@ -26,7 +26,9 @@ Rails.application.routes.draw do
       resources :games, only: [:create]
     end
     resources :games, only: [:index, :show, :create, :update, :destroy]
-    resources :puzzles, only: [:show]
+    resources :puzzles, only: [:show] do
+      resources :pieces, only: [:index], controller: "puzzles/pieces"
+    end
   end
 
   require 'sidekiq/web'
