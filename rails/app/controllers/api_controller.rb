@@ -1,5 +1,6 @@
 class ApiController < ActionController::API
   include Authenticator
+  include FirebaseToken
 
   rescue_from ApiError, with: :handle_api_error
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
