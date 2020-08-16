@@ -2,13 +2,12 @@ module App.App where
 
 import AppPrelude
 
-import App.Api.Client as Api
 import App.Command.Command as Command
 import App.Command.CommandManager as CommandManager
-import App.Data.Game (Game(..), GameId(..))
-import App.Data.Puzzle (Puzzle, PuzzleId(..))
+import App.Data.Game (Game, GameId)
+import App.Data.Piece (Piece)
 import App.Drawer.PieceActor as PieceActor
-import App.Firestore (FirebaseToken(..))
+import App.Firestore (FirebaseToken)
 import App.Firestore as Firestore
 import App.GameManager (GameManager)
 import App.GameManager as GameManager
@@ -26,8 +25,7 @@ import App.Utils as Utils
 import Data.Argonaut (jsonParser)
 import Data.Array as Array
 import Data.Int as Int
-import Data.Time.Duration (Milliseconds(..))
-import Effect.Aff (Aff, error, launchAff_, throwError)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Class.Console (log)
 import Effect.Ref as Ref
 import Web.DOM (Element)
@@ -51,12 +49,13 @@ type App =
   , sounds :: Element
   , log :: Element
   , game :: Game
+  , pieces :: Array Piece
   , initialView :: Maybe Rectangle
   , firebaseToken :: FirebaseToken
   }
 
-init :: Game -> FirebaseToken -> Effect Unit
-init game firebaseToken = do
+init :: Game -> Array Piece -> FirebaseToken -> Effect Unit
+init game pieces firebaseToken = do
   Logger.append(log)
 
   doc <- Window.document =<< HTML.window
@@ -84,15 +83,10 @@ init game firebaseToken = do
        , sounds
        , log
        , game
+       , pieces
        , initialView
        , firebaseToken
        }
-
-
-getGameId :: Element -> Effect (Maybe GameId)
-getGameId elm = do
-  x <- dataset "game-id" elm
-  pure $ map GameId <<< Int.fromString =<< x
 
 
 play :: App -> Effect Unit
@@ -105,7 +99,7 @@ play app = do
   launchAff_ do
     image <- Utils.loadImage pictureUrl
     gi <- liftEffect do
-      game <- GameManager.create (app.game # unwrap # _.id) puzzle image
+      game <- GameManager.create (app.game # unwrap # _.id) puzzle app.pieces image
       CommandManager.register game
       setupUi game app
 
@@ -125,18 +119,10 @@ play app = do
     updateOnlineGame app.firebaseToken (app.game # unwrap # _.id) gi
 
     liftEffect do
-      -- Utils.fadeOutSlow =<< query "#game-progress .loading"
       GameInteractor.fit gi
       setupSound app
 
     pure unit
-
-
--- loadPuzzle :: App -> Aff Puzzle
--- loadPuzzle app = do
---   Logger.info $ "puzzle id: " <> show app.puzzleId
---   Utils.retryOnFailAfter (Milliseconds 5000.0) do
---     Api.getPuzzle app.puzzleId
 
 
 updateStandaloneGame :: GameInteractor -> Aff Unit
@@ -161,16 +147,6 @@ updateOnlineGame token gameId gi = do
         cmds # traverse_ \cmd ->
           Firestore.postCommand cmd firestore
 
-        when (Array.any Command.isMerge cmds) do
-          progress <- GameManager.progress gi.manager
-          launchAff_ do
-            Api.updateGame gameId { progress }
-
-  Utils.retryOnFailAfter (Milliseconds 5000.0) do
-    Game game <- Api.getGame gameId
-    when (not game.is_ready) do
-      throwError (error "Game is not ready")
-
 
 setupLogger :: App -> Effect Unit
 setupLogger app = do
@@ -191,12 +167,6 @@ setupUi manager app = do
 
   Utils.fadeInSlow app.activeCanvas
   Utils.fadeInSlow app.baseCanvas
-
-  -- query "#log-button" >>= \btn -> do
-  --   listener <- eventListener \e -> do
-  --     Utils.fadeToggle app.log
-  --     Utils.toggleClass "rotate-180" btn
-  --   addEventListener (EventType "click") listener false (Element.toEventTarget btn)
 
   -- Utils.isFullscreenAvailable >>= if _
   --   then

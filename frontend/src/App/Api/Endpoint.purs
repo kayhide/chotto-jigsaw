@@ -2,8 +2,9 @@ module App.Api.Endpoint where
 
 import AppPrelude hiding ((/))
 
-import App.Data.Picture (PictureId)
 import App.Data.Game (GameId)
+import App.Data.Picture (PictureId)
+import App.Data.Puzzle (PuzzleId)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Lens.Iso.Newtype (_Newtype)
@@ -18,6 +19,7 @@ data Endpoint
   | PictureGames PictureId
   | Games
   | Game GameId
+  | PuzzlePieces PuzzleId
 
 derive instance genericEndpoint :: Generic Endpoint _
 instance showEndpoint :: Show Endpoint where
@@ -33,4 +35,5 @@ endpointCodec =
   , "PictureGames": "pictures" / (_Newtype (int segment) :: RouteDuplex' PictureId) / "games"
   , "Games": "games" / noArgs
   , "Game": "games" / (_Newtype (int segment) :: RouteDuplex' GameId)
+  , "PuzzlePieces": "puzzles" / (_Newtype (int segment) :: RouteDuplex' PuzzleId) / "pieces"
   }

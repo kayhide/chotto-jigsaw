@@ -47,7 +47,7 @@ draw actor drawer = do
   when drawer.drawsStroke do
     G.setLineStyle { width: 2.0, color: G.rgb 255 125 255 } g
 
-  traverse_ (\loop -> drawCurve loop g) actor.body.loops
+  traverse_ (\loop -> drawCurve loop g) (actor.body # unwrap # _.loops)
 
   G.endFill g
   G.closePath g
@@ -60,7 +60,7 @@ draw actor drawer = do
 
   when drawer.drawsControlLine do
     G.setLineStyle { width: 1.0, color: G.rgb 80 80 40 } g
-    traverse_ (\loop -> drawPolyline loop g) actor.body.loops
+    traverse_ (\loop -> drawPolyline loop g) (actor.body # unwrap # _.loops)
     G.closePath g
 
   when drawer.drawsCenter do

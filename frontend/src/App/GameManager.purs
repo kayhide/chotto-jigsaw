@@ -2,13 +2,14 @@ module App.GameManager where
 
 import AppPrelude
 
+import App.Data.Game (GameId)
+import App.Data.Piece (Piece(..))
+import App.Data.Puzzle (Puzzle)
 import App.Drawer.PieceActor (PieceActor)
 import App.Drawer.PieceActor as PieceActor
 import App.Drawer.PuzzleActor (PuzzleActor)
 import App.Drawer.PuzzleActor as PuzzleActor
 import App.Drawer.PuzzleDrawer as PuzzleDrawer
-import App.Data.Game (GameId)
-import App.Data.Puzzle (Puzzle)
 import Data.Array ((!!))
 import Data.Array as Array
 import Data.Int as Int
@@ -22,10 +23,10 @@ type GameManager =
   , pieceActors :: Array PieceActor
   }
 
-create :: GameId -> Puzzle -> Element -> Effect GameManager
-create gameId puzzle picture = do
+create :: GameId -> Puzzle -> Array Piece -> Element -> Effect GameManager
+create gameId puzzle pieces picture = do
   puzzleActor <- PuzzleActor.create puzzle
-  pieceActors <- traverse PieceActor.create (unwrap puzzle).pieces
+  pieceActors <- traverse PieceActor.create pieces
   PuzzleDrawer.draw puzzleActor { drawsGuide: false }
 
   pure
