@@ -120,13 +120,13 @@ shuffle gi = do
   actors # traverse_ \actor -> do
     center <- Rectangle.center <$> PieceActor.getBoundary actor
     degree <- randomRange (-180.0) 180.0
-    CommandManager.post $ Command.rotate actor.body.id center degree
+    CommandManager.post $ Command.rotate (actor.body # unwrap # _.id) center degree
 
     vec <-
       Point.create
       <$> ((_ - center.x) <$> randomRange x0 x1)
       <*> ((_ - center.y) <$> randomRange y0 y1)
-    CommandManager.post $ Command.translate actor.body.id vec
+    CommandManager.post $ Command.translate (actor.body # unwrap # _.id) vec
 
   CommandManager.commit
 
@@ -187,7 +187,7 @@ movePointerTo pt gi = do
         pt0 <- project dragger.pointer
         pt1 <- project pt
         let vec = Point.subtract pt1 pt0
-        CommandManager.post $ Command.translate actor.body.id vec
+        CommandManager.post $ Command.translate (actor.body # unwrap # _.id) vec
     Ref.modify_ (_{ pointer = pt }) gi.dragger
 
 
@@ -204,7 +204,7 @@ spinPointer angle gi = do
       Just actor -> do
         let obj = gi.manager.puzzleActor.container
         pt0 <- DisplayObject.fromGlobalTo obj dragger.pointer
-        CommandManager.post $ Command.rotate actor.body.id pt0 (angle - dragger.spinner)
+        CommandManager.post $ Command.rotate (actor.body # unwrap # _.id) pt0 (angle - dragger.spinner)
 
 pegZoomer :: Number -> GameInteractor -> Effect Unit
 pegZoomer scale gi =
@@ -241,7 +241,7 @@ resume pt gi = do
         obj <- Application.hitTest pt gi.baseStage
         join <$> traverse (lookupPieceActor gi) obj
       Just _ -> pure p
-  when ((_.body.id <$> dragger.piece) /= (_.body.id <$> piece)) do
+  when ((_.body >>> unwrap >>> _.id <$> dragger.piece) /= (_.body >>> unwrap >>> _.id <$> piece)) do
     release gi
     traverse_ (capture gi) piece
   Ref.modify_ (_{ active = true, pointer = pt }) gi.dragger
@@ -259,7 +259,7 @@ attempt gi = do
     findMeargeableOn gi pt0 mergee
       >>= traverse_ \merger -> do
         release gi
-        CommandManager.post $ Command.merge merger.body.id mergee.body.id
+        CommandManager.post $ Command.merge (merger.body # unwrap # _.id) (mergee.body # unwrap # _.id)
         CommandManager.commit
         Ref.modify_ (_{ active = false, piece = Nothing }) gi.dragger
 
@@ -272,7 +272,7 @@ capture :: GameInteractor -> PieceActor -> Effect Unit
 capture gi actor = do
   dragger <- Ref.read gi.dragger
   when (isNothing dragger.piece) do
-    Logger.info $ "capture: " <> show actor.body.id
+    Logger.info $ "capture: " <> show (actor.body # unwrap # _.id)
     DisplayObject.copyTransform
       (gi.manager.puzzleActor.container)
       (gi.activeLayer)
@@ -284,7 +284,7 @@ release :: GameInteractor -> Effect Unit
 release gi = do
   dragger <- Ref.read gi.dragger
   dragger.piece # traverse_ \actor -> do
-    Logger.info $ "release: " <> show actor.body.id
+    Logger.info $ "release: " <> show (actor.body # unwrap # _.id)
     obj <- PieceActor.getFace actor
     Container.addChild obj $ gi.manager.puzzleActor.container
     CommandManager.commit
@@ -295,7 +295,7 @@ findMeargeableOn :: GameInteractor -> Point -> PieceActor -> Effect (Maybe Piece
 findMeargeableOn gi pt sbj = do
   ids <- Array.fromFoldable <$> Ref.read sbj.neighborIds
   actors <-
-    Array.filter (\obj -> obj.body.id /=  sbj.body.id) <<< Array.nubBy (compare `on` _.body.id)
+    Array.filter (\obj -> (obj.body # unwrap # _.id) /=  (sbj.body # unwrap # _.id)) <<< Array.nubBy (compare `on` (_.body >>> unwrap >>> _.id))
     <$> traverse (GameManager.entity gi.manager <=< GameManager.findPieceActor gi.manager) ids
   Array.head <$> Array.filterA (\obj -> isWithinTolerance gi sbj obj pt) actors
 

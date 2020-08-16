@@ -3,11 +3,9 @@ module App.Data.Puzzle where
 import AppPrelude
 
 import App.Data.DateTime (decodeDateTime, encodeDateTime)
-import App.Data.Piece (Piece)
 import App.Pixi.Rectangle (Rectangle)
 import App.Pixi.Rectangle as Rectangle
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
-import Data.Array as Array
 import Data.DateTime (DateTime)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
@@ -27,7 +25,6 @@ derive newtype instance decodeJsonPuzzleId :: DecodeJson PuzzleId
 newtype Puzzle =
   Puzzle
   { id :: PuzzleId
-  , pieces :: Array Piece
   , pieces_count :: Int
   , linear_measure :: Number
   , difficulty :: Difficulty
@@ -49,21 +46,16 @@ instance encodeJsonPuzzle :: EncodeJson Puzzle where
     <<< Record.modify (SProxy :: _ "updated_at") encodeDateTime
     $ unwrap x
 
--- TODO Load pieces into a separate data type
 instance decodeJsonPuzzle :: DecodeJson Puzzle where
   decodeJson json = do
     obj <- decodeJson json
-    let pieces = []
-    let boundary =
-          Array.foldr Rectangle.addPoint Rectangle.empty
-          <<< Array.catMaybes <<< Array.concat <<< Array.concat $ _.loops <$> pieces
+    boundary <- Rectangle.decode obj.boundary
     createdAt <- decodeDateTime obj.created_at
     updatedAt <- decodeDateTime obj.updated_at
     pure $ wrap
       <<< Record.modify (SProxy :: _ "created_at") (const createdAt)
       <<< Record.modify (SProxy :: _ "updated_at") (const updatedAt)
-      <<< Record.insert (SProxy :: _ "pieces") pieces
-      <<< Record.insert (SProxy :: _ "boundary") boundary
+      <<< Record.modify (SProxy :: _ "boundary") (const boundary)
       $ obj
 
 

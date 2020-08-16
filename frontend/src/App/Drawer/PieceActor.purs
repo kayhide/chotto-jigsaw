@@ -3,7 +3,7 @@ module App.Drawer.PieceActor where
 import AppPrelude
 
 import App.Drawer.Transform (Transform)
-import App.Data.Piece (Piece)
+import App.Data.Piece (Piece(..))
 import App.Data.Piece as Piece
 import App.Pixi.Container as Container
 import App.Pixi.DisplayObject as DisplayObject
@@ -32,19 +32,19 @@ type PieceActor =
   }
 
 create :: Piece -> Effect PieceActor
-create body = do
+create body@(Piece { id }) = do
   shape <- Graphics.create
-  shape # DisplayObject.setName ("piece-" <> show body.id)
+  shape # DisplayObject.setName ("piece-" <> show id)
 
   container <- Ref.new Nothing
   transform <- Ref.new { position: Point.zero, rotation: 0.0 }
-  loops <- Ref.new body.loops
+  loops <- Ref.new (body # unwrap # _.loops)
   merger <- Ref.new Nothing
   let boundary' =
         Array.foldr Rectangle.addPoint Rectangle.empty
-        $ Array.catMaybes $ Array.concat body.loops
+        $ Array.catMaybes $ Array.concat (body # unwrap # _.loops)
   localBoundary <- Ref.new boundary'
-  neighborIds <- Ref.new body.neighborIds
+  neighborIds <- Ref.new (body # unwrap # _.neighborIds)
   pure { body, shape, container, transform, loops, merger, localBoundary, neighborIds }
 
 isAlive :: PieceActor -> Effect Boolean
@@ -79,11 +79,11 @@ updateFace actor = do
 
 merge :: PieceActor -> PieceActor -> Effect Unit
 merge mergee merger = do
-  Ref.write (pure merger.body.id) mergee.merger
+  Ref.write (pure $ merger.body # unwrap # _.id) mergee.merger
 
   neighborIds <- Set.union <$> Ref.read mergee.neighborIds <*> Ref.read merger.neighborIds
-  Ref.write (Set.delete merger.body.id neighborIds) merger.neighborIds
-  Ref.write (Set.delete mergee.body.id neighborIds) mergee.neighborIds
+  Ref.write (Set.delete (merger.body # unwrap # _.id) neighborIds) merger.neighborIds
+  Ref.write (Set.delete (mergee.body # unwrap # _.id) neighborIds) mergee.neighborIds
 
   loops <- Ref.read mergee.loops
   Ref.modify_ (_ <> loops) merger.loops

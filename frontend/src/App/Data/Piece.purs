@@ -4,28 +4,34 @@ import AppPrelude
 
 import App.Pixi.Point (Point)
 import App.Pixi.Point as Point
-import Data.Argonaut (Json, decodeJson, (.:))
+import Data.Argonaut (class DecodeJson, Json, decodeJson, (.:))
 import Data.Set (Set)
 
 type Loop = Array (Maybe Point)
 
-type Piece =
+newtype Piece =
+  Piece
   { id :: Int
   , loops :: Array Loop
   , neighborIds :: Set Int
   }
 
-decode :: Json -> Either String Piece
-decode json = do
-  obj <- decodeJson json
-  id <- obj .: "number"
-  loop <- traverse (traverse decodePoint) =<< obj .: "points"
-  neighborIds <- obj .: "neighbors"
-  pure
-    { id
-    , loops: pure loop
-    , neighborIds
-    }
+derive instance newtypePiece :: Newtype Piece _
+derive newtype instance eqPiece :: Eq Piece
+derive newtype instance showPiece :: Show Piece
+
+instance decodeJsonPiece :: DecodeJson Piece where
+  decodeJson json = do
+    obj <- decodeJson json
+    id <- obj .: "number"
+    loop <- traverse (traverse decodePoint) =<< obj .: "points"
+    neighborIds <- obj .: "neighbors"
+    pure
+      $ wrap
+      { id
+      , loops: pure loop
+      , neighborIds
+      }
 
 decodePoint :: Array Json -> Either String Point
 decodePoint xs = do
