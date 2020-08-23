@@ -64,8 +64,15 @@ services:
 
   entrance-dev:
     image: nginx:stable-alpine
+    command: >
+        /bin/sh -c
+        "envsubst '$$FRONTEND_HOST' < /root/proxy.conf > /etc/nginx/conf.d/proxy.conf
+        && cat /etc/nginx/conf.d/proxy.conf
+        && nginx -g 'daemon off;'"
     volumes:
-      - ./entrance/proxy-dev.conf:/etc/nginx/conf.d/proxy.conf:ro
+      - ./entrance/proxy-dev.conf:/root/proxy.conf:ro
+    environment:
+      FRONTEND_HOST: ${FRONTEND_HOST:-localhost:3000}
     ports:
       - "${APP_HTTP_PORT:-3000}:3000"
     depends_on:
@@ -95,7 +102,7 @@ services:
 
   frontend-dev:
     <<: *app
-    command: "yarn dev --color --public localhost:${APP_HTTP_PORT:-3000}"
+    command: "bash -c 'yarn install && yarn dev --color --public ${FRONTEND_HOST:-localhost:3000}'"
     working_dir: /app/frontend
     ports:
       - 8080
@@ -103,7 +110,8 @@ services:
       - .:/app:cached
       - bundle:/bundle
     environment:
-      BASE_URL: ${BASE_URL}
+      FRONTEND_HOST: "${FRONTEND_HOST:-localhost:3000}"
+      BASE_URL: "${BASE_URL:-http://localhost:3000}"
       FIREBASE_CONFIG: ${FIREBASE_CONFIG}
       NODE_ENV: ${NODE_ENV:-development}
       RAILS_ENV: ${RAILS_ENV:-development}
