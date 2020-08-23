@@ -31,7 +31,8 @@ class SetupJob < ApplicationJob
 
     puzzle.update!(
       pieces_count: cutter.count,
-      linear_measure: cutter.linear_measure
+      linear_measure: cutter.linear_measure,
+      boundary: Rectangle.new(0.0, 0.0, cutter.width.to_f, cutter.height.to_f)
     )
   end
 
