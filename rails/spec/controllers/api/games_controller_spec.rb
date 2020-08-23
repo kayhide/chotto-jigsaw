@@ -36,6 +36,16 @@ RSpec.describe Api::GamesController, type: :controller do
     it "returns http success" do
       get :show, params: { id: game.id }
       expect(response).to have_http_status(:success)
+      body = JSON.parse response.body
+      expect(body.keys).to match_array %w(
+        id picture_id puzzle_id puzzle is_ready progress shuffled_at created_at updated_at
+      )
+      expect(body["puzzle"].keys).to match_array %w(
+        id user_id  pieces_count linear_measure difficulty boundary picture_url picture_thumbnail_url created_at updated_at
+      )
+      expect(body["puzzle"]["boundary"].keys).to match_array %w(
+        x y width height
+      )
     end
 
     it "adds firebase token to the response header" do

@@ -72,9 +72,11 @@ class Api::GamesController < ApiController
       "is_ready" => game.ready?,
       "puzzle" =>
         puzzle.attributes
+        .except(*Rectangle.members.map { |x| "boundary_#{x}" })
         .merge(
-          picture_url: rails_blob_url(puzzle.picture),
-          picture_thumbnail_url: rails_representation_url(puzzle.picture.variant(resize_to_fill: [300, 300]).processed)
+          "picture_url" => rails_blob_url(puzzle.picture),
+          "picture_thumbnail_url" => rails_representation_url(puzzle.picture.variant(resize_to_fill: [300, 300]).processed),
+          "boundary" => puzzle.boundary.to_h
         )
     )
   end

@@ -10,6 +10,10 @@ class Puzzle < ApplicationRecord
   DIFFICULTIES = %w(trivial easy normal hard extreme lunatic)
   enum difficulty: DIFFICULTIES.map { |x| [x, x] }.to_h
 
+  composed_of :boundary,
+    class_name: "Rectangle",
+    mapping: Rectangle.members.map { |x| ["boundary_#{x}", x] }
+
   DIFFICULTY_THRESHOLDS = {
     trivial: 50,
     easy: 100,
