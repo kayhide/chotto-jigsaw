@@ -5,10 +5,10 @@ services:
       context: .
       dockerfile: docker/Dockerfile.app
       args:
-        RUBY_VERSION: "2.6.5"
+        RUBY_VERSION: "2.6.6"
         PG_MAJOR: "12"
-        NODE_MAJOR: "13"
-        YARN_VERSION: "1.19.2"
+        NODE_MAJOR: "14"
+        YARN_VERSION: "1.22.5"
         BUNDLER_VERSION: "2.0.2"
     image: chotto-jigsaw-app
 
