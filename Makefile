@@ -22,14 +22,13 @@ down:
 .PHONY: down
 
 provision:
-	${COMPOSE_COMMAND} up -d db redis
+	${COMPOSE_COMMAND} up -d db redis firestore
 	@$$($(MAKE) --no-print-directory envs)
-	@bin/spring stop
 .PHONY: provision
 
 unprovision:
 	${COMPOSE_COMMAND} down
-	@bin/spring stop
+	@$$($(MAKE) --no-print-directory envs)
 .PHONY: unprovision
 
 envs: DB_PORT := $(shell docker-compose port db 5432 | cut -d ':' -f 2)
@@ -37,8 +36,7 @@ envs: REDIS_PORT := $(shell docker-compose port redis 6379 | cut -d ':' -f 2)
 envs: FIRESTORE_PORT := $(shell docker-compose port firestore 8080 | cut -d ':' -f 2)
 envs:
 	@mkdir -p .env
-	@rm -f .env/ports
-	@echo "export DB_PORT=${DB_PORT}" >> .env/ports
-	@echo "export REDIS_PORT=${REDIS_PORT}" >> .env/ports
-	@echo "export FIRESTORE_PORT=${FIRESTORE_PORT}" >> .env/ports
+	@echo "${DB_PORT}" > .env/DB_PORT 
+	@echo "${REDIS_PORT}" > .env/REDIS_PORT
+	@echo "${FIRESTORE_PORT}" > .env/FIRESTORE_PORT
 .PHONY: envs
