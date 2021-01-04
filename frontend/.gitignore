@@ -1,18 +1,19 @@
-/dist/*
-!/dist/.keep
-
+dist/*
+!dist/.keep
 
 ### https://raw.github.com/github/gitignore/7ab549fcae8269fdd4004065470176f829d88200/PureScript.gitignore
 
 # Dependencies
 .psci_modules
-.spago
+.spago/*
+!.spago/.keep
 bower_components
 node_modules
 
 # Generated files
 .psci
-output
+output/*
+!output/.keep
 
 
 ### https://raw.github.com/github/gitignore/3df9bc0bd9cb0c3f5ea0904e88b9df5a378ccd59/Node.gitignore

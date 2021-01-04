@@ -4,7 +4,7 @@ set -eu
 
 cd /app/rails
 
-bundle install
+bundle install --deployment ${BUNDLE_PATH:+--path "$BUNDLE_PATH"}
 
 export DISABLE_SPRING=1
 

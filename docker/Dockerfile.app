@@ -19,6 +19,7 @@ RUN curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
   && echo 'deb http://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list
 
 COPY docker/Aptfile /tmp/Aptfile
+# python2.7 is required by node-gyp to build grpc
 RUN apt-get update -qq \
   && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrade \
   && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
@@ -26,23 +27,20 @@ RUN apt-get update -qq \
   libpq-dev \
   nodejs \
   postgresql-client-$PG_MAJOR \
+  python2.7 \
   yarn=$YARN_VERSION-1 \
   $(cat /tmp/Aptfile | xargs) \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
 
-RUN yarn global add purescript spago
-
 ENV LANG=C.UTF-8 \
-  GEM_HOME=/bundle \
-  BUNDLE_JOBS=4 \
-  BUNDLE_RETRY=3
-ENV BUNDLE_PATH $GEM_HOME
-ENV BUNDLE_APP_CONFIG=$BUNDLE_PATH \
-  BUNDLE_BIN=$BUNDLE_PATH/bin \
-  YARN_BIN=/app/node_modules/.bin
-ENV PATH /app/bin:$BUNDLE_BIN:$YARN_BIN:$PATH
+  GEM_HOME=/app-var/bundle \
+  BUNDLE_PATH=/app-var/bundle \
+  BUNDLE_APP_CONFIG=/app-var/bundle
+ENV PATH /app/bin:/app-var/bundle/bin:/app/frontend/node_modules/.bin:$PATH
+
+RUN yarn global add purescript spago
 
 RUN gem update --system \
   && gem install bundler:$BUNDLER_VERSION

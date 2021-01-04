@@ -12,63 +12,81 @@ services:
         BUNDLER_VERSION: "2.0.2"
     image: chotto-jigsaw-app
 
-  backend: &backend
+  base: &base
     <<: *app
     stdin_open: true
     tty: true
     volumes:
-      - .:/app:cached
-      - bundle:/bundle
+      - .:/app:ro
+      - app-var:/app-var
+      - frontend-dist:/app/frontend/dist
+      - frontend-node-modules:/app/frontend/node_modules
+      - frontend-output:/app/frontend/output
+      - frontend-spago:/app/frontend/.spago
+      - rails-log:/app/rails/log
+      - rails-tmp:/app/rails/tmp
     environment:
-      BOOTSNAP_CACHE_DIR: /bundle/bootsnap
-      BASE_URL: ${BASE_URL}
+      BASE_URL: "${BASE_URL:-http://localhost:3000}"
+      BOOTSNAP_CACHE_DIR: /app-var/bundle/bootsnap
       DB_HOST: db
       EDITOR: vim
-      HISTFILE: /app/log/.bash_history
-      NODE_ENV: development
-      PSQL_HISTFILE: /app/log/.psql_history
-      RAILS_ENV: ${RAILS_ENV:-development}
-      RAILS_HOST: rails
-      REDIS_HOST: redis
-      WEBPACKER_DEV_SERVER_HOST: webpacker
-      WEB_CONCURRENCY: 1
       FIREBASE_CONFIG: ${FIREBASE_CONFIG}
       FIRESTORE_HOST: firestore
+      FRONTEND_HOST: "${FRONTEND_HOST:-localhost:3000}"
       GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      HISTFILE: /app-var/.bash_history
+      NODE_ENV: ${NODE_ENV:-development}
+      PSQL_HISTFILE: /app-var/.psql_history
+      RAILS_ENV: ${RAILS_ENV:-development}
+      REDIS_HOST: redis
       SEED_USERS: ${SEED_USERS}
+      WEB_CONCURRENCY: 1
+    working_dir: /app
     depends_on:
       - db
       - redis
 
   runner:
-    <<: *backend
+    <<: *base
     command: /bin/bash
 
   rails:
-    <<: *backend
+    <<: *base
     command: start-rails
     ports:
       - 3000
 
   worker:
-    <<: *backend
-    command: sidekiq -C config/sidekiq.yml
+    <<: *base
+    command: bundle exec sidekiq -C config/sidekiq.yml
     working_dir: /app/rails
 
   livereload:
-    <<: *backend
+    <<: *base
     command: guard --no-interactions --plugin LiveReload
     working_dir: /app/rails
     ports:
       - 35729:35729
 
+  frontend-dev:
+    <<: *base
+    command: >
+      bash -c "
+      yarn install
+      && yarn dev --color --public $$FRONTEND_HOST
+      "
+    working_dir: /app/frontend
+    ports:
+      - 8080
+
   entrance-dev:
     image: nginx:stable-alpine
     command: >
-        /bin/sh -c
-        "envsubst '$$FRONTEND_HOST' < /root/proxy.conf > /etc/nginx/conf.d/proxy.conf
-        && cat /etc/nginx/conf.d/proxy.conf
-        && nginx -g 'daemon off;'"
+      /bin/sh -c "
+      envsubst '$$FRONTEND_HOST' < /root/proxy.conf > /etc/nginx/conf.d/proxy.conf
+      && cat /etc/nginx/conf.d/proxy.conf
+      && nginx -g 'daemon off;'
+      "
     volumes:
       - ./entrance/proxy-dev.conf:/root/proxy.conf:ro
     environment:
@@ -82,9 +100,10 @@ services:
   db:
     image: postgres:12.1-alpine
     volumes:
+      - db-log:/root/log:cached
       - postgres:/var/lib/postgresql/data
     environment:
-      PSQL_HISTFILE: /root/log/.psql_history
+      PSQL_HISTFILE: /app-var/.psql_history
     ports:
       - 5432
 
@@ -100,24 +119,15 @@ services:
     ports:
       - 8080
 
-  frontend-dev:
-    <<: *app
-    command: "bash -c 'yarn install && yarn dev --color --public ${FRONTEND_HOST:-localhost:3000}'"
-    working_dir: /app/frontend
-    ports:
-      - 8080
-    volumes:
-      - .:/app:cached
-      - bundle:/bundle
-    environment:
-      FRONTEND_HOST: "${FRONTEND_HOST:-localhost:3000}"
-      BASE_URL: "${BASE_URL:-http://localhost:3000}"
-      FIREBASE_CONFIG: ${FIREBASE_CONFIG}
-      NODE_ENV: ${NODE_ENV:-development}
-      RAILS_ENV: ${RAILS_ENV:-development}
-      WEBPACKER_DEV_SERVER_HOST: 0.0.0.0
 
 volumes:
-  bundle:
+  app-var:
+  db-log:
+  frontend-dist:
+  frontend-node-modules:
+  frontend-output:
+  frontend-spago:
   postgres:
+  rails-log:
+  rails-tmp:
   redis:
